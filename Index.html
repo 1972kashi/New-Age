@@ -96,16 +96,17 @@
         <span class="search-icon"><img src="Pic/Search.svg" alt="Search"></span>
       </div>
       <button class="btn btn-gold btn-lg">Search</button>
-      <button class="btn btn-dark btn-lg">Show More Filters ▽</button>
+      <button class="btn btn-dark btn-lg" id="Filter Toggle">Show More Filters ▽</button>
     </div>
     <div class="popular-searches">
       <span>Popular Searches:</span>
-      <span class="pop-tag">Toyota</span>
-      <span class="pop-tag">Mercedes Benz</span>
-      <span class="pop-tag">BMW</span>
-      <span class="pop-tag">Subaru</span>
-      <span class="pop-tag">Range Rover</span>
-      <span class="pop-tag">Audi</span>
+       <span class="pop-tag" onclick="document.getElementById('searchInput').value='Toyota'">Toyota</span> •
+      <span class="pop-tag" onclick="document.getElementById('searchInput').value='BMW'">BMW</span>
+        • <span class="pop-tag" onclick="document.getElementById('searchInput').value='Porsche'">Mercedes</span> •
+      <span class="pop-tag" onclick="document.getElementById('searchInput').value='Audi'">Audi</span> •
+      <span class="pop-tag" onclick="document.getElementById('searchInput').value='Dodge'">Isuzu</span>•
+       <span class="pop-tag" onclick="document.getElementById('searchInput').value='Audi'">Subaru</span> •
+      <span class="pop-tag" onclick="document.getElementById('searchInput').value='Dodge'">Range Rover</span>
     </div>
   </div>
 </section>
@@ -255,13 +256,13 @@
     <!-- Source Banner -->
     <div class="source-banner" >
       <div class="source-banner-left">
-        <div class="source-icon">🤝</div>
+        <div class="source-icon"><img src="Pic/Handshake.svg" alt="Handshake"></div>
         <div>
           <div class="source-title">Don't see what you are looking for?</div>
           <div class="source-desc">Tell us what you are looking for and we'll source it for you.</div>
         </div>
       </div>
-      <button class="btn btn-outline btn-lg">Get Started</button>
+      <a class="get-btn" href="car-listings.html">Get Started</a>
     </div>
   </div>
 </section>
