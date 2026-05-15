@@ -94,15 +94,12 @@
       padding:72px 0;
       text-align:center;}
 
-    .why-section h2{
-      font-family:'Bebas Neue',sans-serif;
+    .why-section h2{font-family:'Bebas Neue',sans-serif;
       font-size:44px;
       letter-spacing:1px;
       margin-bottom:52px;}
 
-    .why-grid{display:grid;
-      grid-template-columns:repeat(5,1fr);
-      gap:24px;}
+    .why-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:24px;}
     .why-card{
       background:var(--dark-card);
       border:1px solid var(--border);
@@ -128,8 +125,7 @@
       border-top:1px solid var(--border);
       padding:48px 0 24px;
     }
-    .footer-grid{display:grid;
-      grid-template-columns:1fr 2fr 1fr;gap:48px;margin-bottom:36px;}
+    .footer-grid{display:grid;grid-template-columns:1fr 2fr 1fr;gap:48px;margin-bottom:36px;}
     .footer-brand h3{font-family:'Bebas Neue',sans-serif;font-size:26px;margin-bottom:10px;}
     .footer-brand p{font-size:13px;color:var(--text-muted);line-height:1.8;}
     .footer-links-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:28px;}

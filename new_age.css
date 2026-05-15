@@ -515,8 +515,7 @@
       font-size: 36px; margin-bottom: 14px;
       display: flex; align-items: center; justify-content: center;
       width: 64px; height: 64px;
-      background: rgba(245,166,35,0.1);
-      border-radius: 50%; margin: 0 auto 16px;
+      margin: 0 auto 16px;
     }
     .why-title { font-size: 14px; font-weight: 700; margin-bottom: 8px; }
     .why-desc { font-size: 12px; color: var(--text-muted); line-height: 1.7; }
