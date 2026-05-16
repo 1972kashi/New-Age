@@ -57,7 +57,7 @@
     /* ─────────────── NAVBAR ─────────────── */
     .navbar {
       background: #253745;
-      margin-top: 10px;
+      margin-top: 1px;
       border-bottom: 1px #364DA2;
       position: sticky; top: 0; z-index: 100;
     }
@@ -70,29 +70,45 @@
       padding-bottom: 12px;
     }
     .logo {
-      display: flex; align-items: center; gap: 10px;
+      display: flex; 
+      align-items: center; 
+      gap: 10px;
     }
+
     .logo-icon {
-      width: 44px; height: 44px;
-      background: var(--gold);
+      width: 55px; height: 55px;
+      background: transparent;
       border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
+      display: flex; 
+      align-items: center; 
+      justify-content: center;
       font-size: 20px;
     }
+
     .logo-text {
-      font-family: 'Bebas Neue', sans-serif;
-      font-size: 14px; line-height: 1.2;
-      letter-spacing: 0.5px;
+      font-family: 'Barlow', sans-serif;
+      line-height: 1.2;
     }
-    .logo-text span { display: block; font-family: 'Barlow', sans-serif; font-size: 10px; color: var(--text-muted); letter-spacing: 2px; text-transform: uppercase; }
+    .logo-text span { 
+      display: block; 
+      font-family: 'Barlow', sans-serif; 
+      font-size: 12px; 
+      color: whitesmoke; 
+      letter-spacing: 4px; 
+      text-transform: uppercase; 
+    }
 
     .nav-links {
-      display: flex; gap: 4px; list-style: none;
+      display: flex; 
+      gap: 4px; 
+      list-style: none;
+      margin-left:200px;
     }
     .nav-links a {
       padding: 7px 16px;
       border-radius: var(--radius);
-      font-size: 13px; font-weight: 500;
+      font-size: 15px; 
+      font-weight: 600;
       transition: background 0.2s;
     }
     .nav-links a:hover, .nav-links a.active { background: var(--dark-3); }
@@ -162,7 +178,7 @@
     .hero {
       background-image: url(Pic/Showroom.svg);
       border-bottom: 1px solid var(--border);
-      padding: 60px 0 50px;
+      padding: 30px 0 30px;
     }
     .hero .container {
       display: grid;
@@ -177,33 +193,66 @@
     }
     .hero-title {
       font-family: 'Bebas Neue', sans-serif;
-      font-size: 68px; line-height: 0.95;
+      font-size: 68px; 
+      line-height: 0.95;
       letter-spacing: 3px;
       margin-bottom: 8px;
     }
-    .hero-title .accent { color: var(--gold); }
+
+    .hero-title .accent { 
+      color: var(--gold);
+     }
+
     .hero-subtitle {
-      font-size: 22px; font-weight: 300; color: whitesmoke;
+      font-size: 22px; 
+      font-weight: 300; 
+      color: whitesmoke;
       margin-bottom: 20px;
-      letter-spacing: 3px; text-transform: uppercase;
+      letter-spacing: 3px; 
+      text-transform: uppercase;
     }
+
     .hero-desc {
-      font-size: 15px; color: whitesmoke;
-      max-width: 440px; margin-bottom: 32px; line-height: 1.8;
+      font-size: 15px; 
+      color: whitesmoke;
+      max-width: 440px; 
+      margin-bottom: 32px; 
+      line-height: 1.8;
     }
+
     .hero-badges {
-      display: grid; grid-template-columns: repeat(3, 1fr);
-      gap: 12px; margin-top: 32px;
+      display: grid; 
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px; 
+      margin-top: 32px;
     }
+
     .hero-badge {
       background: rgba(255,255,255,0.04);
       border: 1px solid var(--border);
       border-radius: var(--radius);
-      padding: 14px; display: flex; gap: 10px; align-items: flex-start;
+      padding: 14px; 
+      display: flex; 
+      gap: 10px; 
+      align-items: flex-start;
     }
-    .hero-badge-icon { font-size: 22px; flex-shrink: 0; }
-    .hero-badge-title { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
-    .hero-badge-desc { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+
+    .hero-badge-icon { 
+      font-size: 22px; 
+      flex-shrink: 0; 
+    }
+
+    .hero-badge-title { 
+      font-size: 15px; 
+      font-weight: 600; 
+      text-transform: uppercase; 
+      letter-spacing: 0.5px; 
+    }
+    .hero-badge-desc { 
+      font-size: 12px; 
+      color: whitesmoke; 
+      margin-top: 2px;
+     }
 
     /* Featured Car Card */
     .featured-car-card {
@@ -314,7 +363,7 @@
       font-size: 13px; font-weight: 600; color: var(--gold);
       display: flex; align-items: center; gap: 4px;
     }
-    .view-all:hover { color: var(--gold-light); }
+    .view-all:hover { color: whitesmoke; }
 
     /* Car Card */
     .car-card {
@@ -338,7 +387,7 @@
       height: 220px;
        object-fit: cover; 
        border-radius: 0;
-    }
+      }
 
     .verified-badge {
       position: absolute; top: 10px; right: 10px;
@@ -412,7 +461,10 @@
       background: var(--dark-2);
       border-top: 1px solid var(--border);
       border-bottom: 1px solid var(--border);
-      padding: 60px 0;
+      padding: 20px 0;
+      margin-left: 40px;
+       margin-right: 40px;
+       border-radius: 15px;
     }
     .calculator-section h2 {
       text-align: center;
@@ -422,8 +474,8 @@
     }
     .calculator-grid {
       display: grid;
-      grid-template-columns: 1fr 340px;
-      gap: 24px;
+      grid-template-columns: 1fr 600px;
+      gap: 10px;
     }
     .calc-inputs {
       background: var(--dark-card);

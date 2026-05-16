@@ -24,16 +24,53 @@
     .btn-dark{background:var(--dark-3);color:var(--text);border:1px solid var(--border);}
 
     /* NAVBAR */
-    .navbar{background:var(--dark-2);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:200;}
-    .navbar .container{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:32px;padding-block:12px;}
-    .logo{display:flex;align-items:center;gap:10px;}
-    .logo-badge{width:44px;height:44px;border-radius:50%;background:var(--gold);display:flex;align-items:center;justify-content:center;font-size:19px;flex-shrink:0;}
-    .logo-text{font-family:'Bebas Neue',sans-serif;font-size:15px;line-height:1.15;letter-spacing:.5px;}
-    .logo-text small{display:block;font-family:'Barlow',sans-serif;font-size:9px;color:var(--text-muted);letter-spacing:2px;text-transform:uppercase;}
-    .nav-links{display:flex;gap:4px;list-style:none;}
-    .nav-links a{padding:7px 16px;border-radius:var(--radius);font-size:13px;font-weight:500;transition:background var(--tr);}
-    .nav-links a:hover,.nav-links a.active{background:var(--dark-3);}
-    .nav-auth{display:flex;gap:10px;}
+    .navbar {
+      background: #253745;
+      margin-top: 1px;
+      border-bottom: 1px #364DA2;
+      position: sticky; top: 0; z-index: 100;
+    }
+    .navbar .container {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      align-items: center;
+      gap: 32px;
+      padding-top: 12px;
+      padding-bottom: 12px;
+    }
+    .logo {
+      display: flex; align-items: center; gap: 10px;
+    }
+    .logo-icon {
+      width: 44px; height: 44px;
+      background: var(--gold);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px;
+    }
+    .logo-text {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 14px; line-height: 1.2;
+      letter-spacing: 0.5px;
+    }
+    .logo-text span { display: block; font-family: 'Barlow', sans-serif; font-size: 10px; color: var(--text-muted); letter-spacing: 2px; text-transform: uppercase; }
+
+    .nav-links {
+      display: flex; 
+      gap: 4px; 
+      list-style: none;
+      margin-left:200px;
+    }
+    .nav-links a {
+      padding: 7px 16px;
+      border-radius: var(--radius);
+      font-size: 15px; 
+      font-weight: 600;
+      transition: background 0.2s;
+    }
+    .nav-links a:hover, .nav-links a.active { background: var(--dark-3); }
+
+    .nav-auth { display: flex; gap: 10px; }
 
     /* BREADCRUMB */
     .breadcrumb{background:var(--dark-2);border-bottom:1px solid var(--border);padding:10px 0;font-size:12px;color:var(--text-muted);}

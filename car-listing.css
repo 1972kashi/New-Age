@@ -22,16 +22,62 @@
     .btn-sm{padding:6px 14px;font-size:12px;} .btn-lg{padding:13px 28px;font-size:14px;}
 
     /* NAVBAR */
-    .navbar{background:var(--dark-2);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:200;}
-    .navbar .container{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:32px;padding-block:12px;}
-    .logo{display:flex;align-items:center;gap:10px;}
-    .logo-badge{width:44px;height:44px;border-radius:50%;background:var(--gold);display:flex;align-items:center;justify-content:center;font-size:19px;flex-shrink:0;}
-    .logo-text{font-family:'Bebas Neue',sans-serif;font-size:15px;line-height:1.15;letter-spacing:.5px;}
-    .logo-text small{display:block;font-family:'Barlow',sans-serif;font-size:9px;color:var(--text-muted);letter-spacing:2px;text-transform:uppercase;}
-    .nav-links{display:flex;gap:4px;list-style:none;}
-    .nav-links a{padding:7px 16px;border-radius:var(--radius);font-size:13px;font-weight:500;transition:background var(--tr);}
-    .nav-links a:hover,.nav-links a.active{background:var(--dark-3);}
-    .nav-auth{display:flex;gap:10px;}
+     .navbar {
+      background: #253745;
+      margin-top: 1px;
+      border-bottom: 1px #364DA2;
+      position: sticky; top: 0; z-index: 100;
+    }
+    .navbar .container {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      align-items: center;
+      gap: 32px;
+      padding-top: 12px;
+      padding-bottom: 12px;
+    }
+    .logo {
+      display: flex; align-items: center; gap: 10px;
+    }
+    .logo-icon {
+      width: 44px; height: 44px;
+      background: var(--gold);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px;
+    }
+    .logo-text {
+      font-family: 'Barlow', sans-serif;
+      
+      line-height: 1.2;
+      
+    }
+    .logo-text span { 
+      display: block; 
+      font-family: 'Barlow', sans-serif; 
+      font-size: 12px;
+       color: whitesmoke;
+       letter-spacing: 4px; 
+       text-transform: uppercase; 
+      }
+
+    .nav-links {
+      display: flex; 
+      gap: 4px; 
+      list-style: none;
+      margin-left:200px;
+    }
+    
+    .nav-links a {
+      padding: 7px 16px;
+      border-radius: var(--radius);
+      font-size: 15px; 
+      font-weight: 600;
+      transition: background 0.2s;
+    }
+    .nav-links a:hover, .nav-links a.active { background: var(--dark-3); }
+
+    .nav-auth { display: flex; gap: 10px; }
 
     /* BREADCRUMB */
     .breadcrumb{background:var(--dark-2);border-bottom:1px solid var(--border);padding:10px 0;font-size:12px;color:var(--text-muted);}
@@ -52,10 +98,34 @@
     .search-input:focus{outline:none;border-color:var(--gold);}
     .search-input::placeholder{color:var(--text-muted);}
     .search-icon{position:absolute;right:14px;top:50%;transform:translateY(-50%);color:var(--text-muted);}
-    .popular-tags{display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:center;font-size:13px;}
-    .popular-tags strong{color:var(--white);margin-right:4px;}
-    .tag{padding:4px 14px;border-radius:20px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);font-size:12px;cursor:pointer;transition:all var(--tr);}
-    .tag:hover{border-color:var(--gold);color:var(--gold);}
+
+    .popular-searches {
+      margin-top: 4px;
+      display: flex; 
+      gap: 8px; 
+      align-items: center; 
+      flex-wrap: wrap;
+    }
+
+    .popular-searches span { 
+      font-size: 12px; 
+      color: whitesmoke;
+     }
+
+    .pop-tag {
+      font-size: 15px; 
+      padding: 4px 12px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid var(--border);
+      border-radius: 20px; 
+      cursor: pointer; 
+      transition: all 0.2s;
+    }
+
+    .pop-tag:hover { 
+      border-color: var(--gold); 
+      color: var(--gold);
+     }
 
     /* LISTINGS */
     .listings-section{padding:52px 0;}
@@ -63,12 +133,41 @@
     .listings-title span{color:var(--gold);font-size:24px;}
 
     /* CAR CARD */
-    .car-card{background:var(--dark-card);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;transition:transform var(--tr),box-shadow var(--tr),border-color var(--tr);}
-    .car-card:hover{transform:translateY(-5px);box-shadow:0 20px 56px rgba(0,0,0,.6);border-color:rgba(245,166,35,.25);}
+    .car-card{
+       background: #292D32;
+      border: 2px solid white;
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+    }
+
+    .car-card:hover{
+      transform:translateY(-5px);
+      box-shadow:0 20px 56px rgba(0,0,0,.6);
+      border-color:rgba(245,166,35,.25);
+    }
     .card-img-wrap{position:relative;overflow:hidden;}
-    .card-img-wrap img{width:100%;height:175px;object-fit:cover;transition:transform .4s ease;}
+    .card-img-wrap img{
+      width:100%;
+      height:175px;
+      object-fit:cover;
+      border-bottom: 2px solid white;
+      transition:transform .4s ease;
+    }
     .car-card:hover .card-img-wrap img{transform:scale(1.05);}
-    .verified-pill{position:absolute;top:10px;right:10px;background:var(--green);color:#fff;font-size:10px;font-weight:700;padding:3px 10px;border-radius:20px;text-transform:uppercase;letter-spacing:.5px;}
+    .verified-pill
+    {position:absolute;
+      top:10px;right:10px;
+      background:var(--green);
+      color:#fff;
+      font-size:10px;
+      font-weight:700;
+      padding:3px 10px;
+      border-radius:20px;
+      text-transform:uppercase;
+      letter-spacing:.5px;
+    }
+
     .card-body{padding:14px 16px;}
     .card-name{font-size:13px;font-weight:700;margin-bottom:10px;line-height:1.35;}
     .card-meta{display:grid;grid-template-columns:repeat(2,1fr);gap:6px 8px;margin-bottom:12px;}

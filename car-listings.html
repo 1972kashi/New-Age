@@ -12,12 +12,14 @@
 <!-- NAVBAR -->
 <nav class="navbar">
   <div class="container">
-    <a href="index.html" class="logo">
-      <div class="logo-badge"><img src="Pic/New_Age_transparent 1.svg" alt="Logo"></div>
-      <div class="logo-text">Your One Stop Car Shopping</div>
-    </a>
+    <div class="logo">
+      <div class="logo-icon"><img src="Pic/NewAge.jpeg" alt="Logo"></div>
+      <div class="logo-text">
+        <span>Your One<br> Stop Car<br> Shopping</span>
+      </div>
+    </div>
     <ul class="nav-links">
-      <li><a href="index.html">Home</a></li>
+      <li><a href="Index.html" class="active">Home</a></li>
       <li><a href="about.html">About us</a></li>
       <li><a href="#">FAQ</a></li>
       <li><a href="#">Sell your Car</a></li>
@@ -47,11 +49,16 @@
     <button class="btn btn-gold btn-lg">Search</button>
   </div>
   <button class="btn btn-dark" style="padding:11px 28px;">Show More Filters ▽</button>
-  <div class="popular-tags">
-    <strong>Popular Searches:</strong>
-    <span class="tag">Toyota</span><span class="tag">Mercedes Benz</span><span class="tag">BMW</span>
-    <span class="tag">Subaru</span><span class="tag">Range Rover</span><span class="tag">Audi</span>
-  </div>
+   <div class="popular-searches">
+      <span>Popular Searches:</span>
+       <span class="pop-tag" onclick="document.getElementById('searchInput').value='Toyota'">Toyota</span> •
+      <span class="pop-tag" onclick="document.getElementById('searchInput').value='BMW'">BMW</span>
+        • <span class="pop-tag" onclick="document.getElementById('searchInput').value='Porsche'">Mercedes</span> •
+      <span class="pop-tag" onclick="document.getElementById('searchInput').value='Audi'">Audi</span> •
+      <span class="pop-tag" onclick="document.getElementById('searchInput').value='Dodge'">Isuzu</span>•
+       <span class="pop-tag" onclick="document.getElementById('searchInput').value='Audi'">Subaru</span> •
+      <span class="pop-tag" onclick="document.getElementById('searchInput').value='Dodge'">Range Rover</span>
+    </div>
 </section>
 
 <!-- LISTINGS -->
@@ -61,7 +68,22 @@
 
     <!-- Cars grid rows -->
     <div class="g-3 row-gap">
-      <div class="car-card"><div class="card-img-wrap"><img src="https://images.unsplash.com/photo-1555215695-3004980ad54e?w=600&q=80" alt="BMW M4"/><span class="verified-pill">Verified</span></div><div class="card-body"><div class="card-name">BMW M4 Coupé (F82 Generation)</div><div class="card-meta"><div class="meta-item">🔄 1524 Miles</div><div class="meta-item">⚙️ CVT</div><div class="meta-item">⛽ Petrol</div><div class="meta-item">🗓️ 2014</div></div><div class="card-footer"><div class="card-price"><small>USD</small> 50,317</div><a href="car-detail.html" class="btn btn-gold btn-sm">More Details</a></div></div></div>
+      <div class="car-card">
+        <div class="card-img-wrap"><img src="https://images.unsplash.com/photo-1555215695-3004980ad54e?w=600&q=80" alt="BMW M4"/>
+          <span class="verified-pill">Verified</span></div
+          ><div class="card-body"><div class="card-name">BMW M4 Coupé (F82 Generation)</div
+            ><div class="card-meta"><div class="meta-item">🔄 1524 Miles</div>
+            <div class="meta-item">⚙️ CVT</div>
+            <div class="meta-item">⛽ Petrol</div>
+            <div class="meta-item">🗓️ 2014</div>
+          </div>
+          <div class="card-footer">
+            <div class="card-price"><small>USD</small> 50,317</div>
+            <a href="car-detail.html" class="btn btn-gold btn-sm">More Details</a>
+          </div>
+          </div>
+          </div>
+          
       <div class="car-card"><div class="card-img-wrap"><img src="https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=600&q=80" alt="Porsche 911"/><span class="verified-pill">Verified</span></div><div class="card-body"><div class="card-name">Porsche 911 Turbo (993 Generation)</div><div class="card-meta"><div class="meta-item">🔄 1524 Miles</div><div class="meta-item">⚙️ CVT</div><div class="meta-item">⛽ Petrol</div><div class="meta-item">🗓️ 2014</div></div><div class="card-footer"><div class="card-price"><small>USD</small> 50,317</div><a href="car-detail.html" class="btn btn-gold btn-sm">More Details</a></div></div></div>
       <div class="car-card"><div class="card-img-wrap"><img src="https://images.unsplash.com/photo-1614200187524-dc4b892acf16?w=600&q=80" alt="Audi RS7"/><span class="verified-pill">Verified</span></div><div class="card-body"><div class="card-name">Audi RS7 Sportback (C8 Generation)</div><div class="card-meta"><div class="meta-item">🔄 1524 Miles</div><div class="meta-item">⚙️ CVT</div><div class="meta-item">⛽ Petrol</div><div class="meta-item">🗓️ 2014</div></div><div class="card-footer"><div class="card-price"><small>USD</small> 50,317</div><a href="car-detail.html" class="btn btn-gold btn-sm">More Details</a></div></div></div>
     </div>
