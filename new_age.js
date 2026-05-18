@@ -106,3 +106,52 @@ function triggerScrollReveal() {
       revealObserver.observe(el);
     });
 }
+
+const CARDS_PER_PAGE = 3; // how many cards per page
+const cards = [...document.querySelectorAll('.car-card')];
+const pageBtns = [...document.querySelectorAll('.page-btn[data-page]')];
+const prevBtn = document.querySelector('.page-btn[data-prev]');
+const nextBtn = document.querySelector('.page-btn[data-next]');
+
+const totalPages = Math.ceil(cards.length / CARDS_PER_PAGE);
+let currentPage = 1;
+
+function showPage(page) {
+  // Clamp page within bounds
+  currentPage = Math.max(1, Math.min(page, totalPages));
+
+  // Show/hide cards
+  cards.forEach((card, i) => {
+    const cardPage = Math.floor(i / CARDS_PER_PAGE) + 1;
+    if (cardPage === currentPage) {
+      card.classList.remove('hidden');
+      // Restart animation
+      card.classList.remove('fade-in');
+      void card.offsetWidth; // force reflow
+      card.classList.add('fade-in');
+    } else {
+      card.classList.add('hidden');
+      card.classList.remove('fade-in');
+    }
+  });
+
+  // Update active button
+  pageBtns.forEach(btn => {
+    btn.classList.toggle('active', Number(btn.dataset.page) === currentPage);
+  });
+
+  // Scroll to the grid top smoothly
+  document.querySelector('.grid-3').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+// Page number buttons
+pageBtns.forEach(btn => {
+  btn.addEventListener('click', () => showPage(Number(btn.dataset.page)));
+});
+
+// Prev / Next
+prevBtn?.addEventListener('click', () => showPage(currentPage - 1));
+nextBtn?.addEventListener('click', () => showPage(currentPage + 1));
+
+// Init
+showPage(1);

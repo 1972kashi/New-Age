@@ -371,7 +371,7 @@
       border: 2px solid white;
       border-radius: var(--radius-lg);
       overflow: hidden;
-      transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+      transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s, opacity 0.3s;
     }
     .car-card:hover {
       transform: translateY(-4px);
@@ -422,6 +422,17 @@
       border-radius: 6px; transition: background 0.2s;
     }
     .btn-details:hover { background: var(--gold-light); }
+
+   
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.car-card.fade-in {
+  animation: fadeInUp 0.35s ease forwards;
+}
 
     /* Pagination */
     .pagination {
