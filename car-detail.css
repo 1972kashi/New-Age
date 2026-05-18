@@ -17,11 +17,63 @@
     .container{max-width:1440px;margin:0 auto;padding:0 24px;}
 
     /* BUTTONS */
-    .btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:10px 22px;border-radius:var(--radius);font-family:'Barlow',sans-serif;font-size:13px;font-weight:600;cursor:pointer;border:none;transition:all var(--tr);}
-    .btn-gold{background:var(--gold);color:#000;} .btn-gold:hover{background:var(--gold-light);}
-    .btn-outline{background:transparent;border:1.5px solid var(--border);color:var(--text);} .btn-outline:hover{border-color:var(--gold);color:var(--gold);}
-    .btn-green{background:var(--green);color:#fff;} .btn-green:hover{background:#19a84e;}
-    .btn-dark{background:var(--dark-3);color:var(--text);border:1px solid var(--border);}
+    .btn{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:6px;
+      padding:10px 22px;
+      border-radius:var(--radius);
+      font-family:'Barlow',sans-serif;
+      font-size:13px;
+      font-weight:600;
+      cursor:pointer;
+      border:none;
+      transition:all var(--tr);
+    }
+
+    .btn-gold{
+      background:var(--gold);
+      color:#000;
+    } 
+    
+    .btn-gold:hover{
+      background:var(--gold-light);
+    }
+
+    .btn-outline{
+      background:transparent;
+      border:1.5px solid var(--border);
+      color:var(--text);
+    }
+    
+    .btn-outline:hover{
+      border-color:var(--gold);
+      color:var(--gold);
+    }
+
+    .btn-green{
+      background:var(--green);
+      color:#fff;
+      width:100%;
+      justify-content:center;
+      font-size:14px;
+      padding:13px;
+    }
+    
+    .btn-green:hover{
+      background:#19a84e;
+    }
+
+    .btn-dark{
+      background:var(--dark-3);
+      color:var(--text);
+      border:1px solid var(--border);
+      width:100%;
+      justify-content:center;
+      font-size:14px;
+      padding:13px;
+    }
 
     /* NAVBAR */
     .navbar {
@@ -153,38 +205,100 @@
 
     /* RIGHT SIDE – ENQUIRY FORM */
     .enquiry-card{
-      background:var(--dark-card);border:1px solid var(--border);
-      border-radius:var(--radius-lg);padding:32px;
-      position:sticky;top:80px;
+      width: 450px;
+      background:var(--dark-card);
+      border:1px solid var(--border);
+      border-radius:var(--radius-lg);
+      padding:32px;
+      position:sticky;
+      top:80px;
     }
+
+  
     .enquiry-card h3{
-      font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:1px;
-      text-align:center;margin-bottom:24px;
+      font-family:'Bebas Neue',sans-serif;
+      font-size:26px;
+      letter-spacing:1px;
+      text-align:center;
+      margin-bottom:24px;
     }
+
     .enquiry-inner{
-      display:grid;grid-template-columns:1fr 1fr;
+      display:flex;
+      flex-direction:column;
       gap:16px;
     }
-    .enq-fields{display:flex;flex-direction:column;gap:12px;}
+
+    .enq-fields{
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      margin-right: 0;
+    }
+
     .enq-msg{
-      background:var(--dark-3);border:1.5px solid var(--border);border-radius:var(--radius);
-      padding:14px;font-family:'Barlow',sans-serif;font-size:13px;color:var(--text);
-      line-height:1.7;resize:none;height:100%;min-height:148px;
+      background:var(--dark-3);
+      border:1.5px solid var(--border);
+      border-radius:var(--radius);
+      padding:14px;
+      font-family:'Barlow',sans-serif;
+      font-size:13px;
+      color:var(--text);
+      line-height:1.7;
+      resize:none;
+      height:100%;
+      min-height:120px;
+      width: 100%;
+      box-sizing: border-box;
+      height: auto;
+       
     }
-    .enq-msg:focus{outline:none;border-color:var(--gold);}
+
+    textarea{
+
+      color:#4a4f68;
+      margin-right: 0;
+    }
+
+    .enq-msg:focus{
+      outline:none;
+      border-color:var(--gold);
+    }
+
     .enq-input{
-      width:100%;padding:12px 14px;
-      background:var(--dark-3);border:1.5px solid var(--border);border-radius:var(--radius);
-      color:var(--text);font-family:'Barlow',sans-serif;font-size:13px;
+      width:100%;
+      padding:12px 14px;
+      background:var(--dark-3);
+      border:1.5px solid var(--border);
+      border-radius:var(--radius);
+      color:var(--text);
+      font-family:'Barlow',sans-serif;
+      font-size:13px;
     }
-    .enq-input:focus{outline:none;border-color:var(--gold);}
-    .enq-input::placeholder{color:#4a4f68;}
-    .phone-row{display:flex;gap:0;}
+
+    .enq-input:focus{
+      outline:none;
+      border-color:var(--gold);
+    }
+
+    .enq-input::placeholder{
+      color:#4a4f68;
+    }
+
+    .phone-row{
+      display:flex;
+      gap:0;
+    }
+
     .phone-prefix{
-      padding:12px 12px;background:var(--dark-2);
-      border:1.5px solid var(--border);border-right:none;
+      padding:12px 12px;
+      background:var(--dark-2);
+      border:1.5px solid var(--border);
+      border-right:none;
       border-radius:var(--radius) 0 0 var(--radius);
-      font-size:13px;color:var(--text-muted);white-space:nowrap;
+      font-size:13px;
+      color:var(--text-muted);
+      white-space:nowrap;
     }
     .phone-input{
       flex:1;padding:12px 14px;
@@ -192,12 +306,40 @@
       border-radius:0 var(--radius) var(--radius) 0;
       color:var(--text);font-family:'Barlow',sans-serif;font-size:13px;
     }
-    .phone-input:focus{outline:none;border-color:var(--gold);}
-    .phone-input::placeholder{color:#4a4f68;}
-    .enq-checks{display:flex;flex-direction:column;gap:8px;margin:16px 0;}
-    .enq-check{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text-muted);}
-    .enq-check input{accent-color:var(--gold);width:15px;height:15px;}
-    .enq-btns{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:4px;}
+    .phone-input:focus{
+      outline:none;
+      border-color:var(--gold);
+    }
+
+    .phone-input::placeholder{
+      color:#4a4f68;
+    }
+
+    .enq-checks{ 
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+      margin:16px 0;
+    }
+
+    .enq-check{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      font-size:13px;
+      color:var(--text-muted);
+    }
+    .enq-check input{
+      accent-color:var(--gold);
+      width:15px;
+      height:15px;
+    }
+    .enq-btns{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:12px;
+      margin-top:4px;
+    }
 
     /* FOOTER */
     .footer{background:var(--dark-2);border-top:1px solid var(--border);padding:48px 0 24px;}
