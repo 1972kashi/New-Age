@@ -126,8 +126,8 @@
     font-family: 'Barlow', sans-serif;
     font-size: 13px;
     transition: border-color 0.18s;
-    appearance: none;
-    -webkit-appearance: none;
+    
+   
   }
 
   .field input::placeholder { color: #3a3f52; }
@@ -185,7 +185,7 @@
   .submit-row {
     margin-top: 22px;
     display: grid;
-    grid-template-columns: repeat(3, minmax(0,1fr));
+    grid-template-columns: repeat(auto-fit, minmax(140px,1fr));
     gap: 10px;
   }
 
@@ -235,6 +235,89 @@
     background: var(--dark-2);
     color: var(--text);
     font-size: 14px;
+  }
+
+  .saved-panel {
+    padding-top: 20px;
+    border-top: 1px solid rgba(255,255,255,0.1);
+    margin-top: 18px;
+  }
+
+  .saved-cars-list {
+    display: grid;
+    gap: 12px;
+    margin-top: 12px;
+  }
+
+  .saved-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 16px;
+    background: #1f2434;
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: var(--radius-lg);
+  }
+
+  .saved-card-info {
+    min-width: 0;
+  }
+
+  .saved-card-title {
+    font-size: 13px;
+    font-weight: 700;
+    margin-bottom: 6px;
+    color: var(--text);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .saved-card-meta,
+  .saved-card-path {
+    font-size: 12px;
+    color: var(--text-muted);
+    line-height: 1.4;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .saved-card-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .saved-btn {
+    padding: 8px 12px;
+    border-radius: var(--radius);
+    border: none;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 11px;
+    cursor: pointer;
+    transition: background 0.18s;
+  }
+
+  .saved-btn.edit {
+    background: var(--gold);
+    color: #000;
+  }
+
+  .saved-btn.delete {
+    background: rgba(255,255,255,0.08);
+    color: var(--text);
+  }
+
+  .saved-btn.delete:hover {
+    background: rgba(255,255,255,0.16);
+  }
+
+  .saved-empty {
+    text-align: center;
+    color: var(--text-muted);
+    padding: 18px 0;
   }
 
   .no-results {

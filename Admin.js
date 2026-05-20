@@ -2,6 +2,9 @@
   let showBadge = true;
   let activeCard = 0;
   let searchQuery = '';
+  let savedSearchQuery = '';
+  let savedCars = [];
+  let editingSavedIndex = null;
 
   const cards = Array.from({ length: TOTAL }, (_, i) => ({
     name: '', miles: '', fuel: '', trans: '', year: '',
@@ -63,6 +66,99 @@
     clearForm();
     renderGrid();
     showToast('Card ' + (activeCard + 1) + ' deleted');
+  }
+
+  function fetchSavedCars() {
+    try { return JSON.parse(localStorage.getItem('uploadedCars') || '[]'); } catch (e) { return []; }
+  }
+
+  function saveStoredCars(cars) {
+    localStorage.setItem('uploadedCars', JSON.stringify(cars));
+  }
+
+  function loadSavedCars() {
+    savedCars = fetchSavedCars();
+    renderSavedCars();
+  }
+
+  function setSavedSearch(value) {
+    savedSearchQuery = (value || '').trim().toLowerCase();
+    renderSavedCars();
+  }
+
+  function renderSavedCars() {
+    const list = document.getElementById('saved-cars-list');
+    const entries = savedCars
+      .map((car, index) => ({ car, index }))
+      .filter(({ car }) => {
+        if (!savedSearchQuery) return true;
+        const target = [car.name, car.miles, car.fuel, car.trans, car.year, car.price, car.link, car.img]
+          .filter(Boolean).join(' ').toLowerCase();
+        return target.includes(savedSearchQuery);
+      });
+
+    if (!entries.length) {
+      list.innerHTML = '<div class="saved-empty">No saved cars found.</div>';
+      return;
+    }
+
+    list.innerHTML = entries.map(({ car, index }) => `
+      <div class="saved-card">
+        <div class="saved-card-info">
+          <div class="saved-card-title">${car.name || 'Unnamed Car'}</div>
+          <div class="saved-card-meta">${car.year || 'Year'} · ${car.trans || 'Trans'} · ${car.fuel || 'Fuel'} · KSH ${car.price || '—'}</div>
+          <div class="saved-card-path">${car.link || 'car-detail.html'}</div>
+        </div>
+        <div class="saved-card-actions">
+          <button class="saved-btn edit" onclick="editSavedCar(${index})">Edit</button>
+          <button class="saved-btn delete" onclick="deleteSavedCar(${index})">Delete</button>
+        </div>
+      </div>`).join('');
+  }
+
+  function editSavedCar(index) {
+    const car = savedCars[index];
+    if (!car) return;
+    document.getElementById('f-name').value = car.name;
+    document.getElementById('f-miles').value = car.miles;
+    document.getElementById('f-fuel').value = car.fuel;
+    document.getElementById('f-trans').value = car.trans;
+    document.getElementById('f-year').value = car.year;
+    document.getElementById('f-price').value = car.price;
+    document.getElementById('f-link').value = car.link;
+    document.getElementById('f-img').value = car.img;
+    setBadge(car.badge);
+    editingSavedIndex = index;
+    showToast('Editing saved car #' + (index + 1) + '. Save to Storage to update.');
+  }
+
+  function deleteSavedCar(index) {
+    if (index < 0 || index >= savedCars.length) return;
+    savedCars.splice(index, 1);
+    saveStoredCars(savedCars);
+    if (editingSavedIndex === index) {
+      editingSavedIndex = null;
+      clearForm();
+    }
+    renderSavedCars();
+    showToast('Saved car deleted');
+  }
+
+  function saveToStorage() {
+    const car = getFormVals();
+    if (!car.name && !car.img && !car.price) {
+      return showToast('Fill in a car name, image, or price before saving.');
+    }
+    if (editingSavedIndex !== null && editingSavedIndex >= 0) {
+      savedCars[editingSavedIndex] = car;
+      showToast('Saved car updated');
+      editingSavedIndex = null;
+    } else {
+      savedCars.push(car);
+      showToast('Saved car added');
+    }
+    saveStoredCars(savedCars);
+    renderSavedCars();
   }
 
   function setSearch(value) {
@@ -141,10 +237,12 @@
   function uploadCards() {
     const toSave = cards.filter(c => (c.name && c.name.trim()) || (c.img && c.img.trim()) || (c.price && c.price.trim()));
     if (!toSave.length) return showToast('No cards to upload');
-    const existing = JSON.parse(localStorage.getItem('uploadedCars') || '[]');
+    const existing = fetchSavedCars();
     const merged = existing.concat(toSave);
-    localStorage.setItem('uploadedCars', JSON.stringify(merged));
+    saveStoredCars(merged);
+    loadSavedCars();
     showToast('Cards uploaded locally!');
   }
 
+  loadSavedCars();
   renderGrid();
