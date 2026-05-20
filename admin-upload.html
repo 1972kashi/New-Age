@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Admin — New Age Automotive</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@400;600;700&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="Admin.css"/>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-brand">Login &rsaquo; <span>ADMIN</span></div>
+  <div class="nav-links">
+    <button class="nav-btn active">Upload</button>
+    <button class="nav-btn">Register</button>
+    <button class="nav-btn">Dealers</button>
+  </div>
+</nav>
+
+<div class="page">
+
+  <!-- FORM -->
+  <div class="form-card">
+    <div class="form-card-title">Card Details</div>
+
+    <div class="field">
+      <label>Select Car Card</label>
+      <div class="select-wrap">
+        <select title="Select Car Card" id="card-select" onchange="loadCard()">
+          <option value="0">Car-Card 1</option>
+          <option value="1">Car-Card 2</option>
+          <option value="2">Car-Card 3</option>
+          <option value="3">Car-Card 4</option>
+          <option value="4">Car-Card 5</option>
+          <option value="5">Car-Card 6</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Car Name / Title</label>
+      <input id="f-name" type="text" placeholder="e.g. BMW M4 Coupé (F82 Generation)" oninput="liveUpdate()"/>
+    </div>
+
+    <div class="row2">
+      <div class="field">
+        <label>Mileage</label>
+        <input id="f-miles" type="text" placeholder="e.g. 1,524" oninput="liveUpdate()"/>
+      </div>
+      <div class="field">
+        <label>Year</label>
+        <input id="f-year" type="text" placeholder="e.g. 2019" oninput="liveUpdate()"/>
+      </div>
+    </div>
+
+    <div class="row2">
+      <div class="field">
+        <label>Transmission</label>
+        <div class="select-wrap">
+          <select title="Transmission" id="f-trans" onchange="liveUpdate()">
+            <option value="" placeholder="Type">Type</option>
+            <option>Automatic</option>
+            <option>Manual</option>
+            
+          </select>
+        </div>
+      </div>
+      <div class="field">
+        <label>Fuel Type</label>
+        <div class="select-wrap">
+          <select title="Fuel Type" id="f-fuel" onchange="liveUpdate()">
+            <option value="" placeholder="Fuel">Fuel</option>
+            <option>Petrol</option>
+            <option>Diesel</option>
+            <option>Electric</option>
+            <option>Hybrid</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="row2">
+      <div class="field">
+        <label>Price (KSH)</label>
+        <input id="f-price" type="text" placeholder="e.g. 5,200,000" oninput="liveUpdate()"/>
+      </div>
+      <div class="field">
+        <label>Detail Page Link</label>
+        <input id="f-link" type="text" placeholder="car detail page" value="car-detail.html" oninput="liveUpdate()"/>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Image Path</label>
+      <input id="f-img" type="text" placeholder="Pic/Car1.svg" oninput="liveUpdate()"/>
+    </div>
+
+    <div class="field">
+      <label>Verified Badge</label>
+      <div class="badge-toggle">
+        <button class="badge-btn active-yes" id="btn-yes" onclick="setBadge(true)">YES</button>
+        <button class="badge-btn" id="btn-no" onclick="setBadge(false)">No</button>
+      </div>
+    </div>
+
+    <div class="submit-row">
+      <button class="btn-submit primary" onclick="saveCard()">Save Card</button>
+      <button class="btn-submit secondary" onclick="clearForm()">Clear</button>
+      <button class="btn-submit secondary" onclick="deleteCard()">Delete Card</button>
+    </div>
+  </div>
+
+  <!-- RIGHT -->
+  <div class="right-panel">
+    <div>
+      <div class="panel-title">Card Detail <span>Preview</span></div>
+      <div class="search-row">
+        <input id="card-search" type="search" placeholder="Search cars..." oninput="setSearch(this.value)" />
+      </div>
+      <div class="grid-3" id="cards-grid"></div>
+      <div class="upload-row">
+        <button class="btn-upload-final" onclick="uploadCards()">Upload</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="Admin.js"></script>
+</body>
+</html>

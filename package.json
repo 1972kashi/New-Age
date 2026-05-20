@@ -1,0 +1,26 @@
+{
+  "name": "new-age",
+  "version": "1.0.0",
+  "description": "",
+  "main": "Admin.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/1972kashi/New-Age.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/1972kashi/New-Age/issues"
+  },
+  "homepage": "https://github.com/1972kashi/New-Age#readme",
+  "dependencies": {
+    "cors": "^2.8.6",
+    "express": "^5.2.1"
+  }
+}

@@ -107,51 +107,108 @@ function triggerScrollReveal() {
     });
 }
 
-const CARDS_PER_PAGE = 3; // how many cards per page
-const cards = [...document.querySelectorAll('.car-card')];
-const pageBtns = [...document.querySelectorAll('.page-btn[data-page]')];
-const prevBtn = document.querySelector('.page-btn[data-prev]');
-const nextBtn = document.querySelector('.page-btn[data-next]');
-
-const totalPages = Math.ceil(cards.length / CARDS_PER_PAGE);
+const CARDS_PER_PAGE = 6; // how many cards per page
+let cards = [];
+let pageBtns = [];
+let prevBtn = null;
+let nextBtn = null;
+let pagination = null;
+let totalPages = 1;
 let currentPage = 1;
+let searchInput = null;
+let searchQuery = '';
+
+function getFilteredCards() {
+  return cards.filter(card => {
+    if (!searchQuery) return true;
+    return card.textContent.toLowerCase().includes(searchQuery);
+  });
+}
+
+function buildHomePagination() {
+  if (!pagination) return;
+  const existingPageBtns = Array.from(pagination.querySelectorAll('[data-page]'));
+  existingPageBtns.forEach(btn => btn.remove());
+
+  for (let i = 1; i <= totalPages; i++) {
+    const btn = document.createElement('div');
+    btn.className = 'page-btn';
+    btn.dataset.page = String(i);
+    btn.textContent = String(i);
+    btn.onclick = () => showPage(i);
+    pagination.insertBefore(btn, nextBtn || null);
+  }
+
+  pageBtns = Array.from(pagination.querySelectorAll('[data-page]'));
+  if (prevBtn) prevBtn.onclick = () => showPage(currentPage - 1);
+  if (nextBtn) nextBtn.onclick = () => showPage(currentPage + 1);
+}
+
+function setSearch(value) {
+  searchQuery = (value || '').trim().toLowerCase();
+  currentPage = 1;
+  updateHomeView();
+}
+
+function updateHomeView() {
+  const filtered = getFilteredCards();
+  totalPages = Math.max(1, Math.ceil(filtered.length / CARDS_PER_PAGE));
+  buildHomePagination();
+  showPage(currentPage);
+}
 
 function showPage(page) {
-  // Clamp page within bounds
+  const filtered = getFilteredCards();
+  totalPages = Math.max(1, Math.ceil(filtered.length / CARDS_PER_PAGE));
   currentPage = Math.max(1, Math.min(page, totalPages));
+  const grid = document.querySelector('.section .grid.grid-3');
 
-  // Show/hide cards
-  cards.forEach((card, i) => {
-    const cardPage = Math.floor(i / CARDS_PER_PAGE) + 1;
+  cards.forEach(card => card.classList.add('hidden'));
+  filtered.forEach((card, index) => {
+    const cardPage = Math.floor(index / CARDS_PER_PAGE) + 1;
     if (cardPage === currentPage) {
       card.classList.remove('hidden');
-      // Restart animation
-      card.classList.remove('fade-in');
-      void card.offsetWidth; // force reflow
-      card.classList.add('fade-in');
-    } else {
-      card.classList.add('hidden');
-      card.classList.remove('fade-in');
     }
   });
 
-  // Update active button
+  const noResults = document.querySelector('.no-results');
+  if (!filtered.length) {
+    if (!noResults && grid) {
+      const msg = document.createElement('div');
+      msg.className = 'no-results';
+      msg.textContent = 'No cars match your search.';
+      grid.parentNode.insertBefore(msg, grid.nextSibling);
+    }
+  } else if (noResults) {
+    noResults.remove();
+  }
+
   pageBtns.forEach(btn => {
     btn.classList.toggle('active', Number(btn.dataset.page) === currentPage);
   });
 
-  // Scroll to the grid top smoothly
-  document.querySelector('.grid-3').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  document.querySelector('.grid-3')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
-// Page number buttons
-pageBtns.forEach(btn => {
-  btn.addEventListener('click', () => showPage(Number(btn.dataset.page)));
-});
+function initHomePagination() {
+  cards = [...document.querySelectorAll('.section .grid.grid-3 .car-card')];
+  pagination = document.querySelector('.pagination');
+  prevBtn = document.querySelector('.page-btn[data-prev]');
+  nextBtn = document.querySelector('.page-btn[data-next]');
+  searchInput = document.querySelector('.search-bar-section .search-input');
 
-// Prev / Next
-prevBtn?.addEventListener('click', () => showPage(currentPage - 1));
-nextBtn?.addEventListener('click', () => showPage(currentPage + 1));
+  if (searchInput && !searchInput.dataset.homeSearchAttached) {
+    searchInput.addEventListener('input', e => setSearch(e.target.value));
+    searchInput.dataset.homeSearchAttached = 'true';
+  }
 
-// Init
-showPage(1);
+  updateHomeView();
+}
+
+window.refreshHomePagination = initHomePagination;
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initHomePagination);
+} else {
+  initHomePagination();
+}
