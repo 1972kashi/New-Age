@@ -354,7 +354,9 @@
     /* ─────────────── FEATURED CARS ─────────────── */
     .section { padding: 60px 0; }
     .section-header {
-      display: flex; justify-content: space-between; align-items: center;
+      display: flex; 
+      justify-content: space-between; 
+      align-items: center;
       margin-bottom: 28px;
     }
     .section-title {
