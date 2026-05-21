@@ -362,10 +362,17 @@
       font-size: 38px; letter-spacing: 1px;
     }
     .view-all {
-      font-size: 13px; font-weight: 600; color: var(--gold);
-      display: flex; align-items: center; gap: 4px;
+      font-size: 13px; 
+      font-weight: 600; 
+      color: var(--gold);
+      display: flex; 
+      align-items: center; 
+      gap: 4px;
     }
-    .view-all:hover { color: whitesmoke; }
+
+    .view-all:hover { 
+      color: whitesmoke;
+     }
 
     /* Car Card */
     .car-card {
@@ -392,18 +399,31 @@
       }
 
     .verified-badge {
-      position: absolute; top: 10px; right: 10px;
+      position: absolute; 
+      top: 10px; 
+      right: 10px;
       background: var(--green);
-      color: #fff; font-size: 10px; font-weight: 700;
-      padding: 3px 9px; border-radius: 20px;
-      text-transform: uppercase; letter-spacing: 0.5px;
+      color: #fff; 
+      font-size: 10px; 
+      font-weight: 700;
+      padding: 3px 9px; 
+      border-radius: 20px;
+      text-transform: uppercase; 
+      letter-spacing: 0.5px;
     }
     .car-body { padding: 14px; }
-    .car-name { font-size: 20px; 
-      font-weight: 700; margin-bottom: 10px; line-height: 1.3; }
+    .car-name { 
+      font-size: 20px; 
+      font-weight: 700; 
+      margin-bottom: 10px; 
+      line-height: 1.3; 
+    }
+
     .car-meta {
-      display: grid; grid-template-columns: repeat(3, 1fr);
-      gap: 6px; margin-bottom: 12px;
+      display: grid; 
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px; 
+      margin-bottom: 12px;
     }
     .car-meta-item {
       display: flex; 
@@ -412,21 +432,41 @@
       font-size: 17px; 
       color: whitesmoke;
     }
-    .car-meta-icon { font-size: 12px; }
-    .car-footer {
-      display: flex; justify-content: space-between; align-items: center;
-      border-top: 1px solid var(--border); padding-top: 12px;
+
+    .car-meta-icon { 
+      font-size: 12px; 
     }
+
+    .car-footer {
+      display: flex; 
+      justify-content: space-between; 
+      align-items: center;
+      border-top: 1px solid var(--border);
+       padding-top: 12px;
+    }
+
     .car-price {
       font-family: 'Barlow Condensed', sans-serif;
-      font-size: 17px; font-weight: 700; color: var(--white);
+      font-size: 17px; 
+      font-weight: 700;
+      color: var(--white);
     }
-    .car-price small { font-size: 11px; color: var(--text-muted); font-weight: 400; }
+    .car-price small { 
+      font-size: 11px; 
+      color: var(--text-muted); 
+      font-weight: 400; 
+    }
+
     .btn-details {
-      font-size: 11px; padding: 6px 14px;
-      background: var(--gold); color: #000; font-weight: 700;
-      border-radius: 6px; transition: background 0.2s;
+      font-size: 11px; 
+      padding: 6px 14px;
+      background: var(--gold); 
+      color: #000; 
+      font-weight: 700;
+      border-radius: 6px; 
+      transition: background 0.2s;
     }
+
     .btn-details:hover { background: var(--gold-light); }
 
    
@@ -442,20 +482,33 @@
 
     /* Pagination */
     .pagination {
-      display: flex; gap: 8px; justify-content: center;
+      display: flex; gap: 8px; 
+      justify-content: center;
       margin-top: 32px;
     }
     .page-btn {
-      width: 36px; height: 36px;
-      display: flex; align-items: center; justify-content: center;
+      width: 36px; 
+      height: 36px;
+      display: flex; align-items: center; 
+      justify-content: center;
       border-radius: var(--radius);
       background: var(--dark-3);
       border: 1px solid var(--border);
-      cursor: pointer; font-size: 13px; font-weight: 600;
+      cursor: pointer; 
+      font-size: 13px;
+      font-weight: 600;
       transition: all 0.2s;
     }
-    .page-btn.active { background: var(--gold); color: #000; border-color: var(--gold); }
-    .page-btn:hover:not(.active) { border-color: var(--gold); color: var(--gold); }
+    .page-btn.active {
+      background: var(--gold); 
+      color: #000; 
+      border-color: var(--gold); 
+    }
+
+    .page-btn:hover:not(.active) { 
+      border-color: var(--gold); 
+      color: var(--gold);
+     }
 
     /* ─────────────── SOURCE BANNER ─────────────── */
     .source-banner {
