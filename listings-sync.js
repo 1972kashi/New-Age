@@ -17,10 +17,10 @@
       <div class="car-body">
         <div class="car-name">${c.name || 'Unnamed Car'}</div>
         <div class="car-meta">
-          <div class="car-meta-item"><span class="car-meta-icon">&#9906;</span> ${c.miles || '—'}</div>
-          <div class="car-meta-item"><span class="car-meta-icon">&#9881;</span> ${c.trans || '—'}</div>
-          <div class="car-meta-item"><span class="car-meta-icon">&#128197;</span> ${c.year || '—'}</div>
-          <div class="car-meta-item"><span class="car-meta-icon">&#9981;</span> ${c.fuel || '—'}</div>
+          <div class="car-meta-item"><span class="car-meta-icon"><img src="Pic/Milage.svg"></span> ${c.miles || '—'}</div>
+          <div class="car-meta-item"><span class="car-meta-icon"><img src="Pic/Transmission.svg"></span> ${c.trans || '—'}</div>
+          <div class="car-meta-item"><span class="car-meta-icon"><img src="Pic/Calender.svg"></span> ${c.year || '—'}</div>
+          <div class="car-meta-item"><span class="car-meta-icon"><img src="Pic/Fuel.svg"></span> ${c.fuel || '—'}</div>
         </div>
         <div class="car-footer">
           <div class="car-price"><small>USD</small> ${c.price || '—'}</div>

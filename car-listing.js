@@ -1,11 +1,11 @@
 // car-listing.js
 // Pagination logic for car-listings page
-const LISTING_CARDS_PER_PAGE = 20;
+const LISTING_CARDS_PER_PAGE = 12;
 let listingCards = [];
 let pageBtns = [];
 let prevListingBtn = null;
 let nextListingBtn = null;
-let listingTotalPages = 1;
+let listingTotalPages = 5;
 let listingCurrentPage = 1;
 let listingSearchInput = null;
 let listingSearchQuery = '';
