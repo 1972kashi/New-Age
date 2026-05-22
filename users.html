@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>New Age Automotive — Users</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@300;400;600;700&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="users.css"/>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-brand">NEW AGE <span>AUTOMOTIVE</span></div>
+  <div class="nav-links">
+    <a class="nav-btn" href="admin-upload.html">Upload</a>
+    <a class="nav-btn active" href="users.html">Users</a>
+    <a class="nav-btn" href="login.html">Dealers</a>
+  </div>
+  <div class="nav-user">
+    Logged in as <strong id="nav-name">Admin</strong>
+    <button class="btn-logout" onclick="logout()">Sign Out</button>
+  </div>
+</nav>
+
+<div class="page">
+  <div class="page-header">
+    <div class="page-title">User <span>Management</span></div>
+    <button class="btn-primary" onclick="openAddModal()">+ Add User</button>
+  </div>
+
+  <div class="stats">
+    <div class="stat-card">
+      <div class="stat-label">Total Users</div>
+      <div class="stat-val gold" id="stat-total">0</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Admins</div>
+      <div class="stat-val" id="stat-admin">0</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Regular Users</div>
+      <div class="stat-val green" id="stat-users">0</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">This Month</div>
+      <div class="stat-val" id="stat-month">0</div>
+    </div>
+  </div>
+
+  <div class="table-card">
+    <div class="table-toolbar">
+      <div class="search-wrap">
+        <input type="text" id="search" placeholder="Search name, email, phone..." oninput="renderTable()"/>
+      </div>
+      <select class="filter-sel" id="role-filter" title="Filter by role" onchange="renderTable()">
+        <option value="">All Roles</option>
+        <option value="admin">Admin</option>
+        <option value="user">User</option>
+      </select>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>User</th>
+          <th>Phone</th>
+          <th>Role</th>
+          <th>Joined</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="users-tbody"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ADD/EDIT MODAL -->
+<div class="overlay" id="user-overlay">
+  <div class="modal">
+    <div class="modal-title" id="modal-title">Add New User</div>
+    <div class="row2">
+      <div class="field"><label>First Name</label><input type="text" id="m-fname" placeholder="John"/></div>
+      <div class="field"><label>Last Name</label><input type="text" id="m-lname" placeholder="Doe"/></div>
+    </div>
+    <div class="field"><label>Email Address</label><input type="email" id="m-email" placeholder="user@email.com"/></div>
+    <div class="field"><label>Phone Number</label><input type="tel" id="m-phone" placeholder="+254 7XX XXX XXX"/></div>
+    <div class="field"><label>Role</label>
+      <select id="m-role" title="Select user role">
+        <option value="user">User</option>
+        <option value="admin">Admin</option>
+      </select>
+    </div>
+    <div class="field" id="m-pass-field"><label>Password</label><input type="password" id="m-pass" placeholder="Min 8 characters"/></div>
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+      <button class="btn-save" onclick="saveUser()">Save User</button>
+    </div>
+  </div>
+</div>
+
+<!-- CONFIRM DELETE -->
+<div class="overlay" id="del-overlay">
+  <div class="modal confirm-modal">
+    <div class="confirm-icon">🗑️</div>
+    <div class="confirm-title">Delete User?</div>
+    <div class="confirm-msg" id="del-msg">This action cannot be undone.</div>
+    <div class="confirm-btns">
+      <button class="btn-cancel" onclick="closeDelModal()">Cancel</button>
+      <button class="btn-confirm-del" onclick="confirmDelete()">Delete</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="users.js"></script>
+</body>
+</html>

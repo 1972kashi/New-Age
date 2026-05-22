@@ -25,8 +25,9 @@
       <li><a href="#">Sell your Car</a></li>
     </ul>
     <div class="nav-auth">
-      <button class="btn btn-outline">Login</button>
-      <button class="btn btn-gold">Sign Up</button>
+      <a href="login.html" class="btn btn-outline" id="nav-login">Login</a>
+      <a href="login.html" class="btn btn-gold" id="nav-signup">Sign Up</a>
+      <a href="#" class="btn btn-icon hidden" id="nav-profile" title="Profile">👤</a>
     </div>
   </div>
 </nav>
@@ -330,5 +331,25 @@
 </footer>
 <script src="new_age.js"></script>
 <script src="listings-sync.js"></script>
+<script>
+  function updateNavForSession(){
+    const session = JSON.parse(localStorage.getItem('naa_session')||'null');
+    const loginBtn = document.getElementById('nav-login');
+    const signupBtn = document.getElementById('nav-signup');
+    const profileBtn = document.getElementById('nav-profile');
+    if(session){
+      loginBtn.classList.add('hidden');
+      signupBtn.classList.add('hidden');
+      profileBtn.classList.remove('hidden');
+      profileBtn.title = 'Signed in as ' + session.name;
+      profileBtn.href = session.role === 'admin' ? 'admin-upload.html' : 'users.html';
+    } else {
+      loginBtn.classList.remove('hidden');
+      signupBtn.classList.remove('hidden');
+      profileBtn.classList.add('hidden');
+    }
+  }
+  updateNavForSession();
+</script>
 </body>
 </html>

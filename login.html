@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>New Age Automotive — Login</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Barlow+Condensed:wght@300;400;600;700&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="Login.css"/>
+</head>
+<body>
+
+<div class="card">
+  <div class="logo">
+    <div class="logo-mark">NEW AGE <span>AUTOMOTIVE</span></div>
+    <div class="logo-sub">Admin Portal</div>
+  </div>
+
+  <div class="tabs">
+    <div class="tab active" onclick="switchTab('login')">Sign In</div>
+    <div class="tab" onclick="switchTab('signup')">Sign Up</div>
+  </div>
+
+  <!-- LOGIN -->
+  <div class="form-panel active" id="panel-login">
+    <div class="error-box" id="login-err"></div>
+    <div class="success-box" id="login-ok"></div>
+
+    <div class="field">
+      <label>Email or Phone Number</label>
+      <div class="input-wrap">
+        <input type="text" id="login-id" placeholder="+254 7XX XXX XXX or admin@email.com"/>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Password</label>
+      <div class="input-wrap">
+        <input type="password" id="login-pass" placeholder="••••••••"/>
+        <button class="eye-btn" onclick="togglePwd('login-pass',this)">👁</button>
+      </div>
+    </div>
+
+    <div class="check-row">
+      <label><input type="checkbox" id="remember"/> Remember me</label>
+      <a class="forgot" href="activation.html">Forgot password?</a>
+    </div>
+
+    <button class="btn-main" onclick="doLogin()">Sign In</button>
+
+    <div class="msg">No account? <a href="#" onclick="switchTab('signup');return false">Register here</a></div>
+  </div>
+
+  <!-- SIGN UP (admin invite only note) -->
+  <div class="form-panel" id="panel-signup">
+    <div class="error-box" id="su-err"></div>
+    <div class="success-box" id="su-ok"></div>
+
+    <div class="row2">
+      <div class="field">
+        <label>First Name</label>
+        <div class="input-wrap"><input type="text" id="su-fname" placeholder="John"/></div>
+      </div>
+      <div class="field">
+        <label>Last Name</label>
+        <div class="input-wrap"><input type="text" id="su-lname" placeholder="Doe"/></div>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Email Address</label>
+      <div class="input-wrap"><input type="email" id="su-email" placeholder="admin@newage.co.ke"/></div>
+    </div>
+
+    <div class="field">
+      <label>Phone Number</label>
+      <div class="input-wrap"><input type="tel" id="su-phone" placeholder="+254 7XX XXX XXX"/></div>
+    </div>
+
+    <div class="field">
+      <label>Password</label>
+      <div class="input-wrap">
+        <input type="password" id="su-pass" placeholder="Min 8 characters" oninput="checkStrength(this,'su-str')"/>
+        <button class="eye-btn" onclick="togglePwd('su-pass',this)">👁</button>
+      </div>
+      <div class="strength-track"><div class="strength-fill" id="su-str"></div></div>
+    </div>
+
+    <div class="field">
+      <label>Confirm Password</label>
+      <div class="input-wrap">
+        <input type="password" id="su-pass2" placeholder="Repeat password"/>
+        <button class="eye-btn" onclick="togglePwd('su-pass2',this)">👁</button>
+      </div>
+    </div>
+
+    <button class="btn-main" onclick="doSignUp()">Create Account</button>
+
+    <div class="msg">Already registered? <a href="#" onclick="switchTab('login');return false">Sign in</a></div>
+  </div>
+</div>
+
+<script src="Login.js"></script>
+
+
+</body>
+</html>
