@@ -6,17 +6,11 @@ function saveUsers(u){localStorage.setItem('naa_users',JSON.stringify(u))}
 
 function initSession(){
   const s=JSON.parse(localStorage.getItem('naa_session')||'null');
-  if(!s){window.location.href='login.html';return;}
-  document.getElementById('nav-name').textContent=s.name;
-  if(s.role==='admin'){
-    const goAdmin = confirm('You are an admin. Redirect to the admin dashboard? Click Cancel to go to the home page instead.');
-    if(goAdmin){
-      window.location.href='admin-upload.html';
-      return;
-    }
-    window.location.href='index.html';
+  if(!s||s.role!=='admin'){
+    window.location.href='login.html';
     return;
   }
+  document.getElementById('nav-name').textContent=s.name;
 }
 
 function updateStats(){

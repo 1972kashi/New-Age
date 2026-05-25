@@ -342,7 +342,7 @@
       signupBtn.classList.add('hidden');
       profileBtn.classList.remove('hidden');
       profileBtn.title = 'Signed in as ' + session.name;
-      profileBtn.href = session.role === 'admin' ? 'admin-upload.html' : 'users.html';
+      profileBtn.href = session.role === 'admin' ? 'users.html' : 'index.html';
     } else {
       loginBtn.classList.remove('hidden');
       signupBtn.classList.remove('hidden');

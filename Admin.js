@@ -6,6 +6,15 @@
   let savedCars = [];
   let editingSavedIndex = null;
 
+  function ensureAdminSession(){
+    const session = JSON.parse(localStorage.getItem('naa_session')||'null');
+    if(!session||session.role!=='admin'){
+      window.location.href='login.html';
+      return false;
+    }
+    return true;
+  }
+
   const cards = Array.from({ length: TOTAL }, (_, i) => ({
     name: '', miles: '', fuel: '', trans: '', year: '',
     price: '', link: 'car-detail.html', img: '', badge: true
@@ -244,5 +253,7 @@
     showToast('Cards uploaded locally!');
   }
 
-  loadSavedCars();
-  renderGrid();
+  if (ensureAdminSession()) {
+    loadSavedCars();
+    renderGrid();
+  }

@@ -29,6 +29,22 @@ function showMsg(id,msg,type){
   setTimeout(()=>el.style.display='none',4000);
 }
 
+function ensureDefaultAdmin(){
+  const users = JSON.parse(localStorage.getItem('naa_users')||'[]');
+  if(!users.some(u=>u.email==='admin@gmail.com')){
+    users.push({
+      fname:'Admin',
+      lname:'User',
+      email:'admin@gmail.com',
+      phone:'',
+      password:btoa('Admin@admin'),
+      role:'admin',
+      joined:new Date().toISOString()
+    });
+    localStorage.setItem('naa_users',JSON.stringify(users));
+  }
+}
+
 function doLogin(){
   const id=document.getElementById('login-id').value.trim();
   const pw=document.getElementById('login-pass').value;
@@ -41,7 +57,7 @@ function doLogin(){
 
   localStorage.setItem('naa_session',JSON.stringify({name:user.fname+' '+user.lname,email:user.email,role:user.role}));
   showMsg('login-ok','Welcome back, '+user.fname+'! Redirecting…');
-  setTimeout(()=>window.location.href='index.html',1200);
+  setTimeout(()=>window.location.href=user.role==='admin'?'users.html':'index.html',1200);
 }
 
 function doSignUp(){
@@ -59,10 +75,12 @@ function doSignUp(){
   const users=JSON.parse(localStorage.getItem('naa_users')||'[]');
   if(users.find(u=>u.email===email)){showMsg('su-err','Email already registered.');return;}
 
-  users.push({fname,lname,email,phone,password:btoa(pass),role:'admin',joined:new Date().toISOString()});
+  users.push({fname,lname,email,phone,password:btoa(pass),role:'user',joined:new Date().toISOString()});
   localStorage.setItem('naa_users',JSON.stringify(users));
-  localStorage.setItem('naa_session',JSON.stringify({name:fname+' '+lname,email,role:'admin'}));
+  localStorage.setItem('naa_session',JSON.stringify({name:fname+' '+lname,email,role:'user'}));
 
   showMsg('su-ok','Account created! Redirecting to home…');
   setTimeout(()=>window.location.href='index.html',1500);
 }
+
+ensureDefaultAdmin();
