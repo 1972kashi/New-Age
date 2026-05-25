@@ -257,3 +257,8 @@
     loadSavedCars();
     renderGrid();
   }
+
+  function logout(){
+  localStorage.removeItem('naa_session');
+  window.location.href='login.html';
+}

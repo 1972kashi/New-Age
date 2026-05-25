@@ -24,53 +24,83 @@
   }
 
   /* ── NAV ── */
-  .nav {
-    background: var(--dark-2);
-    border-bottom: 1px solid var(--border);
-    padding: 0 32px;
-    height: 56px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    position: sticky;
-    top: 0;
-    z-index: 100;
-  }
+.nav{
+  background:var(--dark-2);
+  border-bottom:1px solid var(--border);
+  padding:0 32px;
+  height:56px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  position:sticky;
+  top:0;
+  z-index:100;
+}
+.nav-brand{
+  font-family:'Bebas Neue',sans-serif;
+  font-size:15px;
+  letter-spacing:1px;
+  color:var(--muted)
+}
 
-  .nav-brand {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 15px;
-    letter-spacing: 1px;
-    color: var(--text-muted);
-  }
+.nav-brand span{
+  color:var(--gold)
+}
 
-  .nav-brand span { color: var(--gold); }
+.nav-links{
+  display:flex;
+  gap:8px
+}
 
-  .nav-links {
-    display: flex;
-    gap: 8px;
-  }
+.nav-btn{
+  font-size:12px;
+  font-weight:700;
+  letter-spacing:0.08em;
+  text-transform:uppercase;
+  padding:7px 20px;
+  border-radius:var(--radius);
+  border:1.5px solid var(--border);
+  background:transparent;
+  color:var(--text);
+  cursor:pointer;
+  transition:all .18s;
+  text-decoration:none;
+  display:inline-flex;
+  align-items:center;
+}
 
-  .nav-btn {
-    font-family: 'Barlow', sans-serif;
-    font-size: 12px;
-    font-weight: 700;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    padding: 7px 20px;
-    border-radius: var(--radius);
-    border: 1.5px solid var(--border);
-    background: transparent;
-    color: var(--text);
-    cursor: pointer;
-    transition: all 0.18s;
-  }
+.nav-btn:hover,.nav-btn.active{
+  background:var(--gold);
+  color:#000;
+  border-color:var(--gold)
+}
 
-  .nav-btn:hover, .nav-btn.active {
-    background: var(--gold);
-    color: #000;
-    border-color: var(--gold);
-  }
+.nav-user{
+  font-size:13px;
+  color:var(--muted);
+  display:flex;
+  align-items:center;
+  gap:10px
+}
+
+.nav-user strong{
+  color:var(--text)
+}
+
+.btn-logout{
+  font-size:12px;
+  color:var(--red);
+  background:none;
+  border:1px solid rgba(220,38,38,.3);
+  border-radius:6px;
+  padding:4px 12px;
+  cursor:pointer;
+  transition:all .18s;
+}
+
+.btn-logout:hover{
+  background:rgba(220,38,38,.1)
+} 
 
   /* ── LAYOUT ── */
   .page {
