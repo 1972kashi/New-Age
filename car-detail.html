@@ -19,14 +19,15 @@
       </div>
     </div>
     <ul class="nav-links">
-      <li><a href="Index.html" class="active">Home</a></li>
+      <li><a href="index.html" class="active">Home</a></li>
       <li><a href="about.html">About us</a></li>
       <li><a href="#">FAQ</a></li>
       <li><a href="#">Sell your Car</a></li>
     </ul>
     <div class="nav-auth">
-      <button class="btn btn-outline">Login</button>
-      <button class="btn btn-gold">Sign Up</button>
+       <a href="login.html" class="btn btn-outline" id="nav-login">Login</a>
+      <a href="login.html" class="btn btn-gold" id="nav-signup">Sign Up</a>
+      <a href="#" class="profile hidden" id="nav-profile" title="Profile">👤</a>
     </div>
   </div>
 </nav>
@@ -80,7 +81,7 @@
       <!-- LEFT: Info -->
       <div>
         <div class="price-tag">Price</div>
-        <div class="price-amount"><small>USD</small> 50,317 <span style="font-size:16px;color:var(--text-muted);font-weight:400;">ⓘ</span></div>
+        <div class="price-amount"><small>USD</small> 50,317 <span class="price-info-icon">ⓘ</span></div>
 
         <div class="detail-section-title">DESCRIPTION</div>
         <p class="description-text">
@@ -186,7 +187,7 @@
       <div class="footer-newsletter">
         <h4>Connect via Email</h4>
         <input type="email" class="nl-input" placeholder="Your email address"/>
-        <button class="btn btn-gold" style="width:100%;justify-content:center;letter-spacing:1px;">SUBMIT</button>
+        <button class="btn btn-gold btn-gold-full">SUBMIT</button>
       </div>
     </div>
     <div class="footer-bottom">
@@ -195,5 +196,6 @@
     </div>
   </div>
 </footer>
+<script src="auth-nav.js"></script>
 </body>
 </html>

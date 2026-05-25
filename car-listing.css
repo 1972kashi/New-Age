@@ -23,6 +23,25 @@
     .btn-dark{background:var(--dark-3);color:var(--text);border:1px solid var(--border);} .btn-dark:hover{background:#232741;}
     .btn-sm{padding:6px 14px;font-size:12px;} .btn-lg{padding:13px 28px;font-size:14px;}
 
+     .profile{
+      width: 42px;
+      min-width: 42px;
+      height: 42px;
+      padding: 0;
+      font-size: 18px;
+      justify-content: center;
+      display: inline-flex; 
+      align-items: center; 
+      gap: 6px;
+      padding: 9px 22px;
+      border-radius: var(--radius);
+      font-family: 'Barlow', sans-serif;
+      font-weight: 600;
+      cursor: pointer; 
+      border: none; 
+      transition: all 0.2s;
+     }
+
     /* NAVBAR */
      .navbar {
       background: #253745;
@@ -206,3 +225,14 @@
     .footer-nav a:hover{color:var(--gold);}
 
     .row-gap{margin-bottom:22px;}
+
+    /* UTILITY BUTTON CLASSES */
+    .btn-filter {
+      padding: 11px 28px;
+    }
+
+    .btn-gold-full {
+      width: 100%;
+      justify-content: center;
+      letter-spacing: 1px;
+    }

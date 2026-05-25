@@ -529,4 +529,4 @@
     pointer-events: none;
     z-index: 999;
   }
-  .toast.show { opacity: 1; transform: translateY(0); }
+  .toast.show { opacity: 1; transform: translateY(0); }\n\n  /* UTILITY CLASSES */\n  .hidden { display: none !important; }

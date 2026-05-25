@@ -214,4 +214,4 @@ body::after{
 
 /* strength bar */
 .strength-track{height:3px;background:var(--border);border-radius:2px;margin-top:6px;overflow:hidden}
-.strength-fill{height:100%;width:0;border-radius:2px;transition:width .3s,background .3s}
+.strength-fill{height:100%;width:0;border-radius:2px;transition:width .3s,background .3s}\n\n/* UTILITY CLASSES */\n.hidden{display:none !important;}

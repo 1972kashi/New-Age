@@ -75,6 +75,25 @@
       padding:13px;
     }
 
+     .profile{
+      width: 42px;
+      min-width: 42px;
+      height: 42px;
+      padding: 0;
+      font-size: 18px;
+      justify-content: center;
+      display: inline-flex; 
+      align-items: center; 
+      gap: 6px;
+      padding: 9px 22px;
+      border-radius: var(--radius);
+      font-family: 'Barlow', sans-serif;
+      font-weight: 600;
+      cursor: pointer; 
+      border: none; 
+      transition: all 0.2s;
+     }
+
     /* NAVBAR */
     .navbar {
       background: #253745;
@@ -364,3 +383,18 @@
     .footer-nav{display:flex;gap:20px;}
     .footer-nav a{font-size:12px;color:var(--text-muted);transition:color var(--tr);}
     .footer-nav a:hover{color:var(--gold);}
+
+    /* UTILITY CLASSES */
+    .hidden{display:none !important;}
+
+    .btn-gold-full {
+      width: 100%;
+      justify-content: center;
+      letter-spacing: 1px;
+    }
+
+    .price-info-icon {
+      font-size: 16px;
+      color: var(--text-muted);
+      font-weight: 400;
+    }

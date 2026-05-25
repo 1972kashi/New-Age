@@ -25,10 +25,9 @@
       <li><a href="#">Sell your Car</a></li>
     </ul>
     <div class="nav-auth">
-      <button class="btn btn-outline">Login</button>
-      <button class="btn btn-gold">Sign Up</button>
-
-      <a href="#" class="btn btn-icon hidden" id="nav-profile" title="Profile">👤</a>
+      <a href="login.html" class="btn btn-outline" id="nav-login">Login</a>
+      <a href="login.html" class="btn btn-gold" id="nav-signup">Sign Up</a>
+      <a href="#" class="profile hidden" id="nav-profile" title="Profile">👤</a>
     </div>
   </div>
 </nav>
@@ -50,7 +49,7 @@
     </div>
     <button class="btn btn-gold btn-lg">Search</button>
   </div>
-  <button class="btn btn-dark" style="padding:11px 28px;">Show More Filters ▽</button>
+  <button class="btn btn-dark btn-filter">Show More Filters ▽</button>
    <div class="popular-searches">
       <span>Popular Searches:</span>
        <span class="pop-tag" onclick="document.getElementById('searchInput').value='Toyota'">Toyota</span> •
@@ -94,6 +93,8 @@
   </div>
 </section>
 
+<script src="auth-nav.js"></script>
+
 <!-- FOOTER -->
 <footer class="footer">
   <div class="container">
@@ -110,7 +111,7 @@
       <div class="footer-newsletter">
         <h4>Connect via Email</h4>
         <input type="email" class="nl-input" placeholder="Your email address"/>
-        <button class="btn btn-gold" style="width:100%;justify-content:center;letter-spacing:1px;">SUBMIT</button>
+        <button class="btn btn-gold btn-gold-full">SUBMIT</button>
       </div>
     </div>
     <div class="footer-bottom">

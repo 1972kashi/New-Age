@@ -165,6 +165,24 @@
       width:100%;
       margin-top:20px;
     }
+     .profile{
+      width: 42px;
+      min-width: 42px;
+      height: 42px;
+      padding: 0;
+      font-size: 18px;
+      justify-content: center;
+      display: inline-flex; 
+      align-items: center; 
+      gap: 6px;
+      padding: 9px 22px;
+      border-radius: var(--radius);
+      font-family: 'Barlow', sans-serif;
+      font-weight: 600;
+      cursor: pointer; 
+      border: none; 
+      transition: all 0.2s;
+     }
 
     .get-btn{
       display: inline-flex; align-items: center; justify-content: center;
@@ -749,3 +767,10 @@
       font-size: 15px; cursor: pointer; transition: all 0.2s;
     }
     .social-btn:hover { border-color: var(--gold); color: var(--gold); }
+
+    /* UTILITY BUTTON CLASSES */
+    .btn-gold-full {
+      width: 100%;
+      justify-content: center;
+      letter-spacing: 1px;
+    }

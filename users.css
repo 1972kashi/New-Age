@@ -177,7 +177,7 @@ tbody tr:hover{background:rgba(255,255,255,0.02)}
 .btn-cancel:hover{border-color:var(--text);color:var(--text)}
 
 /* confirm modal */
-.confirm-modal{width:380px;text-align:center}
+.confirm-modal{width:380px;text-align:center}\n\n/* UTILITY CLASSES */\n.hidden{display:none !important;}
 .confirm-icon{font-size:40px;margin-bottom:12px}
 .confirm-title{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:1px;margin-bottom:8px}
 .confirm-msg{font-size:13px;color:var(--muted);margin-bottom:22px}
