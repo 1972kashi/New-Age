@@ -13,7 +13,7 @@
 <nav class="navbar">
   <div class="container">
     <div class="logo">
-      <div class="logo-icon"><img src="Pic/Logo.svg" alt="Logo"></div>
+      <div class="logo-icon"><img class="logo-img" src="Pic/Logo.svg" alt="Logo"></div>
       <div class="logo-text">
         <span>Your One<br>Stop Car<br>Shopping</span>
       </div>
@@ -27,7 +27,7 @@
     <div class="nav-auth">
       <a href="login.html" class="btn btn-outline" id="nav-login">Login</a>
       <a href="login.html" class="btn btn-gold" id="nav-signup">Sign Up</a>
-      <a href="#" class="profile hidden" id="nav-profile" title="Profile">👤</a>
+      <a href="#" class="profile hidden" id="nav-profile" title="Profile"><img src="Pic/profile.svg" alt="Profile"></a>
     </div>
   </div>
 </nav>
@@ -216,7 +216,7 @@
           <span>Total Payment:</span>
           <strong>KES 5,230,400</strong>
         </div>
-        <button class="btn btn-green btn-lg" >Check Finance Options</button>
+        <button id="prfoformabtn" class="btn btn-green btn-lg" onclick="prepareAndGoToProforma()">Generate Proforma Invoice</button>
       </div>
     </div>
   </div>
@@ -352,5 +352,28 @@
   updateNavForSession();
 </script>
 <script src="auth-nav.js"></script>
+<script>
+function prepareAndGoToProforma(){
+  const prefill = {};
+  document.querySelectorAll('.result-row').forEach(r=>{
+    const label = r.querySelector('span'); const val = r.querySelector('strong');
+    if(!label||!val) return;
+    const key = label.textContent.trim().toLowerCase();
+    const num = val.textContent.replace(/[^0-9\.]/g,'');
+    if(key.includes('loan')) prefill.price = num;
+    if(key.includes('interest')) prefill.rate = num;
+  });
+  const sel = document.querySelector('.select-input'); if(sel) { const m = sel.value.match(/(\d+)/); if(m) prefill.tenure = m[1]; }
+  const carName = document.querySelector('.featured-car-name'); if(carName) prefill.make = carName.textContent.trim().split(' ')[0];
+  localStorage.setItem('proforma_prefill', JSON.stringify(prefill));
+  const session = JSON.parse(localStorage.getItem('naa_session')||'null');
+  if(!session){
+    localStorage.setItem('post_login_redirect','proforma-loan-calculator.html');
+    window.location.href = 'login.html';
+    return;
+  }
+  window.location.href = 'proforma-loan-calculator.html';
+}
+</script>
 </body>
 </html>

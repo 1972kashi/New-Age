@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Car Loan Calculator – New Age Automotive</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:wght@300;400;500;600;700&family=Barlow+Condensed:wght@500;600;700&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="Proforma.css"/>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="header">
+  <div class="container">
+    <div class="inner">
+      <div class="logo">
+        <div class="logo-badge">🚗</div>
+        <div class="logo-text">
+          NEW AGE AUTOMOTIVE
+          <small>Your One Stop Car Shopping</small>
+        </div>
+      </div>
+      <div class="header-contact">Nairobi, Kenya &nbsp;|&nbsp; info@newageauto.co.ke &nbsp;|&nbsp; +254 700 000 000</div>
+    </div>
+  </div>
+</header>
+
+<!-- PAGE BAND -->
+<div class="page-band">
+  <div class="container">
+    <h1>Car Loan <span>Calculator</span></h1>
+    <p>Estimate your monthly payments and generate a bank-ready Proforma Invoice to take straight to your bank's asset finance department.</p>
+    <div class="steps">
+      <div class="step active"><div class="num">1</div> Calculate</div>
+      <div class="step"><div class="num">2</div> Apply via My Bank</div>
+      <div class="step"><div class="num">3</div> Download Proforma</div>
+      <div class="step"><div class="num">4</div> Visit Your Bank</div>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN -->
+<main class="main">
+  <div class="container">
+    <div class="calc-layout">
+
+      <!-- LEFT COLUMN: Inputs -->
+      <div>
+        <!-- Vehicle Info -->
+        <div class="card mb-20">
+          <div class="card-title"><span class="ct-icon">🚗</span> Vehicle Details</div>
+          <div class="vehicle-fields">
+            <div class="field">
+              <label>Vehicle Make <span>*</span></label>
+              <input class="input" id="v_make" type="text" placeholder="e.g. BMW"/>
+            </div>
+            <div class="field">
+              <label>Model <span>*</span></label>
+              <input class="input" id="v_model" type="text" placeholder="e.g. M4 Coupé"/>
+            </div>
+            <div class="field">
+              <label>Year</label>
+              <input class="input" id="v_year" type="text" placeholder="e.g. 2014"/>
+            </div>
+            <div class="field">
+              <label>Engine Size</label>
+              <input class="input" id="v_engine" type="text" placeholder="e.g. 3000cc"/>
+            </div>
+            <div class="field">
+              <label>Colour</label>
+              <input class="input" id="v_colour" type="text" placeholder="e.g. Alpine White"/>
+            </div>
+            <div class="field">
+              <label>Mileage</label>
+              <input class="input" id="v_mileage" type="text" placeholder="e.g. 1,524 Miles"/>
+            </div>
+            <div class="field full-width">
+              <label>Dealership Name <span>*</span></label>
+              <input class="input" id="v_dealer" type="text" placeholder="e.g. New Age Automotive"/>
+            </div>
+          </div>
+        </div>
+
+        <!-- Loan Calculator -->
+        <div class="card mb-20">
+          <div class="card-title"><span class="ct-icon">🏦</span> Loan Parameters</div>
+
+          <div class="field">
+            <label>Vehicle Purchase Price (KES) <span>*</span></label>
+            <div class="input-prefix-wrap">
+              <div class="input-prefix">KES</div>
+              <input class="input" id="price" type="number" placeholder="e.g. 5,000,000" oninput="calc()"/>
+            </div>
+          </div>
+
+          <div class="field-row">
+            <div class="field">
+              <label>Down Payment (KES)</label>
+              <div class="input-prefix-wrap">
+                <div class="input-prefix">KES</div>
+                <input class="input" id="down" type="number" placeholder="e.g. 1,000,000" oninput="calc()"/>
+              </div>
+            </div>
+            <div class="field">
+              <label>Down Payment %</label>
+              <div class="input-prefix-wrap">
+                <div class="input-prefix">%</div>
+                <input class="input" id="down_pct" type="number" placeholder="e.g. 20" oninput="calcFromPct()"/>
+              </div>
+            </div>
+          </div>
+
+          <div class="field">
+            <label>Loan Tenure</label>
+            <select class="input select" id="tenure" onchange="calc()" title="Loan tenure">
+              <option value="12">12 months (1 year)</option>
+              <option value="24">24 months (2 years)</option>
+              <option value="36" selected>36 months (3 years)</option>
+              <option value="48">48 months (4 years)</option>
+              <option value="60">60 months (5 years)</option>
+              <option value="72">72 months (6 years)</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label>Annual Interest Rate (%) — Standard Bank Rate: <span>13%</span></label>
+            <div class="slider-wrap">
+              <input class="slider" id="rate_slider" type="range" min="8" max="25" step="0.5" value="13" oninput="syncRate(this.value)" title="Interest rate slider" />
+              <div class="slider-labels"><span>8%</span><span id="rate_disp" class="rate-disp">13%</span><span>25%</span></div>
+            </div>
+            <div class="input-prefix-wrap mt-10">
+              <div class="input-prefix">%</div>
+              <input class="input" id="rate" type="number" value="13" step="0.5" oninput="syncSlider(this.value);calc()" title="Interest rate" placeholder="e.g. 13" />
+            </div>
+          </div>
+
+          <!-- Buyer Info -->
+          <div class="section-top-sep">
+            <div class="small-section-title">Your Details (for Proforma)</div>
+            <div class="field-row">
+              <div class="field">
+                <label>Full Name <span>*</span></label>
+                <input class="input" id="buyer_name" type="text" placeholder="Your full name"/>
+              </div>
+              <div class="field">
+                <label>ID / Passport No.</label>
+                <input class="input" id="buyer_id" type="text" placeholder="National ID or Passport"/>
+              </div>
+            </div>
+            <div class="field-row">
+              <div class="field">
+                <label>Phone</label>
+                <div class="input-prefix-wrap">
+                  <div class="input-prefix">+254</div>
+                  <input class="input" id="buyer_phone" type="tel" placeholder="7XX XXX XXX"/>
+                </div>
+              </div>
+              <div class="field">
+                <label>Email</label>
+                <input class="input" id="buyer_email" type="email" placeholder="you@email.com"/>
+              </div>
+            </div>
+            <div class="field">
+              <label>Preferred Bank</label>
+              <select class="input select" id="buyer_bank" title="Preferred bank">
+                <option value="">— Select bank —</option>
+                <option>KCB Bank Kenya</option>
+                <option>Equity Bank Kenya</option>
+                <option>Co-operative Bank of Kenya</option>
+                <option>NCBA Bank Kenya</option>
+                <option>Standard Chartered Kenya</option>
+                <option>Absa Bank Kenya</option>
+                <option>Diamond Trust Bank</option>
+                <option>I&M Bank</option>
+                <option>Family Bank</option>
+                <option>Other</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Amortisation Preview -->
+        <div class="card hidden" id="amort-card">
+          <div class="card-title"><span class="ct-icon">📊</span> Repayment Schedule (First 6 Months)</div>
+          <div class="scroll-x">
+            <table class="amort-table">
+              <thead>
+                <tr>
+                  <th>Month</th>
+                  <th>Opening Balance</th>
+                  <th>Monthly Payment</th>
+                  <th>Principal</th>
+                  <th>Interest</th>
+                  <th>Closing Balance</th>
+                </tr>
+              </thead>
+              <tbody id="amort-body"></tbody>
+            </table>
+          </div>
+          <div class="muted-center-note">Full schedule included in the downloadable Proforma Invoice</div>
+        </div>
+      </div>
+
+      <!-- RIGHT COLUMN: Results + CTA -->
+      <div>
+        <!-- Result Panel -->
+        <div class="result-panel mb-20" id="result-panel">
+          <div class="result-label">Estimated Monthly Payment</div>
+          <div class="result-monthly" id="res_monthly"><small>KES </small><span id="res_monthly_val">—</span></div>
+          <div class="result-currency" id="res_currency"></div>
+          <div class="result-rows">
+            <div class="result-row"><span class="rl">Loan Amount</span><span class="rv" id="res_loan">—</span></div>
+            <div class="result-row"><span class="rl">Tenure</span><span class="rv" id="res_tenure">—</span></div>
+            <div class="result-row"><span class="rl">Interest Rate</span><span class="rv" id="res_rate">—</span></div>
+            <div class="result-row"><span class="rl">Total Interest</span><span class="rv" id="res_interest">—</span></div>
+            <div class="result-row total"><span class="rl">Total Repayment</span><span class="rv" id="res_total">—</span></div>
+          </div>
+        </div>
+
+        <!-- Apply CTA Card -->
+        <div class="card">
+          <div class="card-title"><span class="ct-icon">📄</span> Apply via My Bank</div>
+          <p class="muted-paragraph">
+            Your website automatically generates a downloadable <strong class="text-white">Proforma Invoice</strong> containing the car's details, the dealership's information, and the total cost — ready to hand to your bank's asset finance department.
+          </p>
+          <button class="btn btn-green" onclick="generateInvoice()">
+            📄 Generate Proforma Invoice
+          </button>
+          <button class="btn btn-outline mt-10" onclick="window.print()">🖨️ Print This Page</button>
+
+          <div class="notice">
+            <div class="notice-icon">ℹ️</div>
+            <div>
+              In Kenya, banks require a <strong>Proforma Invoice</strong> and the car's logbook/import documentation before processing an asset finance loan. Download this document and take it directly to your preferred bank.
+            </div>
+          </div>
+
+          <!-- Steps -->
+          <div class="process-steps">
+            <div class="process-title">The Process</div>
+            <div class="process-list">
+              <div class="process-item"><div class="process-num">1</div><div>Use this calculator to estimate your monthly installments based on standard banking interest rates.</div></div>
+              <div class="process-item"><div class="process-num">2</div><div>Click <strong class="gold">"Generate Proforma Invoice"</strong> to get your formal quote document.</div></div>
+              <div class="process-item"><div class="process-num">3</div><div>Your Proforma Invoice is automatically generated with the car's details, dealership info, and total cost.</div></div>
+              <div class="process-item"><div class="process-num">4</div><div>Take this document straight to your bank's <strong class="text-white">asset finance department</strong> to initiate the loan.</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</main>
+
+<!-- ═══════════════════════════════════════
+     INVOICE PREVIEW MODAL
+═══════════════════════════════════════ -->
+<div id="invoice-preview">
+  <button class="inv-close" onclick="closeInvoice()">✕</button>
+  <div class="invoice-modal" id="print-target">
+    <div class="invoice-body" id="invoice-body">
+      <!-- Populated by JS -->
+    </div>
+    <div class="inv-action-bar">
+      <button class="btn btn-outline" onclick="closeInvoice()">← Back to Calculator</button>
+      <button class="btn btn-dark" onclick="printInvoice()">🖨️ Print / Save PDF</button>
+      <button class="btn btn-green" onclick="downloadInvoice()">⬇️ Download as PDF</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.2/html2pdf.bundle.min.js"></script>
+<script src="Proforma.js"></script>
+</body>
+</html>

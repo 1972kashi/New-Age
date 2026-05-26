@@ -57,7 +57,11 @@ function doLogin(){
 
   localStorage.setItem('naa_session',JSON.stringify({name:user.fname+' '+user.lname,email:user.email,role:user.role}));
   showMsg('login-ok','Welcome back, '+user.fname+'! Redirecting…');
-  setTimeout(()=>window.location.href=user.role==='admin'?'users.html':'index.html',1200);
+  setTimeout(()=>{
+    const redirect = localStorage.getItem('post_login_redirect');
+    if (redirect) { localStorage.removeItem('post_login_redirect'); window.location.href = redirect; }
+    else window.location.href = user.role==='admin'?'users.html':'index.html';
+  },1200);
 }
 
 function doSignUp(){
@@ -80,7 +84,11 @@ function doSignUp(){
   localStorage.setItem('naa_session',JSON.stringify({name:fname+' '+lname,email,role:'user'}));
 
   showMsg('su-ok','Account created! Redirecting to home…');
-  setTimeout(()=>window.location.href='index.html',1500);
+  setTimeout(()=>{
+    const redirect = localStorage.getItem('post_login_redirect');
+    if (redirect) { localStorage.removeItem('post_login_redirect'); window.location.href = redirect; }
+    else window.location.href='index.html';
+  },1500);
 }
 
 ensureDefaultAdmin();
