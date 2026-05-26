@@ -23,7 +23,7 @@
           <div class="car-meta-item"><span class="car-meta-icon"><img src="Pic/Fuel.svg"></span> ${c.fuel || '—'}</div>
         </div>
         <div class="car-footer">
-          <div class="car-price"><small>USD</small> ${c.price || '—'}</div>
+          <div class="car-price"><small>KSH</small> ${c.price || '—'}</div>
           <a href="${c.link || 'car-detail.html'}" class="btn-details">More Details</a>
         </div>
       </div>`;
