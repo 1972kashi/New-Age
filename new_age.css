@@ -61,7 +61,9 @@
       background: #253745;
       margin-top: 1px;
       border-bottom: 1px #364DA2;
-      position: sticky; top: 0; z-index: 100;
+      position: sticky; 
+      top: 0; 
+      z-index: 100;
     }
     .navbar .container {
       display: grid;
@@ -78,7 +80,8 @@
     }
 
     .logo-icon {
-      width: 55px; height: 55px;
+      width: 44px;
+      height: 44px;
       background: transparent;
       border-radius: 50%;
       display: flex; 

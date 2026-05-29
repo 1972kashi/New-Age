@@ -1,10 +1,12 @@
  const TOTAL = 6;
   let showBadge = true;
+  const API_BASE = (location.protocol === 'file:' ? 'http://localhost:3000' : '');
   let activeCard = 0;
   let searchQuery = '';
   let savedSearchQuery = '';
   let savedCars = [];
   let editingSavedIndex = null;
+  let editingSavedId = null;
 
   function ensureAdminSession(){
     const session = JSON.parse(localStorage.getItem('naa_session')||'null');
@@ -77,16 +79,19 @@
     showToast('Card ' + (activeCard + 1) + ' deleted');
   }
 
-  function fetchSavedCars() {
-    try { return JSON.parse(localStorage.getItem('uploadedCars') || '[]'); } catch (e) { return []; }
+  async function fetchSavedCars() {
+    try {
+      const res = await fetch(API_BASE + '/api/cars?limit=100');
+      if (!res.ok) return [];
+      const data = await res.json();
+      return data.items || [];
+    } catch (e) {
+      return [];
+    }
   }
 
-  function saveStoredCars(cars) {
-    localStorage.setItem('uploadedCars', JSON.stringify(cars));
-  }
-
-  function loadSavedCars() {
-    savedCars = fetchSavedCars();
+  async function loadSavedCars() {
+    savedCars = await fetchSavedCars();
     renderSavedCars();
   }
 
@@ -138,36 +143,59 @@
     document.getElementById('f-img').value = car.img;
     setBadge(car.badge);
     editingSavedIndex = index;
-    showToast('Editing saved car #' + (index + 1) + '. Save to Storage to update.');
+    editingSavedId = car.id || null;
+    showToast('Editing saved car #' + (index + 1) + '. Save to database to update.');
   }
 
-  function deleteSavedCar(index) {
+  async function deleteSavedCar(index) {
     if (index < 0 || index >= savedCars.length) return;
+    const car = savedCars[index];
+    if (car && car.id) {
+      await fetch(API_BASE + '/api/cars/' + encodeURIComponent(car.id), { method: 'DELETE' });
+    }
     savedCars.splice(index, 1);
-    saveStoredCars(savedCars);
     if (editingSavedIndex === index) {
       editingSavedIndex = null;
+      editingSavedId = null;
       clearForm();
     }
     renderSavedCars();
     showToast('Saved car deleted');
   }
 
-  function saveToStorage() {
+  async function saveToStorage() {
     const car = getFormVals();
     if (!car.name && !car.img && !car.price) {
       return showToast('Fill in a car name, image, or price before saving.');
     }
-    if (editingSavedIndex !== null && editingSavedIndex >= 0) {
-      savedCars[editingSavedIndex] = car;
+
+    if (editingSavedId) {
+      const response = await fetch(API_BASE + '/api/cars/' + encodeURIComponent(editingSavedId), {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(car)
+      });
+      if (!response.ok) {
+        showToast('Failed to update saved car');
+        return;
+      }
       showToast('Saved car updated');
       editingSavedIndex = null;
+      editingSavedId = null;
     } else {
-      savedCars.push(car);
+      const response = await fetch(API_BASE + '/api/cars', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(car)
+      });
+      if (!response.ok) {
+        showToast('Failed to save car to database');
+        return;
+      }
       showToast('Saved car added');
     }
-    saveStoredCars(savedCars);
-    renderSavedCars();
+
+    await loadSavedCars();
   }
 
   function setSearch(value) {
@@ -181,6 +209,8 @@
     document.getElementById('f-fuel').value  = '';
     document.getElementById('f-link').value  = 'car-detail.html';
     setBadge(true);
+    editingSavedIndex = null;
+    editingSavedId = null;
     liveUpdate();
   }
 
@@ -243,14 +273,23 @@
     setTimeout(() => t.classList.remove('show'), 2500);
   }
 
-  function uploadCards() {
+  async function uploadCards() {
     const toSave = cards.filter(c => (c.name && c.name.trim()) || (c.img && c.img.trim()) || (c.price && c.price.trim()));
     if (!toSave.length) return showToast('No cards to upload');
-    const existing = fetchSavedCars();
-    const merged = existing.concat(toSave);
-    saveStoredCars(merged);
-    loadSavedCars();
-    showToast('Cards uploaded locally!');
+
+    const response = await fetch(API_BASE + '/api/cars', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(toSave)
+    });
+
+    if (!response.ok) {
+      showToast('Failed to upload cards to database');
+      return;
+    }
+
+    await loadSavedCars();
+    showToast('Cards uploaded to database!');
   }
 
   if (ensureAdminSession()) {

@@ -212,3 +212,43 @@ if (document.readyState === 'loading') {
 } else {
   initHomePagination();
 }
+function updateNavForSession(){
+    const session = JSON.parse(localStorage.getItem('naa_session')||'null');
+    const loginBtn = document.getElementById('nav-login');
+    const signupBtn = document.getElementById('nav-signup');
+    const profileBtn = document.getElementById('nav-profile');
+    if(session){
+      loginBtn.classList.add('hidden');
+      signupBtn.classList.add('hidden');
+      profileBtn.classList.remove('hidden');
+      profileBtn.title = 'Signed in as ' + session.name;
+      profileBtn.href = session.role === 'admin' ? 'users.html' : 'index.html';
+    } else {
+      loginBtn.classList.remove('hidden');
+      signupBtn.classList.remove('hidden');
+      profileBtn.classList.add('hidden');
+    }
+  }
+  updateNavForSession();
+
+  function prepareAndGoToProforma(){
+  const prefill = {};
+  document.querySelectorAll('.result-row').forEach(r=>{
+    const label = r.querySelector('span'); const val = r.querySelector('strong');
+    if(!label||!val) return;
+    const key = label.textContent.trim().toLowerCase();
+    const num = val.textContent.replace(/[^0-9\.]/g,'');
+    if(key.includes('loan')) prefill.price = num;
+    if(key.includes('interest')) prefill.rate = num;
+  });
+  const sel = document.querySelector('.select-input'); if(sel) { const m = sel.value.match(/(\d+)/); if(m) prefill.tenure = m[1]; }
+  const carName = document.querySelector('.featured-car-name'); if(carName) prefill.make = carName.textContent.trim().split(' ')[0];
+  localStorage.setItem('proforma_prefill', JSON.stringify(prefill));
+  const session = JSON.parse(localStorage.getItem('naa_session')||'null');
+  if(!session){
+    localStorage.setItem('post_login_redirect','proforma-loan-calculator.html');
+    window.location.href = 'login.html';
+    return;
+  }
+  window.location.href = 'proforma-loan-calculator.html';
+}

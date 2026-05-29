@@ -3,7 +3,6 @@ function switchTab(t){
   document.querySelectorAll('.form-panel').forEach(p=>p.classList.remove('active'));
   document.getElementById('panel-'+t).classList.add('active');
 }
-
 function togglePwd(id,btn){
   const el=document.getElementById(id);
   el.type=el.type==='password'?'text':'password';
@@ -28,7 +27,6 @@ function showMsg(id,msg,type){
   el.textContent=msg;el.style.display='block';
   setTimeout(()=>el.style.display='none',4000);
 }
-
 function ensureDefaultAdmin(){
   const users = JSON.parse(localStorage.getItem('naa_users')||'[]');
   if(!users.some(u=>u.email==='admin@gmail.com')){
@@ -91,4 +89,5 @@ function doSignUp(){
   },1500);
 }
 
+// ensure an admin account exists so the admin portal stays accessible
 ensureDefaultAdmin();

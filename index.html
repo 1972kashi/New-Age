@@ -13,7 +13,7 @@
 <nav class="navbar">
   <div class="container">
     <div class="logo">
-      <div class="logo-icon"><img class="logo-img" src="Pic/Logo.svg" alt="Logo"></div>
+      <div class="logo-icon"><img src="Pic/NewAge.jpeg" alt="Logo"></div>
       <div class="logo-text">
         <span>Your One<br>Stop Car<br>Shopping</span>
       </div>
@@ -136,11 +136,7 @@
 
     <!-- Pagination -->
     <div class="pagination">
-      <div class="page-btn active" data-page="1">1</div>
-      <div class="page-btn " data-page="2">2</div>
-      <div class="page-btn" data-page="3">3</div>
-      <div class="page-btn" data-page="4">4</div>
-      <div class="page-btn" data-page="5">5</div>
+      
       <div class="page-btn" data-prev>‹</div>
       <div class="page-btn" data-next>›</div>
     </div>
@@ -151,7 +147,7 @@
         <div class="source-icon"><img src="Pic/Handshake.svg" alt="Handshake"></div>
         <div>
           <div class="source-title">Don't see what you are looking for?</div>
-          <div class="source-desc">Tell us what you are looking for and we'll source it for you.</div>
+          <div class="source-desc">Tell us what you are looking for and we'll source it for you.</div> 
         </div>
       </div>
       <a class="get-btn" href="car-listings.html">Get Started</a>
@@ -331,49 +327,7 @@
 </footer>
 <script src="new_age.js"></script>
 <script src="listings-sync.js"></script>
-<script>
-  function updateNavForSession(){
-    const session = JSON.parse(localStorage.getItem('naa_session')||'null');
-    const loginBtn = document.getElementById('nav-login');
-    const signupBtn = document.getElementById('nav-signup');
-    const profileBtn = document.getElementById('nav-profile');
-    if(session){
-      loginBtn.classList.add('hidden');
-      signupBtn.classList.add('hidden');
-      profileBtn.classList.remove('hidden');
-      profileBtn.title = 'Signed in as ' + session.name;
-      profileBtn.href = session.role === 'admin' ? 'users.html' : 'index.html';
-    } else {
-      loginBtn.classList.remove('hidden');
-      signupBtn.classList.remove('hidden');
-      profileBtn.classList.add('hidden');
-    }
-  }
-  updateNavForSession();
-</script>
 <script src="auth-nav.js"></script>
-<script>
-function prepareAndGoToProforma(){
-  const prefill = {};
-  document.querySelectorAll('.result-row').forEach(r=>{
-    const label = r.querySelector('span'); const val = r.querySelector('strong');
-    if(!label||!val) return;
-    const key = label.textContent.trim().toLowerCase();
-    const num = val.textContent.replace(/[^0-9\.]/g,'');
-    if(key.includes('loan')) prefill.price = num;
-    if(key.includes('interest')) prefill.rate = num;
-  });
-  const sel = document.querySelector('.select-input'); if(sel) { const m = sel.value.match(/(\d+)/); if(m) prefill.tenure = m[1]; }
-  const carName = document.querySelector('.featured-car-name'); if(carName) prefill.make = carName.textContent.trim().split(' ')[0];
-  localStorage.setItem('proforma_prefill', JSON.stringify(prefill));
-  const session = JSON.parse(localStorage.getItem('naa_session')||'null');
-  if(!session){
-    localStorage.setItem('post_login_redirect','proforma-loan-calculator.html');
-    window.location.href = 'login.html';
-    return;
-  }
-  window.location.href = 'proforma-loan-calculator.html';
-}
-</script>
+
 </body>
 </html>
