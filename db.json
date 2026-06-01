@@ -1,3 +1,108 @@
 {
-  "cars": []
+  "cars": [
+    {
+      "id": "mpv9kwac1diqvr",
+      "name": "TestCar",
+      "miles": "",
+      "trans": "",
+      "fuel": "",
+      "year": "",
+      "price": "100",
+      "link": "car-detail.html",
+      "img": "",
+      "badge": false,
+      "createdAt": "2026-06-01T13:48:31.476Z"
+    },
+    {
+      "id": "mpv9uoebjzbzy9",
+      "name": "AUDI",
+      "miles": "1000",
+      "trans": "Automatic",
+      "fuel": "Petrol",
+      "year": "2023",
+      "price": "6,200,000",
+      "link": "car-detail.html",
+      "img": "Pic/Car 2.svg",
+      "badge": true,
+      "createdAt": "2026-06-01T13:56:07.811Z"
+    },
+    {
+      "id": "mpv9w04m2k6e97",
+      "name": "AUDI",
+      "miles": "1000",
+      "trans": "Automatic",
+      "fuel": "Petrol",
+      "year": "2023",
+      "price": "6,200,000",
+      "link": "car-detail.html",
+      "img": "Pic/Car 2.svg",
+      "badge": true,
+      "createdAt": "2026-06-01T13:57:09.670Z"
+    },
+    {
+      "id": "mpv9w04mcjwnip",
+      "name": "BMW COUPE",
+      "miles": "1000",
+      "trans": "Automatic",
+      "fuel": "Petrol",
+      "year": "2024",
+      "price": "4,500,000",
+      "link": "car-detail.html",
+      "img": "Pic/Car 3.svg",
+      "badge": true,
+      "createdAt": "2026-06-01T13:57:09.670Z"
+    },
+    {
+      "id": "mpv9w04mr55h1e",
+      "name": "AUDI",
+      "miles": "1000",
+      "trans": "Automatic",
+      "fuel": "Diesel",
+      "year": "2024",
+      "price": "4,500,000",
+      "link": "car-detail.html",
+      "img": "Pic/Car 2.svg",
+      "badge": true,
+      "createdAt": "2026-06-01T13:57:09.670Z"
+    },
+    {
+      "id": "mpva3y4l6hitw1",
+      "name": "Benz",
+      "miles": "2500",
+      "trans": "Automatic",
+      "fuel": "Electric",
+      "year": "2021",
+      "price": "4,500,000",
+      "link": "car-detail.html",
+      "img": "Pic/Car 4.svg",
+      "badge": true,
+      "createdAt": "2026-06-01T14:03:20.325Z"
+    },
+    {
+      "id": "mpva6w85if2b3s",
+      "name": "Isuzu D-Max",
+      "miles": "3000",
+      "trans": "Manual",
+      "fuel": "Diesel",
+      "year": "2020",
+      "price": "3,520,00",
+      "link": "car-detail.html",
+      "img": "Pic/Car 2.svg",
+      "badge": true,
+      "createdAt": "2026-06-01T14:05:37.829Z"
+    },
+    {
+      "id": "mpva6w85hlciy2",
+      "name": "BMW COUPE",
+      "miles": "1000",
+      "trans": "Automatic",
+      "fuel": "Hybrid",
+      "year": "2024",
+      "price": "4,500,000",
+      "link": "car-detail.html",
+      "img": "Pic/Car 4.svg",
+      "badge": true,
+      "createdAt": "2026-06-01T14:05:37.829Z"
+    }
+  ]
 }

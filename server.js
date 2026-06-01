@@ -65,4 +65,31 @@ app.get('/api/cars/:id', (req, res) => {
   res.json(car);
 });
 
+// Update a single car
+app.put('/api/cars/:id', (req, res) => {
+  const db = readDB();
+  const carIndex = db.cars.findIndex(c => c.id === req.params.id);
+  if (carIndex === -1) return res.status(404).json({ error: 'Not found' });
+
+  const update = req.body;
+  if (!update || typeof update !== 'object') {
+    return res.status(400).json({ error: 'Invalid body' });
+  }
+
+  db.cars[carIndex] = Object.assign({}, db.cars[carIndex], update, { id: db.cars[carIndex].id });
+  writeDB(db);
+  res.json(db.cars[carIndex]);
+});
+
+// Delete a single car
+app.delete('/api/cars/:id', (req, res) => {
+  const db = readDB();
+  const carIndex = db.cars.findIndex(c => c.id === req.params.id);
+  if (carIndex === -1) return res.status(404).json({ error: 'Not found' });
+
+  const deleted = db.cars.splice(carIndex, 1)[0];
+  writeDB(db);
+  res.json({ deleted });
+});
+
 app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));

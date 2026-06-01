@@ -1,6 +1,9 @@
  const TOTAL = 6;
   let showBadge = true;
-  const API_BASE = (location.protocol === 'file:' ? 'http://localhost:3000' : '');
+  const API_PORT = 3000;
+  const API_BASE = (location.protocol === 'file:' || location.port !== API_PORT.toString())
+    ? `http://localhost:${API_PORT}`
+    : '';
   let activeCard = 0;
   let searchQuery = '';
   let savedSearchQuery = '';
