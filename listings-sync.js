@@ -8,9 +8,19 @@
   async function fetchUploadedCars(){
     try {
       const res = await fetch(API_BASE + '/api/cars?limit=100');
+      if (res.ok) {
+        const data = await res.json();
+        return data.items || [];
+      }
+    } catch (e) {
+      // API is unavailable; fall back to reading the local db.json file.
+    }
+
+    try {
+      const res = await fetch('db.json');
       if (!res.ok) return [];
       const data = await res.json();
-      return data.items || [];
+      return Array.isArray(data.cars) ? data.cars.slice().reverse().slice(0, 100) : [];
     } catch (e) {
       return [];
     }
