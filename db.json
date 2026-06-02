@@ -1,19 +1,6 @@
 {
   "cars": [
     {
-      "id": "mpv9kwac1diqvr",
-      "name": "TestCar",
-      "miles": "",
-      "trans": "",
-      "fuel": "",
-      "year": "",
-      "price": "100",
-      "link": "car-detail.html",
-      "img": "",
-      "badge": false,
-      "createdAt": "2026-06-01T13:48:31.476Z"
-    },
-    {
       "id": "mpv9uoebjzbzy9",
       "name": "AUDI",
       "miles": "1000",
@@ -103,6 +90,68 @@
       "img": "Pic/Car 4.svg",
       "badge": true,
       "createdAt": "2026-06-01T14:05:37.829Z"
+    },
+    {
+      "id": "mpwme3333fmkr8",
+      "name": "Isuzu D-Max",
+      "miles": "3000",
+      "trans": "Manual",
+      "fuel": "Diesel",
+      "year": "2020",
+      "price": "3,520,00",
+      "link": "car-detail.html",
+      "img": "Pic/Car 2.svg",
+      "badge": true,
+      "createdAt": "2026-06-02T12:34:54.879Z"
+    },
+    {
+      "id": "mpwme333dihllc",
+      "name": "Benz",
+      "miles": "2500",
+      "trans": "Automatic",
+      "fuel": "Electric",
+      "year": "2021",
+      "price": "4,500,000",
+      "link": "car-detail.html",
+      "img": "Pic/Car 4.svg",
+      "badge": true,
+      "createdAt": "2026-06-02T12:34:54.879Z"
+    },
+    {
+      "id": "mpwzgvqwrznuvt",
+      "createdAt": "2026-06-02T18:41:00.344Z",
+      "name": "TEST CAR",
+      "miles": "100",
+      "trans": "Automatic",
+      "fuel": "Petrol",
+      "year": "2026",
+      "price": "2,000,000",
+      "link": "car-detail.html?id=mpwyy4o26c9di7",
+      "img": "Pic/Car 1.svg",
+      "badge": true
+    }
+  ],
+  "carDetails": [
+    {
+      "id": "mpwyy4o26c9di7",
+      "createdAt": "2026-06-02T18:26:25.442Z",
+      "name": "TEST CAR",
+      "miles": "100",
+      "trans": "Automatic",
+      "fuel": "Petrol",
+      "year": "2026",
+      "price": "2,000,000",
+      "img": "Pic/Car 1.svg",
+      "badge": true,
+      "model": "T1",
+      "engine": "",
+      "bodyType": "SUV",
+      "condition": "New",
+      "drive": "AWD",
+      "location": "Nairobi",
+      "description": "Test",
+      "make": "Test",
+      "color": "Black"
     }
   ]
 }

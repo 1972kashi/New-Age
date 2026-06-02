@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AutoAdmin — Upload</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="car-detail-upload.css">
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-brand">NEW AGE <span>AUTOMOTIVE</span></div>
+  <div class="nav-links">
+    <a class="nav-btn " href="admin-upload.html">Upload</a>
+    <a class="nav-btn" href="users.html">Users</a>
+    <a class="nav-btn" href="login.html">Dealers</a>
+    <a class="nav-btn active" href="car-detail-upload.html">Car Details</a>
+  </div>
+  <div class="nav-user">
+    Logged in as <strong id="nav-name">Admin</strong>
+    <button class="btn-logout" onclick="logout()">Sign Out</button>
+  </div>
+</nav>
+
+<main>
+  <div class="page-header">
+    <h1>NEW LISTING</h1>
+    <span class="badge">ADMIN</span>
+  </div>
+
+  <div class="form-card">
+    <!-- TOP ROW -->
+    <div class="top-row">
+      <div class="drop-wrapper">
+        <div class="drop-zone-header">Place Images</div>
+        <div class="drop-zone" id="dropZone">
+          <input placeholder="images" type="file" accept="image/*" multiple id="fileInput">
+          <div class="drop-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
+            </svg>
+          </div>
+          <div class="drop-label">
+            <strong>DRAG &amp; DROP IMAGES</strong>
+            or browse pictures
+          </div>
+        </div>
+        <div class="previews-strip" id="previewStrip"></div>
+      </div>
+
+      <div class="right-fields">
+        <div class="field">
+          <label>Car Name</label>
+          <input type="text" id="carName" list="carNameList" placeholder="e.g. BMW M4 Coupe (F82)" oninput="onCarNameInput()">
+          <datalist id="carNameList"></datalist>
+        </div>
+        <div class="field">
+          <label>Link</label>
+          <div class="link-display">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/>
+            </svg>
+            <span id="detailLinkText">car-detail.html?id=</span>
+          </div>
+        </div>
+        <div class="field">
+          <label>Price (KSH)</label>
+          <input type="text" id="price" placeholder="50317" oninput="updatePreview()">
+        </div>
+        <div class="field">
+          <label>Image URL / Path</label>
+          <input type="text" id="imgPath" placeholder="Pic/Car 4.svg" oninput="updatePreview()">
+        </div>
+      </div>
+    </div>
+
+    <!-- FIELDS GRID -->
+    <div class="fields-grid">
+      <div class="field">
+        <label>Make</label>
+        <input type="text" id="make" placeholder="BMW" oninput="updatePreview()">
+      </div>
+      <div class="field">
+        <label>Model</label>
+        <input type="text" id="model" placeholder="M4 (F82)" oninput="updatePreview()">
+      </div>
+      <div class="field">
+        <label>Year</label>
+        <input type="text" id="year" placeholder="2023" oninput="updatePreview()">
+      </div>
+      <div class="field">
+        <label>Transmission</label>
+        <select title="Transmission" id="trans" onchange="updatePreview()">
+          <option value="">Select...</option>
+          <option>Automatic</option>
+          <option>Manual</option>
+          <option>M-DCT 7-Speed</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Fuel Type</label>
+        <select title="Fuel Type" id="fuel" onchange="updatePreview()">
+          <option value="">Select...</option>
+          <option>Petrol</option>
+          <option>Diesel</option>
+          <option>Electric</option>
+          <option>Hybrid</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Mileage</label>
+        <input type="text" id="miles" placeholder="1,524" oninput="updatePreview()">
+      </div>
+      <div class="field">
+        <label>Body Type</label>
+        <select title="Select" id="bodyType" onchange="updatePreview()">
+          <option value="">Select...</option>
+          <option>Coupe</option>
+          <option>Sedan</option>
+          <option>SUV</option>
+          <option>Hatchback</option>
+          <option>Convertible</option>
+          <option>Pickup</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Condition</label>
+        <select title="Condition" id="condition" onchange="updatePreview()">
+          <option value="">Select...</option>
+          <option>New</option>
+          <option>Foreign Used</option>
+          <option>Locally Used</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Drive</label>
+        <select title="Drive" id="drive" onchange="updatePreview()">
+          <option value="">Select...</option>
+          <option>RWD</option>
+          <option>FWD</option>
+          <option>AWD</option>
+          <option>4WD</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Location</label>
+        <input type="text" id="location" placeholder="Nairobi" oninput="updatePreview()">
+      </div>
+      <div class="field">
+        <label>Color</label>
+        <input type="text" id="color" placeholder="Alpine White" oninput="updatePreview()">
+      </div>
+    </div>
+
+    <!-- DESCRIPTION -->
+    <div class="field">
+      <label>Description</label>
+      <textarea id="description" rows="4" placeholder="Describe the vehicle features, condition, history..." oninput="updatePreview()"></textarea>
+    </div>
+  </div>
+
+  <!-- PREVIEW -->
+  <div class="section-title">CAR DETAIL PREVIEW</div>
+
+  <!-- PHOTO GRID PREVIEW -->
+  <div class="photo-grid" id="photoGrid">
+    <div class="photo-cell photo-cell--hero">
+      <div class="placeholder placeholder--center">NO IMAGE</div>
+    </div>
+    <div class="photo-cell"><div class="placeholder"></div></div>
+    <div class="photo-cell"><div class="placeholder"></div></div>
+    <div class="photo-cell"><div class="placeholder"></div></div>
+    <div class="photo-cell"><div class="placeholder"></div></div>
+    <div class="photo-cell">
+      <div class="placeholder placeholder--addphotos">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+        <span class="placeholder-text">+ PHOTOS</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- PRICE -->
+  <div class="price-block">
+    <span class="price-label">PRICE</span>
+    <span class="price-value" id="previewPrice">KSH —</span>
+    <span class="price-currency" id="previewCurrency"></span>
+  </div>
+
+  <!-- DESCRIPTION PREVIEW -->
+  <div class="desc-section">
+    <div class="desc-section-header">Description</div>
+    <div class="desc-section-body" id="previewDesc">
+      Vehicle description will appear here...
+    </div>
+  </div>
+
+  <!-- VEHICLE DETAILS TABLE -->
+  <div class="details-section">
+    <div class="details-header">Vehicle Details</div>
+    <div class="details-grid">
+      <div class="details-col">
+        <div class="detail-row"><span class="detail-key">Year</span><span class="detail-val" id="dYear">—</span></div>
+        <div class="detail-row"><span class="detail-key">Make</span><span class="detail-val" id="dMake">—</span></div>
+        <div class="detail-row"><span class="detail-key">Model</span><span class="detail-val" id="dModel">—</span></div>
+        <div class="detail-row"><span class="detail-key">Condition</span><span class="detail-val" id="dCondition">—</span></div>
+        <div class="detail-row"><span class="detail-key">Transmission</span><span class="detail-val" id="dTrans">—</span></div>
+        <div class="detail-row"><span class="detail-key">Engine Size</span><span class="detail-val" id="dEngine">—</span></div>
+      </div>
+      <div class="details-col">
+        <div class="detail-row"><span class="detail-key">Mileage</span><span class="detail-val" id="dMiles">—</span></div>
+        <div class="detail-row"><span class="detail-key">Fuel Type</span><span class="detail-val" id="dFuel">—</span></div>
+        <div class="detail-row"><span class="detail-key">Body Type</span><span class="detail-val" id="dBody">—</span></div>
+        <div class="detail-row"><span class="detail-key">Location</span><span class="detail-val" id="dLocation">—</span></div>
+        <div class="detail-row"><span class="detail-key">Drive</span><span class="detail-val" id="dDrive">—</span></div>
+        <div class="detail-row"><span class="detail-key">Color</span><span class="detail-val" id="dColor">—</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ACTIONS -->
+  <div class="actions-bar">
+    <button class="btn btn-save" onclick="saveDraft()">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+      SAVE
+    </button>
+    <button class="btn btn-upload" onclick="uploadListing()">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+      UPLOAD
+    </button>
+  </div>
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script src="car-detail-upload.js"></script>
+<script src="car-detail-view.js"></script>
+<script src="auth-nav.js"></script>
+</body>
+</html>
