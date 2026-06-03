@@ -5,9 +5,9 @@ function switchTab(t){
 }
 
 const API_PORT = 3000;
-const API_BASE = (location.protocol === 'file:' || location.port !== API_PORT.toString())
+const API_BASE = (location.protocol === 'file:')
   ? `http://localhost:${API_PORT}`
-  : '';
+  : `http://localhost:${API_PORT}`;  // Always use port 3000 for API
 
 function togglePwd(id,btn){
   const el=document.getElementById(id);
@@ -55,14 +55,19 @@ function doLogin(){
   if(!id||!pw){showMsg('login-err','Please fill in all fields.');return;}
 
   // First try to authenticate from server database
-  fetch(`${API_BASE}/api/users?limit=200`)
-    .then(res => res.json())
+  fetch(`${API_BASE}/api/users?limit=200`, {timeout: 5000})
+    .then(res => {
+      if (!res.ok) throw new Error('Server error');
+      return res.json();
+    })
     .then(data => {
       const users = data.items || [];
-      let user = users.find(u => u.email === id || u.phone === id);
+      let user = users.find(u => (u.email === id || u.phone === id) && u.password === btoa(pw));
       
-      if (user && user.password === btoa(pw)) {
-        localStorage.setItem('naa_session', JSON.stringify({name: user.fname+' '+user.lname, email: user.email, role: user.role}));
+      if (user) {
+        // Successfully found user in database
+        const sessionData = {name: user.fname+' '+user.lname, email: user.email, role: user.role};
+        localStorage.setItem('naa_session', JSON.stringify(sessionData));
         showMsg('login-ok', 'Welcome back, '+user.fname+'! Redirecting…');
         setTimeout(() => {
           const redirect = localStorage.getItem('post_login_redirect');
@@ -71,19 +76,27 @@ function doLogin(){
             window.location.href = redirect; 
           }
           else window.location.href = user.role==='admin'?'car-detail-upload.html':'index.html';
-        }, 1200);
+        }, 800);
         return;
       }
       
+      // Not found in server database, try localStorage
+      throw new Error('User not found in server database');
+    })
+    .catch(err => {
+      console.log('Server auth failed, trying localStorage:', err.message);
       // Fallback to localStorage for backward compatibility
       const localUsers = JSON.parse(localStorage.getItem('naa_users')||'[]');
-      user = localUsers.find(u => u.email === id || u.phone === id);
-      if (!user || user.password !== btoa(pw)) {
+      const user = localUsers.find(u => (u.email === id || u.phone === id) && u.password === btoa(pw));
+      
+      if (!user) {
         showMsg('login-err', 'Invalid credentials.');
         return;
       }
       
-      localStorage.setItem('naa_session', JSON.stringify({name: user.fname+' '+user.lname, email: user.email, role: user.role}));
+      // Successfully authenticated from localStorage
+      const sessionData = {name: user.fname+' '+user.lname, email: user.email, role: user.role};
+      localStorage.setItem('naa_session', JSON.stringify(sessionData));
       showMsg('login-ok', 'Welcome back, '+user.fname+'! Redirecting…');
       setTimeout(() => {
         const redirect = localStorage.getItem('post_login_redirect');
@@ -92,34 +105,14 @@ function doLogin(){
           window.location.href = redirect; 
         }
         else window.location.href = user.role==='admin'?'car-detail-upload.html':'index.html';
-      }, 1200);
-    })
-    .catch(() => {
-      // If server is unavailable, fall back to localStorage
-      const localUsers = JSON.parse(localStorage.getItem('naa_users')||'[]');
-      const user = localUsers.find(u => u.email === id || u.phone === id);
-      if (!user || user.password !== btoa(pw)) {
-        showMsg('login-err', 'Invalid credentials.');
-        return;
-      }
-      
-      localStorage.setItem('naa_session', JSON.stringify({name: user.fname+' '+user.lname, email: user.email, role: user.role}));
-      showMsg('login-ok', 'Welcome back, '+user.fname+'! Redirecting…');
-      setTimeout(() => {
-        const redirect = localStorage.getItem('post_login_redirect');
-        if (redirect) { 
-          localStorage.removeItem('post_login_redirect'); 
-          window.location.href = redirect; 
-        }
-        else window.location.href = user.role==='admin'?'car-detail-upload.html':'index.html';
-      }, 1200);
+      }, 800);
     });
 }
 
 function doSignUp(){
   const fname=document.getElementById('su-fname').value.trim();
   const lname=document.getElementById('su-lname').value.trim();
-  const email=document.getElementById('su-email').value.trim();
+  const email=document.getElementById('su-email').value.trim().toLowerCase();
   const phone=document.getElementById('su-phone').value.trim();
   const pass=document.getElementById('su-pass').value;
   const pass2=document.getElementById('su-pass2').value;
@@ -148,7 +141,8 @@ function doSignUp(){
       return res.json();
     })
     .then(savedUser => {
-      localStorage.setItem('naa_session', JSON.stringify({name: fname+' '+lname, email: email, role: 'user'}));
+      const sessionData = {name: fname+' '+lname, email: email, role: 'user'};
+      localStorage.setItem('naa_session', JSON.stringify(sessionData));
       showMsg('su-ok', 'Account created! Redirecting to home…');
       setTimeout(() => {
         const redirect = localStorage.getItem('post_login_redirect');
@@ -157,7 +151,7 @@ function doSignUp(){
           window.location.href = redirect; 
         }
         else window.location.href = 'index.html';
-      }, 1500);
+      }, 800);
     })
     .catch(err => {
       // If server fails, save to localStorage as fallback
@@ -169,8 +163,9 @@ function doSignUp(){
       
       users.push({fname, lname, email, phone, password: btoa(pass), role: 'user', joined: new Date().toISOString()});
       localStorage.setItem('naa_users', JSON.stringify(users));
-      localStorage.setItem('naa_session', JSON.stringify({name: fname+' '+lname, email: email, role: 'user'}));
-
+      
+      const sessionData = {name: fname+' '+lname, email: email, role: 'user'};
+      localStorage.setItem('naa_session', JSON.stringify(sessionData));
       showMsg('su-ok', 'Account created! Redirecting to home…');
       setTimeout(() => {
         const redirect = localStorage.getItem('post_login_redirect');
@@ -179,7 +174,7 @@ function doSignUp(){
           window.location.href = redirect; 
         }
         else window.location.href = 'index.html';
-      }, 1500);
+      }, 800);
     });
 }
 

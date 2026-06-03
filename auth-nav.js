@@ -48,7 +48,22 @@ function toggleAuthPopup(){
 function logout(){
   localStorage.removeItem('naa_session');
   hideAuthPopup();
-  loadAuthNav();
+  window.location.href = 'login.html';
+}
+
+function checkAdminAccess(){
+  const currentPage = window.location.pathname.split('/').pop() || 'index.html';
+  const adminPages = ['users.html', 'admin-upload.html', 'car-detail-upload.html'];
+  
+  if(adminPages.includes(currentPage)){
+    const session = JSON.parse(localStorage.getItem('naa_session')||'null');
+    if (!session || session.role !== 'admin') {
+      localStorage.setItem('post_login_redirect', currentPage);
+      window.location.href = 'login.html';
+      return false;
+    }
+  }
+  return true;
 }
 
 function loadAuthNav(){
@@ -75,6 +90,9 @@ function loadAuthNav(){
     profileBtn.onclick = null;
     hideAuthPopup();
   }
+  
+  // Check admin access for protected pages
+  checkAdminAccess();
 }
 
 document.addEventListener('DOMContentLoaded', loadAuthNav);

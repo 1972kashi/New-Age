@@ -235,5 +235,9 @@ app.delete('/api/users/:id', (req, res) => {
   res.json({ deleted });
 });
 
-app.listen(PORT, '0.0.0.0', () => console.log(`Server running on http://0.0.0.0:${PORT}` + (PORT !== 3000 ? ` (or http://localhost:${PORT})` : '')));
+app.listen(PORT, '0.0.0.0', () => console.log(`API Server running on http://0.0.0.0:${PORT}`));
+
+// Also listen on port 5500 for static files (same app serves both)
+const PORT_STATIC = 5500;
+app.listen(PORT_STATIC, '0.0.0.0', () => console.log(`Static files also available on http://0.0.0.0:${PORT_STATIC}`));
 

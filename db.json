@@ -187,5 +187,17 @@
       "make": "Isuzu",
       "color": ""
     }
+  ],
+  "users": [
+    {
+      "id": "mpyd2se1fh0hfi",
+      "createdAt": "2026-06-03T17:49:43.609Z",
+      "fname": "Admin",
+      "lname": "User",
+      "email": "admin@gmail.com",
+      "phone": "",
+      "password": "QWRtaW5AYWRtaW4=",
+      "role": "admin"
+    }
   ]
 }
