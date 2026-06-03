@@ -142,6 +142,7 @@
 		document.getElementById('make').value = detail.make || extractMakeFromName(detail.name);
 		document.getElementById('model').value = detail.model || extractModelFromName(detail.name);
 		document.getElementById('year').value = detail.year || '';
+		document.getElementById('engine').value = detail.engine || '';
 		document.getElementById('trans').value = detail.trans || '';
 		document.getElementById('fuel').value = detail.fuel || '';
 		document.getElementById('miles').value = detail.miles || '';
@@ -160,6 +161,7 @@
 		document.getElementById('make').value = extractMakeFromName(car.name);
 		document.getElementById('model').value = extractModelFromName(car.name);
 		document.getElementById('year').value = car.year || extractYearFromName(car.name) || '';
+		document.getElementById('engine').value = car.engine || '';
 		document.getElementById('trans').value = car.trans || '';
 		document.getElementById('fuel').value = car.fuel || '';
 		document.getElementById('miles').value = car.miles || '';
@@ -193,15 +195,52 @@
 		uploadedFiles = [...uploadedFiles, ...arr];
 		if (previewStrip) previewStrip.innerHTML = '';
 
-		uploadedFiles.slice(0, 6).forEach((file) => {
+		uploadedFiles.slice(0, 6).forEach((file, index) => {
 			const url = URL.createObjectURL(file);
+			const wrapper = document.createElement('div');
+			wrapper.style.position = 'relative';
+			wrapper.style.display = 'inline-block';
+			wrapper.style.marginRight = '8px';
+			
 			const img = document.createElement('img');
 			img.src = url;
 			img.className = 'preview-thumb';
-			if (previewStrip) previewStrip.appendChild(img);
+			
+			const removeBtn = document.createElement('button');
+			removeBtn.type = 'button';
+			removeBtn.textContent = '✕';
+			removeBtn.style.cssText = 'position:absolute; top:-8px; right:-8px; width:24px; height:24px; border-radius:50%; background:#dc2626; color:white; border:none; cursor:pointer; font-weight:bold; padding:0;';
+			removeBtn.onclick = () => removeImage(index);
+			
+			wrapper.appendChild(img);
+			wrapper.appendChild(removeBtn);
+			if (previewStrip) previewStrip.appendChild(wrapper);
 		});
 
+		const imageControls = document.getElementById('imageControls');
+		if (imageControls) {
+			imageControls.style.display = uploadedFiles.length > 0 ? 'block' : 'none';
+		}
+
 		updatePhotoGrid(uploadedFiles);
+	}
+
+	window.removeImage = function(index) {
+		uploadedFiles.splice(index, 1);
+		handleFiles([]);
+		if (uploadedFiles.length === 0) {
+			const imageControls = document.getElementById('imageControls');
+			if (imageControls) imageControls.style.display = 'none';
+		}
+	}
+
+	window.clearAllImages = function() {
+		uploadedFiles = [];
+		const previewStrip = document.getElementById('previewStrip');
+		if (previewStrip) previewStrip.innerHTML = '';
+		const imageControls = document.getElementById('imageControls');
+		if (imageControls) imageControls.style.display = 'none';
+		updatePhotoGrid([]);
 	}
 
 	function updatePhotoGrid(files) {
@@ -238,6 +277,7 @@
 			make: document.getElementById('make').value.trim(),
 			model: document.getElementById('model').value.trim(),
 			year: document.getElementById('year').value.trim(),
+			engine: document.getElementById('engine').value.trim(),
 			trans: document.getElementById('trans').value,
 			fuel: document.getElementById('fuel').value,
 			miles: document.getElementById('miles').value.trim(),

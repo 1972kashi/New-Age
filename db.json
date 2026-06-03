@@ -129,6 +129,19 @@
       "link": "car-detail.html?id=mpwyy4o26c9di7",
       "img": "Pic/Car 1.svg",
       "badge": true
+    },
+    {
+      "id": "mpxpgb6o92xu22",
+      "createdAt": "2026-06-03T06:48:23.712Z",
+      "name": "Isuzu D-Max",
+      "miles": "3000",
+      "trans": "Manual",
+      "fuel": "Diesel",
+      "year": "2020",
+      "price": "3,520,000",
+      "link": "car-detail.html?id=mpxpgb6dakngc2",
+      "img": "Pic/Car 2.svg",
+      "badge": true
     }
   ],
   "carDetails": [
@@ -152,6 +165,27 @@
       "description": "Test",
       "make": "Test",
       "color": "Black"
+    },
+    {
+      "id": "mpxpgb6dakngc2",
+      "createdAt": "2026-06-03T06:48:23.701Z",
+      "name": "Isuzu D-Max",
+      "miles": "3000",
+      "trans": "Manual",
+      "fuel": "Diesel",
+      "year": "2020",
+      "price": "3,520,000",
+      "img": "Pic/Car 2.svg",
+      "badge": true,
+      "model": "D-Max",
+      "engine": "3000cc",
+      "bodyType": "Pickup",
+      "condition": "Foreign Used",
+      "drive": "4WD",
+      "location": "Port, Mombasa",
+      "description": "A well preserved car",
+      "make": "Isuzu",
+      "color": ""
     }
   ]
 }

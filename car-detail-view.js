@@ -13,13 +13,32 @@
     element.textContent = value || '—';
   }
 
-  function setImageSources(src) {
-    const images = document.querySelectorAll('.gallery-grid .photo img');
-    if (!images.length) return;
-    const imageSrc = src || 'Pic/Car 3.svg';
-    images.forEach((img, index) => {
-      img.src = imageSrc;
-      img.alt = `Car photo ${index + 1}`;
+  function setImageSources(src, images) {
+    const galleryGrid = document.querySelector('.gallery-grid');
+    if (!galleryGrid) return;
+    
+    // If images array is provided, use those; otherwise use single src
+    const imgArray = images && images.length > 0 ? images : [src || 'Pic/Car 3.svg'];
+    
+    const photoElements = galleryGrid.querySelectorAll('.photo');
+    
+    // Update image elements with available images
+    photoElements.forEach((photoEl, index) => {
+      const img = photoEl.querySelector('img');
+      const overlay = photoEl.querySelector('.photo-overlay');
+      const overlayText = photoEl.querySelector('.overlay-text');
+      
+      if (index < imgArray.length) {
+        if (img) {
+          img.src = imgArray[index];
+          img.alt = `Car photo ${index + 1}`;
+        }
+      } else if (index === photoElements.length - 1 && imgArray.length > photoElements.length - 1) {
+        // Show "+X more photos" on the last cell if there are more images
+        if (overlayText) {
+          overlayText.textContent = `+${imgArray.length - (photoElements.length - 1)} PHOTOS`;
+        }
+      }
     });
   }
 
@@ -70,7 +89,10 @@
     setText('detailLocation', car.location);
     setText('detailMake', car.make || extractMakeFromName(car.name));
     setText('detailDriveAlt', car.drive || '—');
-    setImageSources(car.img);
+    
+    // Handle images - check if car.images is an array or if car.img exists
+    const imageArray = Array.isArray(car.images) ? car.images : (car.img ? [car.img] : []);
+    setImageSources(car.img, imageArray);
   }
 
   function extractMakeFromName(name) {

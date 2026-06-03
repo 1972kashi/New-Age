@@ -6,6 +6,16 @@
 <title>Admin — New Age Automotive</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@400;600;700&display=swap" rel="stylesheet"/>
 <link rel="stylesheet" href="Admin.css"/>
+<script>
+  // Check if user is logged in and is admin
+  (function() {
+    const session = JSON.parse(localStorage.getItem('naa_session')||'null');
+    if (!session || session.role !== 'admin') {
+      localStorage.setItem('post_login_redirect', 'admin-upload.html');
+      window.location.href = 'login.html';
+    }
+  })();
+</script>
 </head>
 <body>
 

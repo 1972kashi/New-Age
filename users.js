@@ -1,6 +1,12 @@
 let editIndex = -1;
 let deleteIndex = -1;
 let users = [];
+let editingUserId = null;
+
+const API_PORT = 3000;
+const API_BASE = (location.protocol === 'file:' || location.port !== API_PORT.toString())
+  ? `http://localhost:${API_PORT}`
+  : '';
 
 function initSession(){
   const session = JSON.parse(localStorage.getItem('naa_session')||'null');
@@ -11,16 +17,19 @@ function initSession(){
   document.getElementById('nav-name').textContent = session.name;
 }
 
-function getStoredUsers(){
-  return JSON.parse(localStorage.getItem('naa_users')||'[]');
-}
-
-function saveStoredUsers(data){
-  localStorage.setItem('naa_users', JSON.stringify(data));
-}
-
-function loadUsers(){
-  users = getStoredUsers();
+async function loadUsers(){
+  try {
+    const res = await fetch(`${API_BASE}/api/users?limit=200`);
+    if (res.ok) {
+      const data = await res.json();
+      users = data.items || [];
+    } else {
+      throw new Error('Failed to load users');
+    }
+  } catch (err) {
+    console.warn('Could not load users from server, trying localStorage:', err);
+    users = JSON.parse(localStorage.getItem('naa_users')||'[]');
+  }
   updateStats();
   renderTable();
 }
@@ -76,7 +85,7 @@ function renderTable(){
 }
 
 function openAddModal(){
-  editIndex = -1;
+  editingUserId = null;
   document.getElementById('modal-title').textContent = 'Add New User';
   ['m-fname','m-lname','m-email','m-phone','m-pass'].forEach(id => document.getElementById(id).value = '');
   document.getElementById('m-role').value = 'user';
@@ -89,6 +98,7 @@ function openEditModal(i){
   const user = users[i];
   if(!user) return;
 
+  editingUserId = user.id;
   document.getElementById('modal-title').textContent = 'Edit User';
   document.getElementById('m-fname').value = user.fname;
   document.getElementById('m-lname').value = user.lname;
@@ -117,50 +127,67 @@ function saveUser(){
     return;
   }
 
-  const allUsers = getStoredUsers();
-  const duplicateIndex = allUsers.findIndex((u, idx) => u.email === email && idx !== editIndex);
-  if(duplicateIndex !== -1){
+  // Check for duplicate email (excluding current user being edited)
+  const isDuplicate = users.some((u, idx) => u.email === email && (editingUserId ? u.id !== editingUserId : true));
+  if(isDuplicate){
     showToast('Email already registered.','err');
     return;
   }
 
-  if(editIndex === -1){
+  if(editingUserId === null){
+    // Creating new user
     if(pass.length < 8){
       showToast('Password must be at least 8 characters.','err');
       return;
     }
-    allUsers.push({
-      fname,
-      lname,
-      email,
-      phone,
-      role,
-      joined: new Date().toISOString(),
-      password: btoa(pass)
-    });
-    showToast('User added successfully.');
+    const userData = { fname, lname, email, phone, role, password: btoa(pass) };
+    
+    fetch(`${API_BASE}/api/users`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(userData)
+    })
+      .then(res => {
+        if (!res.ok) return res.json().then(e => Promise.reject(e));
+        return res.json();
+      })
+      .then(() => {
+        showToast('User added successfully.');
+        loadUsers();
+        closeModal();
+      })
+      .catch(err => {
+        showToast(`Error adding user: ${err.error || err.message}`, 'err');
+      });
   } else {
-    const user = allUsers[editIndex];
-    user.fname = fname;
-    user.lname = lname;
-    user.email = email;
-    user.phone = phone;
-    user.role = role;
-    if(pass){
+    // Updating existing user
+    const userData = { fname, lname, email, phone, role };
+    if(pass) {
       if(pass.length < 8){
         showToast('Password must be at least 8 characters.','err');
         return;
       }
-      user.password = btoa(pass);
+      userData.password = btoa(pass);
     }
-    showToast('User updated successfully.');
+    
+    fetch(`${API_BASE}/api/users/${editingUserId}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(userData)
+    })
+      .then(res => {
+        if (!res.ok) return res.json().then(e => Promise.reject(e));
+        return res.json();
+      })
+      .then(() => {
+        showToast('User updated successfully.');
+        loadUsers();
+        closeModal();
+      })
+      .catch(err => {
+        showToast(`Error updating user: ${err.error || err.message}`, 'err');
+      });
   }
-
-  saveStoredUsers(allUsers);
-  users = allUsers;
-  renderTable();
-  updateStats();
-  closeModal();
 }
 
 function openDelModal(i){
@@ -177,12 +204,24 @@ function closeDelModal(){
 
 function confirmDelete(){
   if(deleteIndex < 0 || deleteIndex >= users.length) return;
-  users.splice(deleteIndex, 1);
-  saveStoredUsers(users);
-  updateStats();
-  renderTable();
-  closeDelModal();
-  showToast('User deleted.');
+  const user = users[deleteIndex];
+  if (!user) return;
+  
+  fetch(`${API_BASE}/api/users/${user.id}`, {
+    method: 'DELETE'
+  })
+    .then(res => {
+      if (!res.ok) throw new Error('Failed to delete');
+      return res.json();
+    })
+    .then(() => {
+      showToast('User deleted.');
+      loadUsers();
+      closeDelModal();
+    })
+    .catch(err => {
+      showToast(`Error deleting user: ${err.message}`, 'err');
+    });
 }
 
 function showToast(msg, type=''){

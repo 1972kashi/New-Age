@@ -13,10 +13,11 @@ function readDB(){
     return {
       cars: Array.isArray(data.cars) ? data.cars : [],
       carDetails: Array.isArray(data.carDetails) ? data.carDetails : [],
+      users: Array.isArray(data.users) ? data.users : [],
       ...data
     };
   }catch(e){
-    return { cars: [], carDetails: [] };
+    return { cars: [], carDetails: [], users: [] };
   }
 }
 
@@ -41,6 +42,24 @@ app.use(express.static(path.join(__dirname)));
 
 // serve uploads (if you later add file uploads)
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
+// Ensure default admin user exists in database
+function ensureDefaultAdmin() {
+  const db = readDB();
+  if (!db.users.some(u => u.email === 'admin@gmail.com')) {
+    const adminRecord = createRecord(db, 'users', {
+      fname: 'Admin',
+      lname: 'User',
+      email: 'admin@gmail.com',
+      phone: '',
+      password: btoa('Admin@admin'),
+      role: 'admin'
+    });
+    writeDB(db);
+  }
+}
+
+ensureDefaultAdmin();
 
 // Create car(s) - accepts JSON body for a single car or an array
 app.post('/api/cars', (req, res) => {
@@ -156,4 +175,65 @@ app.delete('/api/car-details/:id', (req, res) => {
   res.json({ deleted });
 });
 
-app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));
+// USER MANAGEMENT ENDPOINTS
+app.get('/api/users', (req, res) => {
+  const page = Math.max(1, parseInt(req.query.page) || 1);
+  const limit = Math.max(1, parseInt(req.query.limit) || 50);
+  const db = readDB();
+  const items = db.users.slice().reverse();
+  const total = items.length;
+  const start = (page - 1) * limit;
+  const paged = items.slice(start, start + limit);
+  res.json({ total, page, limit, items: paged });
+});
+
+app.get('/api/users/:id', (req, res) => {
+  const db = readDB();
+  const user = db.users.find(u => u.id === req.params.id);
+  if (!user) return res.status(404).json({ error: 'Not found' });
+  res.json(user);
+});
+
+app.post('/api/users', (req, res) => {
+  const body = req.body;
+  if (!body) return res.status(400).json({ error: 'Missing body' });
+  const db = readDB();
+  
+  // Check for duplicate email
+  if (db.users.some(u => u.email === body.email)) {
+    return res.status(400).json({ error: 'Email already registered' });
+  }
+  
+  const created = createRecord(db, 'users', Object.assign({
+    fname: '', lname: '', email: '', phone: '', role: 'user', password: ''
+  }, body));
+  writeDB(db);
+  res.status(201).json(created);
+});
+
+app.put('/api/users/:id', (req, res) => {
+  const db = readDB();
+  const userIndex = db.users.findIndex(u => u.id === req.params.id);
+  if (userIndex === -1) return res.status(404).json({ error: 'Not found' });
+  
+  // Check for duplicate email (excluding current user)
+  if (req.body.email && db.users.some(u => u.email === req.body.email && u.id !== req.params.id)) {
+    return res.status(400).json({ error: 'Email already registered' });
+  }
+  
+  db.users[userIndex] = Object.assign({}, db.users[userIndex], req.body, { id: db.users[userIndex].id });
+  writeDB(db);
+  res.json(db.users[userIndex]);
+});
+
+app.delete('/api/users/:id', (req, res) => {
+  const db = readDB();
+  const userIndex = db.users.findIndex(u => u.id === req.params.id);
+  if (userIndex === -1) return res.status(404).json({ error: 'Not found' });
+  const deleted = db.users.splice(userIndex, 1)[0];
+  writeDB(db);
+  res.json({ deleted });
+});
+
+app.listen(PORT, '0.0.0.0', () => console.log(`Server running on http://0.0.0.0:${PORT}` + (PORT !== 3000 ? ` (or http://localhost:${PORT})` : '')));
+

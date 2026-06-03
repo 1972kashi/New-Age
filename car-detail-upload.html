@@ -6,6 +6,16 @@
 <title>AutoAdmin — Upload</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="car-detail-upload.css">
+<script>
+  // Check if user is logged in and is admin
+  (function() {
+    const session = JSON.parse(localStorage.getItem('naa_session')||'null');
+    if (!session || session.role !== 'admin') {
+      localStorage.setItem('post_login_redirect', 'car-detail-upload.html');
+      window.location.href = 'login.html';
+    }
+  })();
+</script>
 </head>
 <body>
 
@@ -24,11 +34,6 @@
 </nav>
 
 <main>
-  <div class="page-header">
-    <h1>NEW LISTING</h1>
-    <span class="badge">ADMIN</span>
-  </div>
-
   <div class="form-card">
     <!-- TOP ROW -->
     <div class="top-row">
@@ -47,6 +52,9 @@
           </div>
         </div>
         <div class="previews-strip" id="previewStrip"></div>
+        <div class="image-controls" id="imageControls" style="display:none; margin-top:10px; text-align:center;">
+          <button type="button" class="btn-control" onclick="clearAllImages()" style="background:#dc2626; color:white; padding:8px 16px; border:none; border-radius:4px; cursor:pointer;">Clear All Images</button>
+        </div>
       </div>
 
       <div class="right-fields">
@@ -111,6 +119,10 @@
       <div class="field">
         <label>Mileage</label>
         <input type="text" id="miles" placeholder="1,524" oninput="updatePreview()">
+      </div>
+      <div class="field">
+        <label>Engine Size</label>
+        <input type="text" id="engine" placeholder="3000cc" oninput="updatePreview()">
       </div>
       <div class="field">
         <label>Body Type</label>
