@@ -66,19 +66,6 @@
       "createdAt": "2026-06-01T14:03:20.325Z"
     },
     {
-      "id": "mpva6w85if2b3s",
-      "name": "Isuzu D-Max",
-      "miles": "3000",
-      "trans": "Manual",
-      "fuel": "Diesel",
-      "year": "2020",
-      "price": "3,520,00",
-      "link": "car-detail.html",
-      "img": "Pic/Car 2.svg",
-      "badge": true,
-      "createdAt": "2026-06-01T14:05:37.829Z"
-    },
-    {
       "id": "mpva6w85hlciy2",
       "name": "BMW COUPE",
       "miles": "1000",
@@ -198,6 +185,16 @@
       "phone": "",
       "password": "QWRtaW5AYWRtaW4=",
       "role": "admin"
+    },
+    {
+      "id": "mpydubp767etvj",
+      "createdAt": "2026-06-03T18:11:08.347Z",
+      "fname": "jackson",
+      "lname": "murithi",
+      "email": "jacksonmurithi47@gmail.com",
+      "phone": "0757822470",
+      "role": "user",
+      "password": "S2FsZWxpQDIxNTU="
     }
   ]
 }
