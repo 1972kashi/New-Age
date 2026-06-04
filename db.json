@@ -195,6 +195,16 @@
       "phone": "0757822470",
       "role": "user",
       "password": "S2FsZWxpQDIxNTU="
+    },
+    {
+      "id": "mpz4rnvgunhn6u",
+      "createdAt": "2026-06-04T06:44:53.788Z",
+      "fname": "Imran",
+      "lname": "Emmuh",
+      "email": "emranmuh@gmail.com",
+      "phone": "0724105521",
+      "role": "user",
+      "password": "MjQxMDU1MjFtdWg="
     }
   ]
 }
