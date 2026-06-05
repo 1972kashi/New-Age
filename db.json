@@ -129,6 +129,32 @@
       "link": "car-detail.html?id=mpxpgb6dakngc2",
       "img": "Pic/Car 2.svg",
       "badge": true
+    },
+    {
+      "id": "mpzde1oqdbjt8p",
+      "createdAt": "2026-06-04T10:46:15.050Z",
+      "name": "BMW COUPE",
+      "miles": "1000",
+      "trans": "Automatic",
+      "fuel": "Hybrid",
+      "year": "2024",
+      "price": "4,500,000",
+      "link": "car-detail.html?id=mpzde1ojz43a0k",
+      "img": "Pic/BMW 3.svg",
+      "badge": true
+    },
+    {
+      "id": "mpze3e0ol8epyw",
+      "createdAt": "2026-06-04T11:05:57.432Z",
+      "name": "Benz",
+      "miles": "2500",
+      "trans": "Manual",
+      "fuel": "Diesel",
+      "year": "2021",
+      "price": "4,500,000",
+      "link": "car-detail.html?id=mpze3e0grwgvc3",
+      "img": "Pic/Car 4.svg",
+      "badge": true
     }
   ],
   "carDetails": [
@@ -173,6 +199,48 @@
       "description": "A well preserved car",
       "make": "Isuzu",
       "color": ""
+    },
+    {
+      "id": "mpzde1ojz43a0k",
+      "createdAt": "2026-06-04T10:46:15.043Z",
+      "name": "BMW COUPE",
+      "miles": "1000",
+      "trans": "Automatic",
+      "fuel": "Hybrid",
+      "year": "2024",
+      "price": "4,500,000",
+      "img": "Pic/Car 4.svg",
+      "badge": true,
+      "model": "COUPE",
+      "engine": "4000cc",
+      "bodyType": "Coupe",
+      "condition": "New",
+      "drive": "FWD",
+      "location": "Port, Mombasa",
+      "description": "",
+      "make": "BMW",
+      "color": ""
+    },
+    {
+      "id": "mpze3e0grwgvc3",
+      "createdAt": "2026-06-04T11:05:57.424Z",
+      "name": "Benz",
+      "miles": "2500",
+      "trans": "Manual",
+      "fuel": "Diesel",
+      "year": "2021",
+      "price": "4,500,000",
+      "img": "Pic/Car 4.svg",
+      "badge": true,
+      "model": "Convertable",
+      "engine": "4000cc",
+      "bodyType": "",
+      "condition": "New",
+      "drive": "AWD",
+      "location": "Port, Mombasa",
+      "description": "An Inspiration of ingenuity and class. This is a 12v engine master piece with twin turbos.",
+      "make": "Benz",
+      "color": "SILVER GREY"
     }
   ],
   "users": [

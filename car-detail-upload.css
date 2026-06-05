@@ -88,6 +88,15 @@ body {
   color:var(--text)
 }
 
+.btn-control{
+  background:#dc2626; 
+  color:white; 
+  padding:8px 16px; 
+  border:none; 
+  border-radius:4px; 
+  cursor:pointer;
+}
+
 .btn-logout{
   font-size:12px;
   color:var(--red);
@@ -101,6 +110,12 @@ body {
 
 .btn-logout:hover{
   background:rgba(220,38,38,.1)
+}
+
+.image-controls{
+  display:none; 
+  margin-top:10px; 
+  text-align:center;
 }
 
 /* MAIN LAYOUT */

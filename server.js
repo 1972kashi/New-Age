@@ -72,7 +72,7 @@ app.post('/api/cars', (req, res) => {
       name: '', miles:'', trans:'', fuel:'', year:'', price:'', link:'car-detail.html', img:'', badge:false
     }, item));
     if (!car.link || car.link === 'car-detail.html') {
-      car.link = `car-detail.html?id=${car.id}`;
+      car.link = `car-detail/${car.id}`;
     }
     return car;
   });
