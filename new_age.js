@@ -85,11 +85,11 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 
 /*Scroll Reveal*/
-const observerOptions = { threshold: 0.1, rootMargin: "0px 0px -50px 0px" };
+const observerOptions = { threshold: 0.1, rootMargin: "0px 0px -30px 0px" };
 const revealObserver = new IntersectionObserver((entries) => {
   entries.forEach((entry) => {
     if (entry.isIntersecting) {
-      entry.target.classList.remove("reveal-left", "reveal-right", "reveal-top", "reveal-bottom", "reveal-scale");
+      entry.target.classList.remove("reveal-left", "reveal-right", "reveal-top");
       // Trigger reflow to restart animation
       void entry.target.offsetWidth;
       entry.target.classList.add(entry.target.dataset.reveal || "reveal-bottom");

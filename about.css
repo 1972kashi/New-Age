@@ -280,3 +280,100 @@
       justify-content: center;
       letter-spacing: 1px;
     }
+
+    @keyframes revealFromLeft {
+      from {
+        opacity: 0;
+        transform: translateX(-30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    @keyframes revealFromRight {
+      from {
+        opacity: 0;
+        transform: translateX(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    @keyframes revealFromTop {
+      from {
+        opacity: 0;
+        transform: translateY(-20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes revealFromBottom {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes scaleIn {
+      from {
+        opacity: 0;
+        transform: scale(0.9);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    /* Scroll reveal classes */
+    .reveal-left {
+      opacity: 0;
+      animation: revealFromLeft 0.8s ease-out forwards;
+    }
+
+    .reveal-right {
+      opacity: 0;
+      animation: revealFromRight 0.8s ease-out forwards;
+    }
+
+    .reveal-top {
+      opacity: 0;
+      animation: revealFromTop 0.8s ease-out forwards;
+    }
+
+    .reveal-bottom {
+      opacity: 0;
+      animation: revealFromBottom 0.8s ease-out forwards;
+    }
+
+    .reveal-scale {
+      opacity: 0;
+      animation: scaleIn 0.8s ease-out forwards;
+    }
+
+    /* Stagger animations for multiple elements */
+    .reveal-left:nth-child(1) { animation-delay: 0s; }
+    .reveal-left:nth-child(2) { animation-delay: 0.15s; }
+    .reveal-left:nth-child(3) { animation-delay: 0.3s; }
+    .reveal-left:nth-child(n+4) { animation-delay: calc(0.15s * (var(--reveal-index, 1) - 1)); }
+
+    .reveal-right:nth-child(1) { animation-delay: 0s; }
+    .reveal-right:nth-child(2) { animation-delay: 0.15s; }
+    .reveal-right:nth-child(3) { animation-delay: 0.3s; }
+    .reveal-right:nth-child(n+4) { animation-delay: calc(0.15s * (var(--reveal-index, 1) - 1)); }
+
+    .reveal-bottom:nth-child(1) { animation-delay: 0s; }
+    .reveal-bottom:nth-child(2) { animation-delay: 0.15s; }
+    .reveal-bottom:nth-child(3) { animation-delay: 0.3s; }
+    .reveal-bottom:nth-child(n+4) { animation-delay: calc(0.15s * (var(--reveal-index, 1) - 1)); }

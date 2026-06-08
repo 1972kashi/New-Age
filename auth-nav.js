@@ -48,7 +48,15 @@ function toggleAuthPopup(){
 function logout(){
   localStorage.removeItem('naa_session');
   hideAuthPopup();
-  window.location.href = 'login.html';
+  loadAuthNav();
+}
+
+function onLoginSuccess(session){
+  localStorage.setItem('naa_session', JSON.stringify(session));
+
+  const redirect = localStorage.getItem('naa_redirect') || 'index.html';
+  localStorage.removeItem('naa_redirect');
+  window.location.href = redirect;
 }
 
 function checkAdminAccess(){
@@ -71,8 +79,17 @@ function loadAuthNav(){
   const signupBtn = document.getElementById('nav-signup');
   const profileBtn = document.getElementById('nav-profile');
   if(!loginBtn||!signupBtn||!profileBtn) return;
-  loginBtn.onclick = () => window.location.href = 'login.html';
-  signupBtn.onclick = () => window.location.href = 'login.html';
+
+  // Save current page before going to login, so we can return after
+  loginBtn.onclick = () => {
+    localStorage.setItem('naa_redirect', window.location.href);
+    window.location.href = 'login.html';
+  };
+  signupBtn.onclick = () => {
+    localStorage.setItem('naa_redirect', window.location.href);
+    window.location.href = 'login.html';
+  };
+
   ensureAuthPopup();
   const session = JSON.parse(localStorage.getItem('naa_session')||'null');
   if(session){
@@ -90,9 +107,12 @@ function loadAuthNav(){
     profileBtn.onclick = null;
     hideAuthPopup();
   }
+
   
   // Check admin access for protected pages
   checkAdminAccess();
 }
+
+
 
 document.addEventListener('DOMContentLoaded', loadAuthNav);
