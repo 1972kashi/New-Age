@@ -105,3 +105,46 @@ if (document.readyState === 'loading') {
 } else {
   initListingPagination();
 }
+
+/*Scroll Reveal*/
+const observerOptions = { threshold: 0.1, rootMargin: "0px 0px -30px 0px" };
+const revealObserver = new IntersectionObserver((entries) => {
+  entries.forEach((entry) => {
+    if (entry.isIntersecting) {
+      entry.target.classList.remove("reveal-left", "reveal-right", "reveal-top");
+      // Trigger reflow to restart animation
+      void entry.target.offsetWidth;
+      entry.target.classList.add(entry.target.dataset.reveal || "reveal-bottom");
+      revealObserver.unobserve(entry.target);
+    }
+  });
+}, observerOptions);
+
+function triggerScrollReveal() {
+  // Select elements that should have scroll reveal
+  const revealSelectors = [
+    ".listings-section"
+  ];
+
+  document.querySelectorAll(revealSelectors.join(", ")).forEach((el) => {
+    // Set reveal type based on element position or class
+    if (!el.dataset.reveal) {
+      if (el.classList.contains("listings-title")) {
+        el.dataset.reveal = "reveal-left";
+      } else if (el.classList.contains("g-3 row-gap")) {
+        el.dataset.reveal = "reveal-right";
+      } else if (el.classList.contains("g-3 row-gap")) {
+        el.dataset.reveal = "reveal-bottom";
+      } 
+      else if (el.classList.contains("g-3")) {
+        el.dataset.reveal = "reveal-bottom";
+      } else if (el.classList.contains("g-3")) {
+        el.dataset.reveal = "reveal-scale";
+      } else {
+        el.dataset.reveal = "reveal-bottom";
+      }
+    }
+    
+    revealObserver.observe(el);
+  });
+}

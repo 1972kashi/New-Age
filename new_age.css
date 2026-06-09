@@ -39,7 +39,7 @@
     /* ─────────────── GRID UTILITIES ─────────────── */
     .container {
       width: 100%;
-      max-width: 1440px;
+      min-width: 1440px;
       margin: 0 auto;
       padding: 0 24px;
     }
@@ -73,6 +73,7 @@
       padding-bottom: 12px;
     }
 
+   
  
     .logo {
     
@@ -932,353 +933,467 @@
     .reveal-bottom:nth-child(3) { animation-delay: 0.3s; }
     .reveal-bottom:nth-child(n+4) { animation-delay: calc(0.15s * (var(--reveal-index, 1) - 1)); }
 
-    /* ─────────────── MEDIA QUERIES ─────────────── */
+     /* ─────────────── MEDIA QUERIES ─────────────── */
 
-    /* Extra small devices (phones, 600px and down) */
-    @media only screen and (max-width: 600px) {
+    /* ── Base override: remove fixed min-width on container for all responsive sizes ── */
+    @media only screen and (max-width: 1199px) {
       .container {
-        padding: 0 16px;
+        min-width: 0;
+        width: 100%;
+      }
+    }
+
+    /* ══════════════════════════════════════════
+       Extra small — phones portrait (max 599px)
+       All grids: 2 columns. Hero stacks. Nav hidden.
+    ══════════════════════════════════════════ */
+    @media only screen and (max-width: 599px) {
+
+      /* Container */
+      .container {
+        min-width: 0;
+        width: 100%;
+        padding: 0 14px;
       }
 
+      /* ── Navbar ── */
       .navbar .container {
-        grid-template-columns: auto 1fr auto;
-        gap: 12px;
+        grid-template-columns: auto auto;
+        gap: 8px;
         padding-top: 10px;
         padding-bottom: 10px;
+        justify-content: space-between;
       }
-
-      .nav-links {
-        display: none;
-      }
-
+      .nav-links { display: none; }
       .logo-text span {
-        font-size: 10px;
-        letter-spacing: 2px;
+        font-size: 9px;
+        letter-spacing: 1.5px;
       }
+      .main { height: 70px; width: 65px; }
+      .logo-icon { width: 70px; height: 34px; }
+      .nav-auth { gap: 6px; }
+      .btn { padding: 7px 12px; font-size: 12px; }
 
+      /* ── Hero ── */
+      .stage { min-height: auto; padding: 28px 0; }
+      .stage .container,
+      .hero .container {
+        grid-template-columns: 1fr;
+        gap: 20px;
+        padding: 0 14px;
+      }
+      .hero-eyebrow { font-size: 13px; letter-spacing: 1.5px; margin-bottom: 10px; }
+      .hero-title { font-size: 38px; line-height: 1.0; letter-spacing: 1px; }
+      .hero-subtitle { font-size: 13px; letter-spacing: 1.5px; margin-bottom: 12px; }
+      .hero-desc { font-size: 13px; max-width: 100%; margin-bottom: 20px; }
+      .hero-badges {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+        margin-top: 16px;
+      }
+      .hero-badge { padding: 10px; gap: 8px; }
+      .hero-badge-title { font-size: 12px; }
+      .hero-badge-desc { font-size: 11px; }
+
+      /* ── Featured Car Card ── */
+      .featured-car-card { margin-top: 4px; }
+      .featured-img-wrap img { height: 180px; }
+      .featured-car-name { font-size: 12px; }
+      .featured-car-price { font-size: 18px; }
+
+      /* ── Search ── */
+      .search-bar-section {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 12px;
+        margin: 16px 14px 0;
+        padding: 16px;
+      }
+      .search-bar-section h3 { font-size: 14px; margin-bottom: 12px; }
+      .search-grid {
+        grid-template-columns: 1fr;
+        gap: 10px;
+        width: 100%;
+      }
+      .btn-lg { width: 100%; padding: 12px 20px; font-size: 14px; }
+      .popular-searches { gap: 6px; }
+
+      /* ── Section / Car Cards ── */
+      .section { padding: 36px 0; }
+      .section-title { font-size: 28px; }
+      .section-header { margin-bottom: 18px; }
+      .grid-2 { grid-template-columns: repeat(2, 1fr); }
+      .grid-3,
+      .grid-4,
+      .grid-5,
+      .grid-6 { grid-template-columns: repeat(2, 1fr); gap: 14px; }
+      .car-img-wrap img { height: 160px; }
+      .car-name { font-size: 14px; }
+      .car-meta-item { font-size: 12px; }
+      .car-price { font-size: 14px; }
+
+      /* ── Source Banner ── */
+      .source-banner {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 14px;
+        margin-top: 24px;
+        padding: 18px 16px;
+      }
+      .source-banner-left {
+        flex-direction: row;
+        align-items: center;
+        margin-left: 0;
+        gap: 12px;
+      }
+      .source-title { font-size: 16px; }
+      .source-desc { font-size: 13px; }
+      .get-btn { width: 100%; text-align: center; padding: 12px 20px; font-size: 14px; }
+
+      /* ── Calculator ── */
+      .calculator-section {
+        margin: 0 14px;
+        padding: 20px 0;
+        border-radius: 10px;
+      }
+      .calculator-section h2 { font-size: 28px; margin-bottom: 24px; }
+      .calculator-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+        padding: 0 14px;
+      }
+      .calc-btn-row { grid-template-columns: 1fr; gap: 10px; }
+      .result-amount { font-size: 38px; }
+
+      /* ── Why Choose ── */
+      .why-section { padding: 40px 0; }
+      .why-section h2 { font-size: 28px; margin-bottom: 28px; }
+      .why-grid { grid-template-columns: repeat(2, 1fr); gap: 14px; }
+      .why-card { padding: 18px 12px; }
+      .why-title { font-size: 13px; }
+
+      /* ── Footer ── */
+      .footer { padding: 36px 0 20px; }
+      .footer-grid {
+        grid-template-columns: 1fr;
+        gap: 28px;
+        margin-bottom: 28px;
+      }
+      .footer-links-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 20px;
+      }
+      .footer-bottom {
+        grid-template-columns: 1fr;
+        gap: 12px;
+        text-align: center;
+      }
+      .footer-nav { justify-content: center; }
+    }
+
+    /* ══════════════════════════════════════════
+       Small — large phones / portrait tablets (600px – 767px)
+       Grids: 2 columns. Hero still stacked.
+    ══════════════════════════════════════════ */
+    @media only screen and (min-width: 600px) and (max-width: 767px) {
+
+      .container { min-width: 0; width: 100%; padding: 0 20px; }
+
+      /* ── Navbar ── */
+      .navbar .container {
+        grid-template-columns: auto auto;
+        gap: 10px;
+        justify-content: space-between;
+      }
+      .nav-links { display: none; }
+      .main { height: 80px; width: 75px; }
+      .logo-icon { width: 80px; height: 38px; }
+      .logo-text span { font-size: 10px; letter-spacing: 2px; }
+
+      /* ── Hero ── */
+      .stage { min-height: auto; padding: 32px 0; }
       .stage .container,
       .hero .container {
         grid-template-columns: 1fr;
         gap: 24px;
+        padding: 0 20px;
       }
-
-      .hero-title {
-        font-size: 36px;
-        line-height: 1.1;
-      }
-
-      .hero-eyebrow {
-        font-size: 16px;
-      }
-
-      .hero-subtitle {
-        font-size: 14px;
-      }
-
-      .hero-desc {
-        font-size: 13px;
-      }
-
+      .hero-eyebrow { font-size: 16px; }
+      .hero-title { font-size: 44px; line-height: 1.0; }
+      .hero-subtitle { font-size: 15px; }
+      .hero-desc { font-size: 14px; max-width: 100%; }
       .hero-badges {
-        grid-template-columns: 1fr;
+        grid-template-columns: repeat(2, 1fr);
         gap: 10px;
       }
 
-      .featured-car-card {
-        margin-top: 20px;
-      }
+      /* ── Featured Car ── */
+      .featured-img-wrap img { height: 220px; }
 
-      .featured-img-wrap img {
-        height: 200px;
-      }
-
+      /* ── Search ── */
       .search-bar-section {
         flex-direction: column;
-        align-items: flex-start;
-        gap: 16px;
-        margin: 20px 16px 0;
-        padding: 16px;
+        gap: 14px;
+        margin: 24px 20px 0;
+        padding: 20px;
       }
+      .search-bar-section h3 { font-size: 15px; }
+      .search-grid { grid-template-columns: 1fr auto auto; gap: 10px; }
 
-      .search-grid {
-        grid-template-columns: 1fr;
-        width: 100%;
-      }
-
-      .search-input {
-        width: 100%;
-      }
-
-      .btn-lg {
-        width: 100%;
-      }
-
-      .section-title {
-        font-size: 28px;
-      }
-
+      /* ── Grids ── */
+      .section { padding: 48px 0; }
+      .section-title { font-size: 30px; }
       .grid-3,
       .grid-4,
       .grid-5,
-      .grid-6 {
-        grid-template-columns: 1fr;
-      }
+      .grid-6 { grid-template-columns: repeat(2, 1fr); gap: 16px; }
+      .car-img-wrap img { height: 180px; }
 
-      .calculator-grid {
-        grid-template-columns: 1fr;
-        gap: 20px;
-      }
-
-      .calculator-section {
-        margin-left: 16px;
-        margin-right: 16px;
-      }
-
-      .calculator-section h2 {
-        font-size: 28px;
-      }
-
-      .calc-btn-row {
-        grid-template-columns: 1fr;
-      }
-
-      .why-grid {
-        grid-template-columns: 1fr;
-      }
-
+      /* ── Source Banner ── */
       .source-banner {
         flex-direction: column;
-        text-align: center;
-        margin-top: 20px;
-      }
-
-      .source-banner-left {
-        flex-direction: column;
-        margin-left: 0;
-      }
-
-      .source-title {
-        font-size: 24px;
-      }
-
-      .source-desc {
-        font-size: 14px;
-      }
-
-      .footer-grid {
-        grid-template-columns: 1fr;
-        gap: 24px;
-      }
-
-      .footer-links-grid {
-        grid-template-columns: repeat(2, 1fr);
         gap: 16px;
+        padding: 20px;
       }
+      .source-banner-left { margin-left: 0; flex-direction: row; gap: 12px; }
+      .source-title { font-size: 18px; }
+      .source-desc { font-size: 14px; }
+      .get-btn { width: 100%; padding: 12px 24px; }
 
-      .footer-bottom {
-        grid-template-columns: 1fr;
-        gap: 16px;
-      }
+      /* ── Calculator ── */
+      .calculator-section { margin: 0 20px; }
+      .calculator-section h2 { font-size: 30px; margin-bottom: 28px; }
+      .calculator-grid { grid-template-columns: 1fr; gap: 20px; padding: 0 16px; }
+      .calc-btn-row { grid-template-columns: 1fr 1fr; }
+
+      /* ── Why Choose ── */
+      .why-section h2 { font-size: 30px; }
+      .why-grid { grid-template-columns: repeat(2, 1fr); gap: 16px; }
+
+      /* ── Footer ── */
+      .footer-grid { grid-template-columns: 1fr; gap: 32px; }
+      .footer-links-grid { grid-template-columns: repeat(2, 1fr); }
+      .footer-bottom { grid-template-columns: 1fr; gap: 12px; text-align: center; }
+      .footer-nav { justify-content: center; }
     }
 
-    /* Small devices (portrait tablets and large phones, 600px and up) */
-    @media only screen and (min-width: 600px) {
-      .container {
-        padding: 0 20px;
-      }
+    /* ══════════════════════════════════════════
+       Medium — landscape tablets (768px – 991px)
+       Hero: side-by-side. Grids: 2-3 col.
+    ══════════════════════════════════════════ */
+    @media only screen and (min-width: 768px) and (max-width: 991px) {
 
+      .container { min-width: 0; width: 100%; padding: 0 24px; }
+
+      /* ── Navbar ── */
+      .navbar .container {
+        grid-template-columns: auto 1fr auto;
+        gap: 16px;
+      }
       .nav-links {
-        margin-left: 150px;
+        display: flex;
+        margin-left: 0;
+        justify-content: center;
+        gap: 2px;
       }
+      .nav-links a { padding: 6px 10px; font-size: 13px; }
+      .main { height: 90px; width: 85px; }
+      .logo-icon { width: 90px; height: 40px; }
+      .logo-text span { font-size: 10px; letter-spacing: 2px; }
 
-      .hero-title {
-        font-size: 48px;
+      /* ── Hero ── */
+      .stage { min-height: auto; padding: 40px 0; }
+      .stage .container,
+      .hero .container {
+        grid-template-columns: 1fr 300px;
+        gap: 28px;
+        padding: 0 24px;
       }
-
-      .section-title {
-        font-size: 32px;
+      .hero-eyebrow { font-size: 18px; letter-spacing: 2px; }
+      .hero-title { font-size: 50px; }
+      .hero-subtitle { font-size: 16px; }
+      .hero-desc { font-size: 14px; }
+      .hero-badges {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
+        margin-top: 24px;
       }
+      .hero-badge { padding: 10px; }
+      .hero-badge-title { font-size: 12px; }
 
-      .grid-3,
+      /* ── Featured Car ── */
+      .featured-img-wrap img { height: 220px; }
+      .featured-car-name { font-size: 12px; }
+      .featured-car-price { font-size: 18px; }
+
+      /* ── Search ── */
+      .search-bar-section {
+        flex-direction: column;
+        gap: 16px;
+        margin: 32px 24px 0;
+        padding: 22px 24px;
+      }
+      .search-grid { grid-template-columns: 1fr auto auto; gap: 12px; }
+
+      /* ── Grids ── */
+      .section { padding: 52px 0; }
+      .section-title { font-size: 34px; }
+      .grid-3 { grid-template-columns: repeat(2, 1fr); }
       .grid-4,
       .grid-5,
-      .grid-6 {
-        grid-template-columns: repeat(2, 1fr);
-      }
+      .grid-6 { grid-template-columns: repeat(2, 1fr); gap: 18px; }
+      .car-img-wrap img { height: 200px; }
 
-      .why-grid {
-        grid-template-columns: repeat(2, 1fr);
-      }
+      /* ── Source Banner ── */
+      .source-banner { flex-direction: row; padding: 22px 24px; }
+      .source-banner-left { margin-left: 0; gap: 14px; }
+      .source-title { font-size: 20px; }
+      .source-desc { font-size: 15px; }
 
-      .calculator-grid {
-        grid-template-columns: 1fr;
-      }
+      /* ── Calculator ── */
+      .calculator-section { margin: 0 24px; }
+      .calculator-section h2 { font-size: 34px; margin-bottom: 32px; }
+      .calculator-grid { grid-template-columns: 1fr; gap: 24px; padding: 0 20px; }
+      .calc-btn-row { grid-template-columns: 1fr 1fr; }
 
-      .search-bar-section {
-        margin: 30px 20px 0;
-      }
+      /* ── Why Choose ── */
+      .why-section { padding: 56px 0; }
+      .why-section h2 { font-size: 34px; margin-bottom: 36px; }
+      .why-grid { grid-template-columns: repeat(3, 1fr); gap: 18px; }
+
+      /* ── Footer ── */
+      .footer-grid { grid-template-columns: 1fr 2fr; gap: 32px; }
+      .footer-links-grid { grid-template-columns: repeat(3, 1fr); gap: 20px; }
+      .footer-bottom { grid-template-columns: 1fr auto; }
     }
 
-    /* Medium devices (landscape tablets, 768px and up) */
-    @media only screen and (min-width: 768px) {
+    /* ══════════════════════════════════════════
+       Large — laptops / small desktops (992px – 1199px)
+       Full layout, slightly tighter than XL.
+    ══════════════════════════════════════════ */
+    @media only screen and (min-width: 992px) and (max-width: 1199px) {
+
+      .container { min-width: 0; width: 100%; padding: 0 28px; }
+
+      /* ── Navbar ── */
+      .navbar .container { gap: 24px; }
+      .nav-links { margin-left: 60px; gap: 2px; }
+      .nav-links a { padding: 7px 12px; font-size: 14px; }
+
+      /* ── Hero ── */
+      .stage { min-height: 560px; padding: 50px 0; }
+      .stage .container,
+      .hero .container {
+        grid-template-columns: 1fr 340px;
+        gap: 36px;
+        padding: 0 28px;
+      }
+      .hero-eyebrow { font-size: 22px; }
+      .hero-title { font-size: 58px; }
+      .hero-subtitle { font-size: 18px; }
+      .hero-desc { font-size: 14px; }
+      .hero-badges {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 12px;
+        margin-top: 28px;
+      }
+
+      /* ── Featured Car ── */
+      .featured-img-wrap img { height: 260px; }
+
+      /* ── Search ── */
+      .search-bar-section { margin: 36px 28px 0; }
+      .search-grid { grid-template-columns: 1fr auto auto; gap: 12px; }
+
+      /* ── Grids ── */
+      .section { padding: 56px 0; }
+      .section-title { font-size: 36px; }
+      .grid-3 { grid-template-columns: repeat(3, 1fr); }
+      .grid-4 { grid-template-columns: repeat(2, 1fr); }
+      .grid-5,
+      .grid-6 { grid-template-columns: repeat(3, 1fr); }
+      .car-img-wrap img { height: 210px; }
+
+      /* ── Source Banner ── */
+      .source-banner-left { margin-left: 60px; }
+      .source-title { font-size: 26px; }
+      .source-desc { font-size: 18px; }
+
+      /* ── Calculator ── */
+      .calculator-section { margin: 0 28px; }
+      .calculator-section h2 { font-size: 36px; margin-bottom: 32px; }
+      .calculator-grid { grid-template-columns: 1fr 480px; }
+
+      /* ── Why Choose ── */
+      .why-section { padding: 64px 0; }
+      .why-section h2 { font-size: 38px; }
+      .why-grid { grid-template-columns: repeat(5, 1fr); gap: 20px; }
+
+      /* ── Footer ── */
+      .footer-grid { grid-template-columns: 1fr 2fr 1fr; gap: 36px; }
+    }
+
+    /* ══════════════════════════════════════════
+       Extra large — large desktops (1200px+)
+       Full design at intended scale.
+    ══════════════════════════════════════════ */
+    @media only screen and (min-width: 1200px) {
+
       .container {
+        min-width: 0;
+        max-width: 1440px;
+        width: 100%;
         padding: 0 24px;
       }
 
+      /* ── Navbar ── */
+      .nav-links { margin-left: 300px; }
+
+      /* ── Hero ── */
+      .stage { min-height: 600px; }
       .stage .container,
       .hero .container {
         grid-template-columns: 1fr 380px;
         gap: 48px;
-      }
-
-      .hero-title {
-        font-size: 56px;
-      }
-
-      .hero-badges {
-        grid-template-columns: repeat(3, 1fr);
-      }
-
-      .section-title {
-        font-size: 36px;
-      }
-
-      .grid-3,
-      .grid-4 {
-        grid-template-columns: repeat(3, 1fr);
-      }
-
-      .grid-5,
-      .grid-6 {
-        grid-template-columns: repeat(3, 1fr);
-      }
-
-      .why-grid {
-        grid-template-columns: repeat(4, 1fr);
-      }
-
-      .calculator-grid {
-        grid-template-columns: 1fr 500px;
-      }
-
-      .search-grid {
-        grid-template-columns: 1fr auto auto;
-      }
-
-      .search-bar-section {
-        margin: 40px 24px 0;
-      }
-
-      .footer-grid {
-        grid-template-columns: 1fr 2fr 1fr;
-      }
-    }
-
-    /* Large devices (laptops/desktops, 992px and up) */
-    @media only screen and (min-width: 992px) {
-      .container {
-        padding: 0 24px;
-      }
-
-      .hero-title {
-        font-size: 62px;
-      }
-
-      .featured-img-wrap img {
-        height: 280px;
-      }
-
-      .section-title {
-        font-size: 38px;
-      }
-
-      .grid-3 {
-        grid-template-columns: repeat(3, 1fr);
-      }
-
-      .grid-4 {
-        grid-template-columns: repeat(4, 1fr);
-      }
-
-      .grid-5 {
-        grid-template-columns: repeat(5, 1fr);
-      }
-
-      .grid-6 {
-        grid-template-columns: repeat(6, 1fr);
-      }
-
-      .why-grid {
-        grid-template-columns: repeat(5, 1fr);
-      }
-
-      .calculator-grid {
-        grid-template-columns: 1fr 600px;
-      }
-
-      .search-bar-section {
-        margin: 40px 30px 0;
-      }
-
-      .footer-grid {
-        grid-template-columns: 1fr 2fr 1fr;
-        gap: 48px;
-      }
-
-      .source-banner-left {
-        margin-left: 150px;
-      }
-    }
-
-    /* Extra large devices (large laptops and desktops, 1200px and up) */
-    @media only screen and (min-width: 1200px) {
-      .container {
         max-width: 1440px;
         padding: 0 24px;
       }
+      .hero-eyebrow { font-size: 27px; }
+      .hero-title { font-size: 68px; line-height: 0.95; }
+      .hero-subtitle { font-size: 22px; }
+      .hero-desc { font-size: 15px; }
+      .hero-badges { grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 32px; }
 
-      .hero-title {
-        font-size: 68px;
-      }
+      /* ── Featured Car ── */
+      .featured-img-wrap img { height: 300px; }
 
-      .hero-eyebrow {
-        font-size: 27px;
-      }
+      /* ── Search ── */
+      .search-bar-section { margin: 40px 30px 0; }
+      .search-grid { grid-template-columns: 1fr auto auto; }
 
-      .featured-img-wrap img {
-        height: 300px;
-      }
+      /* ── Grids ── */
+      .section { padding: 60px 0; }
+      .section-title { font-size: 42px; }
+      .grid-3 { grid-template-columns: repeat(3, 1fr); }
+      .grid-4 { grid-template-columns: repeat(4, 1fr); }
+      .grid-5 { grid-template-columns: repeat(5, 1fr); }
+      .grid-6 { grid-template-columns: repeat(6, 1fr); }
 
-      .section-title {
-        font-size: 42px;
-      }
+      /* ── Source Banner ── */
+      .source-banner-left { margin-left: 150px; }
+      .source-title { font-size: 35px; }
+      .source-desc { font-size: 27px; }
 
-      .calculator-section h2 {
-        font-size: 42px;
-      }
+      /* ── Calculator ── */
+      .calculator-section { margin-left: 40px; margin-right: 40px; }
+      .calculator-section h2 { font-size: 42px; }
+      .calculator-grid { grid-template-columns: 1fr 600px; }
 
-      .why-section h2 {
-        font-size: 48px;
-      }
+      /* ── Why Choose ── */
+      .why-section { padding: 70px 0; }
+      .why-section h2 { font-size: 48px; }
+      .why-grid { grid-template-columns: repeat(5, 1fr); }
 
-      .why-grid {
-        grid-template-columns: repeat(5, 1fr);
-      }
-
-      .calculator-grid {
-        grid-template-columns: 1fr 600px;
-      }
-
-      .nav-links {
-        margin-left: 300px;
-      }
-
-      .stage,
-      .section {
-        padding: 60px 0;
-      }
-
-      .source-banner-left {
-        margin-left: 150px;
-      }
+      /* ── Footer ── */
+      .footer-grid { grid-template-columns: 1fr 2fr 1fr; gap: 48px; }
     }
