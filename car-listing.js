@@ -123,7 +123,10 @@ const revealObserver = new IntersectionObserver((entries) => {
 function triggerScrollReveal() {
   // Select elements that should have scroll reveal
   const revealSelectors = [
-    ".listings-section"
+    ".listings-section",
+    "g-3 row-gap",
+    "g-3",
+    "pagination"
   ];
 
   document.querySelectorAll(revealSelectors.join(", ")).forEach((el) => {
@@ -138,7 +141,7 @@ function triggerScrollReveal() {
       } 
       else if (el.classList.contains("g-3")) {
         el.dataset.reveal = "reveal-bottom";
-      } else if (el.classList.contains("g-3")) {
+      } else if (el.classList.contains("pagination")) {
         el.dataset.reveal = "reveal-scale";
       } else {
         el.dataset.reveal = "reveal-bottom";

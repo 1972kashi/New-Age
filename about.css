@@ -439,3 +439,203 @@
     .reveal-bottom:nth-child(2) { animation-delay: 0.15s; }
     .reveal-bottom:nth-child(3) { animation-delay: 0.3s; }
     .reveal-bottom:nth-child(n+4) { animation-delay: calc(0.15s * (var(--reveal-index, 1) - 1)); }
+
+     /* ─────────────── MEDIA QUERIES ─────────────── */
+ 
+    /* ── Base override: remove fixed min-width on container ── */
+    @media only screen and (max-width: 1199px) {
+      .container { min-width: 0; width: 100%; }
+    }
+ 
+    /* ══════════════════════════════════════════
+       Extra small — phones portrait (max 599px)
+    ══════════════════════════════════════════ */
+    @media only screen and (max-width: 599px) {
+ 
+      .container { min-width: 0; width: 100%; padding: 0 14px; }
+ 
+      /* Navbar */
+      .navbar .container {
+        grid-template-columns: auto auto;
+        justify-content: space-between;
+        gap: 8px;
+        padding-top: 10px;
+        padding-bottom: 10px;
+      }
+      .nav-links { display: none; }
+      .main { height: 70px; width: 65px; }
+      .logo-icon { width: 70px; height: 34px; }
+      .logo-text span { font-size: 9px; letter-spacing: 1.5px; }
+      .nav-auth { gap: 6px; }
+      .btn { padding: 7px 12px; font-size: 12px; }
+ 
+      /* About Hero */
+      .about-hero { padding: 28px 0; margin-bottom: 12px; }
+      .about-hero h1 { font-size: 30px; margin-bottom: 14px; }
+      .about-intro { font-size: 14px; font-weight: 500; }
+ 
+      /* Mission / Vision */
+      .mv-section { padding: 32px 0; margin-bottom: 12px; }
+      .mv-grid { grid-template-columns: 1fr; gap: 16px; margin-bottom: 16px; }
+      .mv-logo-card { min-height: 160px; padding: 24px; }
+      .mv-logo-inner { padding: 20px 24px; gap: 8px; }
+      .mv-logo-icon img { max-width: 80px; }
+      .mv-logo-name { font-size: 20px; }
+      .mission-card { padding: 24px; }
+      .mission-card h2 { font-size: 24px; margin-bottom: 14px; }
+      .mission-card p { font-size: 14px; }
+      .vision-card { padding: 24px; }
+      .vision-card h2 { font-size: 24px; }
+      .vision-card p { font-size: 14px; }
+ 
+      /* Why Choose */
+      .why-section { padding: 36px 0; }
+      .why-section h2 { font-size: 28px; margin-bottom: 28px; }
+      .why-grid { grid-template-columns: repeat(2, 1fr); gap: 14px; }
+      .why-card { padding: 18px 12px; }
+      .why-title { font-size: 13px; }
+ 
+      /* Footer */
+      .footer { padding: 36px 0 20px; }
+      .footer-grid { grid-template-columns: 1fr; gap: 28px; margin-bottom: 24px; }
+      .footer-links-grid { grid-template-columns: repeat(2, 1fr); gap: 20px; }
+      .footer-bottom { grid-template-columns: 1fr; gap: 12px; text-align: center; }
+      .footer-nav { justify-content: center; }
+    }
+ 
+    /* ══════════════════════════════════════════
+       Small — large phones (600px – 767px)
+    ══════════════════════════════════════════ */
+    @media only screen and (min-width: 600px) and (max-width: 767px) {
+ 
+      .container { min-width: 0; width: 100%; padding: 0 20px; }
+ 
+      /* Navbar */
+      .navbar .container {
+        grid-template-columns: auto auto;
+        justify-content: space-between;
+        gap: 10px;
+      }
+      .nav-links { display: none; }
+      .main { height: 80px; width: 75px; }
+      .logo-icon { width: 80px; height: 38px; }
+      .logo-text span { font-size: 10px; letter-spacing: 2px; }
+ 
+      /* About Hero */
+      .about-hero { padding: 32px 0; }
+      .about-hero h1 { font-size: 36px; }
+      .about-intro { font-size: 16px; }
+ 
+      /* Mission / Vision */
+      .mv-section { padding: 40px 0; }
+      .mv-grid { grid-template-columns: 1fr; gap: 18px; }
+      .mv-logo-card { min-height: 180px; }
+      .mission-card h2 { font-size: 26px; }
+      .mission-card p { font-size: 15px; }
+      .vision-card h2 { font-size: 26px; }
+      .vision-card p { font-size: 15px; }
+ 
+      /* Why Choose */
+      .why-section { padding: 40px 0; }
+      .why-section h2 { font-size: 30px; margin-bottom: 32px; }
+      .why-grid { grid-template-columns: repeat(2, 1fr); gap: 16px; }
+ 
+      /* Footer */
+      .footer-grid { grid-template-columns: 1fr; gap: 32px; }
+      .footer-links-grid { grid-template-columns: repeat(2, 1fr); }
+      .footer-bottom { grid-template-columns: 1fr; gap: 12px; text-align: center; }
+      .footer-nav { justify-content: center; }
+    }
+ 
+    /* ══════════════════════════════════════════
+       Medium — landscape tablets (768px – 991px)
+    ══════════════════════════════════════════ */
+    @media only screen and (min-width: 768px) and (max-width: 991px) {
+ 
+      .container { min-width: 0; width: 100%; padding: 0 24px; }
+ 
+      /* Navbar */
+      .navbar .container { grid-template-columns: auto 1fr auto; gap: 16px; }
+      .nav-links { display: flex; margin-left: 0; justify-content: center; gap: 2px; }
+      .nav-links a { padding: 6px 10px; font-size: 13px; }
+      .main { height: 90px; width: 85px; }
+      .logo-icon { width: 90px; height: 40px; }
+      .logo-text span { font-size: 10px; }
+ 
+      /* About Hero */
+      .about-hero { padding: 36px 0; }
+      .about-hero h1 { font-size: 42px; }
+      .about-intro { font-size: 18px; }
+ 
+      /* Mission / Vision */
+      .mv-section { padding: 48px 0; }
+      .mv-grid { grid-template-columns: 1fr 1fr; gap: 20px; }
+      .mission-card h2 { font-size: 28px; }
+      .vision-card h2 { font-size: 28px; }
+ 
+      /* Why Choose */
+      .why-section { padding: 56px 0; }
+      .why-section h2 { font-size: 34px; margin-bottom: 36px; }
+      .why-grid { grid-template-columns: repeat(3, 1fr); gap: 18px; }
+ 
+      /* Footer */
+      .footer-grid { grid-template-columns: 1fr 2fr; gap: 32px; }
+      .footer-links-grid { grid-template-columns: repeat(3, 1fr); gap: 20px; }
+      .footer-bottom { grid-template-columns: 1fr auto; }
+    }
+ 
+    /* ══════════════════════════════════════════
+       Large — laptops (992px – 1199px)
+    ══════════════════════════════════════════ */
+    @media only screen and (min-width: 992px) and (max-width: 1199px) {
+ 
+      .container { min-width: 0; width: 100%; padding: 0 28px; }
+ 
+      /* Navbar */
+      .navbar .container { gap: 24px; }
+      .nav-links { margin-left: 60px; }
+      .nav-links a { padding: 7px 12px; font-size: 14px; }
+ 
+      /* About Hero */
+      .about-hero h1 { font-size: 46px; }
+      .about-intro { font-size: 20px; }
+ 
+      /* Mission / Vision */
+      .mv-grid { grid-template-columns: 1fr 1fr; gap: 22px; }
+      .mission-card h2 { font-size: 30px; }
+      .vision-card h2 { font-size: 30px; }
+ 
+      /* Why Choose */
+      .why-section h2 { font-size: 38px; }
+      .why-grid { grid-template-columns: repeat(5, 1fr); gap: 20px; }
+ 
+      /* Footer */
+      .footer-grid { grid-template-columns: 1fr 2fr 1fr; gap: 36px; }
+    }
+ 
+    /* ══════════════════════════════════════════
+       Extra large — desktops (1200px+)
+    ══════════════════════════════════════════ */
+    @media only screen and (min-width: 1200px) {
+ 
+      .container { min-width: 0; max-width: 1440px; width: 100%; padding: 0 24px; }
+ 
+      /* Navbar */
+      .nav-links { margin-left: 300px; }
+ 
+      /* About Hero */
+      .about-hero h1 { font-size: 52px; }
+      .about-intro { font-size: 22px; }
+ 
+      /* Mission / Vision */
+      .mv-section { padding: 64px 0; }
+      .mv-grid { grid-template-columns: 1fr 1fr; gap: 24px; }
+ 
+      /* Why Choose */
+      .why-section { padding: 70px 0; }
+      .why-section h2 { font-size: 42px; margin-bottom: 48px; }
+      .why-grid { grid-template-columns: repeat(5, 1fr); gap: 24px; }
+ 
+      /* Footer */
+      .footer-grid { grid-template-columns: 1fr 2fr 1fr; gap: 48px; }
+    }

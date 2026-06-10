@@ -572,3 +572,226 @@
     .reveal-bottom:nth-child(2) { animation-delay: 0.15s; }
     .reveal-bottom:nth-child(3) { animation-delay: 0.3s; }
     .reveal-bottom:nth-child(n+4) { animation-delay: calc(0.15s * (var(--reveal-index, 1) - 1)); }
+
+     /* ─────────────── MEDIA QUERIES ─────────────── */
+ 
+    /* ── Base override: honour fluid layout below 1200px ── */
+    @media only screen and (max-width: 1199px) {
+      .container { max-width: 100%; width: 100%; }
+    }
+ 
+    /* ══════════════════════════════════════════
+       Extra small — phones portrait (max 599px)
+    ══════════════════════════════════════════ */
+    @media only screen and (max-width: 599px) {
+ 
+      .container { width: 100%; padding: 0 14px; }
+ 
+      /* Navbar */
+      .navbar .container {
+        grid-template-columns: auto auto;
+        justify-content: space-between;
+        gap: 8px;
+        padding-top: 10px;
+        padding-bottom: 10px;
+      }
+      .nav-links { display: none; }
+      .main { height: 70px; width: 65px; }
+      .logo-icon { width: 70px; height: 34px; }
+      .logo-text span { font-size: 9px; letter-spacing: 1.5px; }
+      .nav-auth { gap: 6px; }
+      .btn { padding: 7px 12px; font-size: 12px; }
+ 
+      /* Gallery */
+      .gallery-section { padding: 16px 0 0; }
+      .gallery-grid {
+        grid-template-columns: repeat(2, 1fr);
+        grid-template-rows: repeat(3, 160px);
+        gap: 6px;
+      }
+      .overlay-text { font-size: 16px; letter-spacing: 1px; }
+ 
+      /* Detail layout – stack */
+      .detail-section { padding: 24px 0; }
+      .detail-grid {
+        grid-template-columns: 1fr;
+        gap: 24px;
+      }
+ 
+      /* Price */
+      .price-amount { font-size: 26px; margin-bottom: 20px; }
+      .price-amount small { font-size: 16px; }
+      .description-text { font-size: 13px; }
+ 
+      /* Specs grid – stack both cols into single column */
+      .specs-grid {
+        grid-template-columns: 1fr;
+        margin-bottom: 24px;
+      }
+      .spec-cell { font-size: 12px; padding: 10px 12px; }
+ 
+      /* Enquiry card – full width, remove fixed dimensions */
+      .enquiry-card {
+        width: 100%;
+        height: auto;
+        padding: 20px 16px;
+        position: static;
+      }
+      .enquiry-card h3 { font-size: 20px; margin-bottom: 16px; }
+      .enq-input { font-size: 12px; padding: 10px 12px; }
+      .enq-msg { min-height: 90px; font-size: 12px; }
+      .enq-btns { grid-template-columns: 1fr 1fr; gap: 8px; height: auto; }
+      .btn-green, .btn-dark { font-size: 12px; padding: 11px; }
+ 
+      /* Footer */
+      .footer { padding: 36px 0 20px; }
+      .footer-grid { grid-template-columns: 1fr; gap: 28px; margin-bottom: 24px; }
+      .footer-links-grid { grid-template-columns: repeat(2, 1fr); gap: 20px; }
+      .footer-bottom { grid-template-columns: 1fr; gap: 12px; text-align: center; }
+      .footer-nav { justify-content: center; }
+    }
+ 
+    /* ══════════════════════════════════════════
+       Small — large phones (600px – 767px)
+    ══════════════════════════════════════════ */
+    @media only screen and (min-width: 600px) and (max-width: 767px) {
+ 
+      .container { width: 100%; padding: 0 20px; }
+ 
+      /* Navbar */
+      .navbar .container {
+        grid-template-columns: auto auto;
+        justify-content: space-between;
+        gap: 10px;
+      }
+      .nav-links { display: none; }
+      .main { height: 80px; width: 75px; }
+      .logo-icon { width: 80px; height: 38px; }
+      .logo-text span { font-size: 10px; letter-spacing: 2px; }
+ 
+      /* Gallery */
+      .gallery-grid {
+        grid-template-columns: repeat(2, 1fr);
+        grid-template-rows: repeat(3, 190px);
+        gap: 7px;
+      }
+ 
+      /* Detail layout – stack */
+      .detail-section { padding: 28px 0; }
+      .detail-grid { grid-template-columns: 1fr; gap: 28px; }
+ 
+      /* Price */
+      .price-amount { font-size: 30px; margin-bottom: 22px; }
+      .specs-grid { grid-template-columns: 1fr; margin-bottom: 28px; }
+      .spec-cell { font-size: 13px; }
+ 
+      /* Enquiry card */
+      .enquiry-card { width: 100%; height: auto; padding: 24px 20px; position: static; }
+      .enquiry-card h3 { font-size: 22px; }
+      .enq-btns { height: auto; }
+ 
+      /* Footer */
+      .footer-grid { grid-template-columns: 1fr; gap: 32px; }
+      .footer-links-grid { grid-template-columns: repeat(2, 1fr); }
+      .footer-bottom { grid-template-columns: 1fr; gap: 12px; text-align: center; }
+      .footer-nav { justify-content: center; }
+    }
+ 
+    /* ══════════════════════════════════════════
+       Medium — landscape tablets (768px – 991px)
+    ══════════════════════════════════════════ */
+    @media only screen and (min-width: 768px) and (max-width: 991px) {
+ 
+      .container { width: 100%; padding: 0 24px; }
+ 
+      /* Navbar */
+      .navbar .container { grid-template-columns: auto 1fr auto; gap: 16px; }
+      .nav-links { display: flex; margin-left: 0; justify-content: center; gap: 2px; }
+      .nav-links a { padding: 6px 10px; font-size: 13px; }
+      .main { height: 90px; width: 85px; }
+      .logo-icon { width: 90px; height: 40px; }
+ 
+      /* Gallery */
+      .gallery-grid {
+        grid-template-columns: repeat(3, 1fr);
+        grid-template-rows: repeat(2, 200px);
+        gap: 7px;
+      }
+ 
+      /* Detail layout – side by side, narrower enquiry */
+      .detail-section { padding: 32px 0; }
+      .detail-grid { grid-template-columns: 1fr 320px; gap: 28px; }
+ 
+      /* Price */
+      .price-amount { font-size: 30px; }
+      .specs-grid { grid-template-columns: 1fr 1fr; }
+ 
+      /* Enquiry card */
+      .enquiry-card { width: 100%; height: auto; padding: 24px 20px; }
+      .enquiry-card h3 { font-size: 22px; }
+      .enq-btns { height: auto; }
+ 
+      /* Footer */
+      .footer-grid { grid-template-columns: 1fr 2fr; gap: 32px; }
+      .footer-links-grid { grid-template-columns: repeat(3, 1fr); gap: 20px; }
+      .footer-bottom { grid-template-columns: 1fr auto; }
+    }
+ 
+    /* ══════════════════════════════════════════
+       Large — laptops (992px – 1199px)
+    ══════════════════════════════════════════ */
+    @media only screen and (min-width: 992px) and (max-width: 1199px) {
+ 
+      .container { width: 100%; padding: 0 28px; }
+ 
+      /* Navbar */
+      .navbar .container { gap: 24px; }
+      .nav-links { margin-left: 60px; }
+      .nav-links a { padding: 7px 12px; font-size: 14px; }
+ 
+      /* Gallery */
+      .gallery-grid {
+        grid-template-columns: repeat(3, 1fr);
+        grid-template-rows: repeat(2, 210px);
+        gap: 8px;
+      }
+ 
+      /* Detail layout */
+      .detail-grid { grid-template-columns: 1fr 380px; gap: 32px; }
+      .price-amount { font-size: 34px; }
+      .specs-grid { grid-template-columns: 1fr 1fr; }
+ 
+      /* Enquiry card */
+      .enquiry-card { width: 100%; height: auto; }
+      .enq-btns { height: auto; }
+ 
+      /* Footer */
+      .footer-grid { grid-template-columns: 1fr 2fr 1fr; gap: 36px; }
+    }
+ 
+    /* ══════════════════════════════════════════
+       Extra large — desktops (1200px+)
+    ══════════════════════════════════════════ */
+    @media only screen and (min-width: 1200px) {
+ 
+      .container { max-width: 1440px; width: 100%; padding: 0 24px; }
+ 
+      /* Navbar */
+      .nav-links { margin-left: 300px; }
+ 
+      /* Gallery */
+      .gallery-grid {
+        grid-template-columns: repeat(3, 1fr);
+        grid-template-rows: repeat(2, 220px);
+        gap: 8px;
+      }
+ 
+      /* Detail layout */
+      .detail-grid { grid-template-columns: 1fr 400px; gap: 40px; }
+      .price-amount { font-size: 38px; }
+      .enquiry-card { width: 450px; height: auto; }
+      .enq-btns { height: auto; }
+ 
+      /* Footer */
+      .footer-grid { grid-template-columns: 1fr 2fr 1fr; gap: 48px; }
+    }
