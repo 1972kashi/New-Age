@@ -4,10 +4,8 @@ function switchTab(t){
   document.getElementById('panel-'+t).classList.add('active');
 }
 
-const API_PORT = 3000;
-const API_BASE = (location.protocol === 'file:')
-  ? `http://localhost:${API_PORT}`
-  : `http://localhost:${API_PORT}`;  // Always use port 3000 for API
+const API_PORT = 8000;
+const API_BASE = `http://localhost:${API_PORT}`;  // API now served by FastAPI (port 8000)
 
 function togglePwd(id,btn){
   const el=document.getElementById(id);
@@ -53,60 +51,139 @@ function doLogin(){
   const id=document.getElementById('login-id').value.trim();
   const pw=document.getElementById('login-pass').value;
   if(!id||!pw){showMsg('login-err','Please fill in all fields.');return;}
+  // Try server authentication first (supports MFA)
+  const form = new URLSearchParams();
+  form.append('username', id);
+  form.append('password', pw);
 
-  // First try to authenticate from server database
-  fetch(`${API_BASE}/api/users?limit=200`, {timeout: 5000})
-    .then(res => {
-      if (!res.ok) throw new Error('Server error');
-      return res.json();
-    })
-    .then(data => {
-      const users = data.items || [];
-      let user = users.find(u => (u.email === id || u.phone === id) && u.password === btoa(pw));
-      
-      if (user) {
-        // Successfully found user in database
-        const sessionData = {name: user.fname+' '+user.lname, email: user.email, role: user.role};
-        localStorage.setItem('naa_session', JSON.stringify(sessionData));
-        showMsg('login-ok', 'Welcome back, '+user.fname+'! Redirecting…');
-        setTimeout(() => {
-          const redirect = localStorage.getItem('post_login_redirect');
-          if (redirect) { 
-            localStorage.removeItem('post_login_redirect'); 
-            window.location.href = redirect; 
-          }
-          else window.location.href = user.role==='admin'?'car-detail-upload.html':'index.html';
-        }, 800);
-        return;
-      }
-      
-      // Not found in server database, try localStorage
-      throw new Error('User not found in server database');
-    })
-    .catch(err => {
-      console.log('Server auth failed, trying localStorage:', err.message);
-      // Fallback to localStorage for backward compatibility
-      const localUsers = JSON.parse(localStorage.getItem('naa_users')||'[]');
-      const user = localUsers.find(u => (u.email === id || u.phone === id) && u.password === btoa(pw));
-      
-      if (!user) {
-        showMsg('login-err', 'Invalid credentials.');
-        return;
-      }
-      
-      // Successfully authenticated from localStorage
-      const sessionData = {name: user.fname+' '+user.lname, email: user.email, role: user.role};
+  fetch(`${API_BASE}/auth/login`, {
+    method: 'POST',
+    headers: {'Content-Type':'application/x-www-form-urlencoded'},
+    body: form.toString()
+  })
+  .then(res => res.json().then(j=>({ok:res.ok, status:res.status, body:j})))
+  .then(({ok,status,body})=>{
+    if(!ok){
+      // fallback to legacy local auth
+      throw new Error(body && body.detail ? body.detail : 'Server auth failed');
+    }
+
+    // Handle MFA responses
+    if(body.mfa_setup_required){
+      // Show MFA setup UI
+      window._mfa_token = body.mfa_token;
+      showMfaPanel('setup');
+      startMfaSetup(body.mfa_token);
+      return;
+    }
+
+    if(body.mfa_required){
+      window._mfa_token = body.mfa_token;
+      showMfaPanel('challenge');
+      return;
+    }
+
+    // Successful login without MFA
+    if(body.access_token){
+      const role = body.role || 'user';
+      localStorage.setItem('naa_token', body.access_token);
+      const sessionData = {name: body.name || id, email: id, role};
       localStorage.setItem('naa_session', JSON.stringify(sessionData));
-      showMsg('login-ok', 'Welcome back, '+user.fname+'! Redirecting…');
-      setTimeout(() => {
-        const redirect = localStorage.getItem('post_login_redirect');
-        if (redirect) { 
-          localStorage.removeItem('post_login_redirect'); 
-          window.location.href = redirect; 
-        }
-        else window.location.href = user.role==='admin'?'car-detail-upload.html':'index.html';
-      }, 800);
-    });
+      showMsg('login-ok', 'Welcome back! Redirecting…');
+      setTimeout(()=>{ window.location.href = role==='admin'?'car-detail-upload.html':'index.html'; },800);
+      return;
+    }
+  })
+  .catch(err=>{
+    console.log('Server auth failed, trying localStorage:', err && err.message);
+    // Fallback to localStorage for backward compatibility
+    const localUsers = JSON.parse(localStorage.getItem('naa_users')||'[]');
+    const user = localUsers.find(u => (u.email === id || u.phone === id) && u.password === btoa(pw));
+    
+    if (!user) {
+      showMsg('login-err', 'Invalid credentials.');
+      return;
+    }
+    
+    // Successfully authenticated from localStorage
+    const sessionData = {name: user.fname+' '+user.lname, email: user.email, role: user.role};
+    localStorage.setItem('naa_session', JSON.stringify(sessionData));
+    showMsg('login-ok', 'Welcome back, '+user.fname+'! Redirecting…');
+    setTimeout(() => {
+      const redirect = localStorage.getItem('post_login_redirect');
+      if (redirect) { 
+        localStorage.removeItem('post_login_redirect'); 
+        window.location.href = redirect; 
+      }
+      else window.location.href = user.role==='admin'?'car-detail-upload.html':'index.html';
+    }, 800);
+  });
+}
+
+function showMfaPanel(mode){
+  // hide normal panels and show mfa panel
+  document.querySelectorAll('.form-panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById('panel-mfa').style.display='block';
+  if(mode==='setup'){
+    document.getElementById('mfa-setup-area').style.display='block';
+    document.getElementById('mfa-challenge-area').style.display='none';
+  } else {
+    document.getElementById('mfa-setup-area').style.display='none';
+    document.getElementById('mfa-challenge-area').style.display='block';
+  }
+}
+
+function startMfaSetup(mfa_token){
+  fetch(`${API_BASE}/auth/mfa/setup/start`,{
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({mfa_token})
+  })
+  .then(res=>res.json())
+  .then(data=>{
+    const secret = data.secret;
+    const otpauth = data.otpauth_url;
+    document.getElementById('mfa-secret').value = secret || '';
+    const qr = document.getElementById('mfa-qr');
+    if(otpauth){
+      qr.src = `https://chart.googleapis.com/chart?chs=200x200&cht=qr&chl=${encodeURIComponent(otpauth)}`;
+    }
+  })
+  .catch(err=>{
+    showMsg('mfa-err','Failed to start MFA setup.');
+  });
+}
+
+function confirmMfaSetup(){
+  const secret = document.getElementById('mfa-secret').value.trim();
+  const code = document.getElementById('mfa-code-setup').value.trim();
+  const token = window._mfa_token;
+  if(!secret||!code||!token){showMsg('mfa-err','Missing MFA data');return;}
+  fetch(`${API_BASE}/auth/mfa/setup/confirm`,{
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({mfa_token: token, secret, code})
+  })
+  .then(res=>res.json().then(j=>({ok:res.ok, body:j})))
+  .then(({ok,body})=>{
+    if(!ok){ showMsg('mfa-err', body && body.detail ? body.detail : 'MFA confirm failed'); return; }
+    if(body.access_token){ localStorage.setItem('naa_token', body.access_token); localStorage.setItem('naa_session', JSON.stringify({email:document.getElementById('login-id').value.trim(), role: body.role||'admin'})); showMsg('mfa-ok','MFA setup complete. Redirecting…'); setTimeout(()=> window.location.href = body.role==='admin'?'car-detail-upload.html':'index.html',800); }
+  })
+  .catch(err=> showMsg('mfa-err','MFA confirmation failed'));
+}
+
+function verifyMfaChallenge(){
+  const code = document.getElementById('mfa-code').value.trim();
+  const token = window._mfa_token;
+  if(!code||!token){ showMsg('mfa-err','Enter MFA code'); return; }
+  fetch(`${API_BASE}/auth/mfa/verify`,{
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({mfa_token: token, code})
+  })
+  .then(res=>res.json().then(j=>({ok:res.ok, body:j})))
+  .then(({ok,body})=>{
+    if(!ok){ showMsg('mfa-err', body && body.detail ? body.detail : 'MFA verify failed'); return; }
+    if(body.access_token){ localStorage.setItem('naa_token', body.access_token); localStorage.setItem('naa_session', JSON.stringify({email:document.getElementById('login-id').value.trim(), role: body.role||'admin'})); showMsg('mfa-ok','Login successful. Redirecting…'); setTimeout(()=> window.location.href = body.role==='admin'?'car-detail-upload.html':'index.html',800); }
+  })
+  .catch(err=> showMsg('mfa-err','MFA verify error'));
 }
 
 function doSignUp(){

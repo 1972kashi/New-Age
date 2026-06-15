@@ -50,6 +50,36 @@
     <div class="msg">No account? <a href="#" onclick="switchTab('signup');return false">Register here</a></div>
   </div>
 
+  <!-- MFA Setup / Verify UI (hidden until needed) -->
+  <div class="form-panel" id="panel-mfa">
+    <div class="error-box" id="mfa-err"></div>
+    <div class="success-box" id="mfa-ok"></div>
+
+    <div id="mfa-setup-area">
+      <div class="field"><label>MFA QR</label>
+        <div class="input-wrap">
+          <img id="mfa-qr" alt="MFA QR"/>
+        </div>
+      </div>
+      <div class="field"><label>Secret</label>
+        <div class="input-wrap"><input placeholder="Secret key" type="text" id="mfa-secret" readonly/></div>
+      </div>
+      <div class="field"><label>Enter code from authenticator</label>
+        <div class="input-wrap"><input type="text" id="mfa-code-setup" placeholder="123456"/></div>
+      </div>
+      <button class="btn-main" onclick="confirmMfaSetup()">Confirm MFA</button>
+    </div>
+
+    <div id="mfa-challenge-area">
+      <div class="field"><label>Enter MFA code</label>
+        <div class="input-wrap"><input type="text" id="mfa-code" placeholder="123456"/></div>
+      </div>
+      <button class="btn-main" onclick="verifyMfaChallenge()">Verify</button>
+    </div>
+
+    <div class="msg"><a href="#" onclick="switchTab('login');showMsg('login-err','Back to login');return false">Back to Sign In</a></div>
+  </div>
+
   <!-- SIGN UP (admin invite only note) -->
   <div class="form-panel" id="panel-signup">
     <div class="error-box" id="su-err"></div>

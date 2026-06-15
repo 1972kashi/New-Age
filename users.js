@@ -3,8 +3,8 @@ let deleteIndex = -1;
 let users = [];
 let editingUserId = null;
 
-const API_PORT = 3000;
-const API_BASE = `http://localhost:${API_PORT}`;  // Always use port 3000 for API
+const API_PORT = 8000;
+const API_BASE = `http://localhost:${API_PORT}`;  // API now served by FastAPI (port 8000)
 
 function initSession(){
   const session = JSON.parse(localStorage.getItem('naa_session')||'null');

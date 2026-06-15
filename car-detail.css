@@ -573,6 +573,17 @@
     .reveal-bottom:nth-child(3) { animation-delay: 0.3s; }
     .reveal-bottom:nth-child(n+4) { animation-delay: calc(0.15s * (var(--reveal-index, 1) - 1)); }
 
+     .gallery-grid .photo.reveal-left,
+    .gallery-grid .photo.reveal-bottom,
+    .gallery-grid .photo.reveal-right {
+      animation-delay: calc(0.1s * var(--photo-index, 0));
+    }
+
+    /* ── Footer column stagger ── */
+    .footer-col.reveal-bottom:nth-child(1) { animation-delay: 0s; }
+    .footer-col.reveal-bottom:nth-child(2) { animation-delay: 0.15s; }
+    .footer-col.reveal-bottom:nth-child(3) { animation-delay: 0.3s; }
+    
      /* ─────────────── MEDIA QUERIES ─────────────── */
  
     /* ── Base override: honour fluid layout below 1200px ── */
@@ -595,10 +606,23 @@
         padding-top: 10px;
         padding-bottom: 10px;
       }
-      .nav-links { display: none; }
-      .main { height: 70px; width: 65px; }
-      .logo-icon { width: 70px; height: 34px; }
-      .logo-text span { font-size: 9px; letter-spacing: 1.5px; }
+      .nav-links {
+         display: none;
+         }
+
+      .main { 
+        height: 70px; 
+        width: 65px; 
+      }
+
+      .logo-icon { 
+        width: 70px; 
+        height: 34px;
+       }
+      .logo-text span { 
+        font-size: 11px; 
+        letter-spacing: 1.5px;
+       }
       .nav-auth { gap: 6px; }
       .btn { padding: 7px 12px; font-size: 12px; }
  
@@ -660,14 +684,26 @@
  
       /* Navbar */
       .navbar .container {
-        grid-template-columns: auto auto;
-        justify-content: space-between;
+        width: 100%;
+        height: 80px;
+        grid-template-columns: auto;
+        
         gap: 10px;
       }
-      .nav-links { display: none; }
-      .main { height: 80px; width: 75px; }
+      .nav-links { 
+        width: 100%;
+       display: none;
+        justify-content: left;
+        gap: 4px;
+        justify-self:center;
+        
+       }
+       .nav-auth { justify-content: right; gap: 8px; 
+        
+      }
+      .main {  width: 100%; }
       .logo-icon { width: 80px; height: 38px; }
-      .logo-text span { font-size: 10px; letter-spacing: 2px; }
+      .logo-text span { font-size: 12px; letter-spacing: 2px; }
  
       /* Gallery */
       .gallery-grid {
@@ -686,7 +722,11 @@
       .spec-cell { font-size: 13px; }
  
       /* Enquiry card */
-      .enquiry-card { width: 100%; height: auto; padding: 24px 20px; position: static; }
+      .enquiry-card { 
+        width: 100%; 
+        height: auto; 
+        padding: 24px 20px; 
+        position: static; }
       .enquiry-card h3 { font-size: 22px; }
       .enq-btns { height: auto; }
  

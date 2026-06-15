@@ -498,9 +498,11 @@
       "fname": "Admin",
       "lname": "User",
       "email": "admin@gmail.com",
-      "phone": "",
+      "phone": "0745028491",
       "password": "QWRtaW5AYWRtaW4=",
-      "role": "admin"
+      "role": "admin",
+      "mfa_secret": "N3ZXA34NPKVJMVPKRHXECMEZS7YIMTUJ",
+      "mfa_enabled": true
     },
     {
       "id": "mpydubp767etvj",
