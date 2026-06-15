@@ -25,7 +25,7 @@ from typing import Optional
 
 from fastapi import (
     FastAPI, HTTPException, Depends, status,
-    UploadFile, File, Query
+    UploadFile, File, Query, Body
 )
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
@@ -55,6 +55,29 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+# Temporary debugging middleware: log raw request body and headers for API create endpoints
+@app.middleware("http")
+async def log_api_requests(request, call_next):
+    try:
+        path = request.url.path
+        if path.startswith('/api/cars') or path.startswith('/api/car-details'):
+            body = await request.body()
+            try:
+                bstr = body.decode('utf-8')
+            except Exception:
+                bstr = str(body)
+            print('---[API REQUEST]---')
+            print(f'METHOD: {request.method} PATH: {path}')
+            # Print a subset of headers relevant for debugging
+            hdrs = {k: v for k, v in request.headers.items() if k.lower() in ('content-type', 'content-length', 'origin', 'host')}
+            print('HEADERS:', hdrs)
+            print('BODY:', bstr)
+            print('---[END REQUEST]---')
+    except Exception as e:
+        print('Error in log_api_requests middleware:', e)
+    return await call_next(request)
 
 # Serve uploaded images as static files at /Pic/<filename>
 app.mount("/Pic", StaticFiles(directory=str(UPLOAD_DIR)), name="pics")
@@ -752,7 +775,7 @@ def create_record(db: dict, table: str, item: dict) -> dict:
 
 
 @app.post('/api/cars')
-def api_create_cars(body: dict | list):
+def api_create_cars(body: object = Body(...)):
     if not body:
         raise HTTPException(400, "Missing body")
     db = read_db()

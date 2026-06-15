@@ -101,24 +101,13 @@ function initListingPagination() {
 window.refreshListingPagination = initListingPagination;
 
 if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', initListingPagination);
+  document.addEventListener('DOMContentLoaded', function() { initListingPagination(); triggerScrollReveal(); });
 } else {
   initListingPagination();
+  triggerScrollReveal();
 }
 
-/*Scroll Reveal*/
-const observerOptions = { threshold: 0.1, rootMargin: "0px 0px -30px 0px" };
-const revealObserver = new IntersectionObserver((entries) => {
-  entries.forEach((entry) => {
-    if (entry.isIntersecting) {
-      entry.target.classList.remove("reveal-left", "reveal-right", "reveal-top");
-      // Trigger reflow to restart animation
-      void entry.target.offsetWidth;
-      entry.target.classList.add(entry.target.dataset.reveal || "reveal-bottom");
-      revealObserver.unobserve(entry.target);
-    }
-  });
-}, observerOptions);
+/* Scroll reveal uses shared reveal-common.js: window.reveal.observe(el) */
 
 function triggerScrollReveal() {
   // Select elements that should have scroll reveal
@@ -148,6 +137,6 @@ function triggerScrollReveal() {
       }
     }
     
-    revealObserver.observe(el);
+    window.reveal && window.reveal.observe(el);
   });
 }

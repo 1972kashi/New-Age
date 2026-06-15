@@ -298,6 +298,32 @@
       "link": "car-detail.html?id=mq0y5obysf4lyi",
       "img": "Pic/BMW 3.svg",
       "badge": true
+    },
+    {
+      "id": "08edc358106043e",
+      "createdAt": "2026-06-15T08:27:26.984043+00:00",
+      "name": "BMW COUPE 8",
+      "miles": "1000",
+      "trans": "Automatic",
+      "fuel": "Hybrid",
+      "year": "2024",
+      "price": "4,500,000",
+      "link": "car-detail.html?id=73af1ea30d87413",
+      "img": "Pic/BMW 3.svg",
+      "badge": true
+    },
+    {
+      "id": "5de851c551164a4",
+      "createdAt": "2026-06-15T08:27:39.237984+00:00",
+      "name": "BMW COUPE 8",
+      "miles": "1000",
+      "trans": "Automatic",
+      "fuel": "Hybrid",
+      "year": "2024",
+      "price": "4,500,000",
+      "link": "car-detail.html?id=73af1ea30d87413",
+      "img": "Pic/BMW 3.svg",
+      "badge": true
     }
   ],
   "carDetails": [
@@ -489,6 +515,44 @@
       "description": "Avery interesting car you will love it.",
       "make": "BMW",
       "color": ""
+    },
+    {
+      "id": "2c8befe6bc954be",
+      "createdAt": "2026-06-15T08:19:11.457678+00:00",
+      "name": "BMW COUPE 7",
+      "miles": "1000",
+      "trans": "Automatic",
+      "fuel": "Hybrid",
+      "year": "2024",
+      "price": "4,500,000",
+      "img": "Pic/BMW 3.svg",
+      "badge": true,
+      "model": "COUPE",
+      "engine": "4000cc",
+      "bodyType": "Coupe",
+      "condition": "New",
+      "drive": "FWD",
+      "location": "Port, Mombasa",
+      "description": ""
+    },
+    {
+      "id": "73af1ea30d87413",
+      "createdAt": "2026-06-15T08:27:26.967139+00:00",
+      "name": "BMW COUPE 8",
+      "miles": "1000",
+      "trans": "Automatic",
+      "fuel": "Hybrid",
+      "year": "2024",
+      "price": "4,500,000",
+      "img": "Pic/BMW 3.svg",
+      "badge": true,
+      "model": "COUPE",
+      "engine": "4000cc",
+      "bodyType": "Coupe",
+      "condition": "New",
+      "drive": "FWD",
+      "location": "Port, Mombasa",
+      "description": ""
     }
   ],
   "users": [
