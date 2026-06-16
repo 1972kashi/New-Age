@@ -82,6 +82,36 @@ document.addEventListener('DOMContentLoaded', function () {
     totalInterestEl.textContent = 'KES 0';
     totalPaymentEl.textContent  = 'KES 0';
   });
+  // Index page search & filters wiring
+  const indexSearchWrap = document.querySelector('.search-bar-section');
+  if (indexSearchWrap) {
+    const idxInput = indexSearchWrap.querySelector('#searchInput');
+    const idxSearchBtn = indexSearchWrap.querySelector('.btn-gold');
+    const filterBtn = indexSearchWrap.querySelector('.btn-filter');
+    const adv = document.querySelector('.advanced-filters');
+    if (filterBtn && adv) {
+      filterBtn.onclick = () => {
+        const shown = adv.style.display !== 'none';
+        adv.style.display = shown ? 'none' : 'block';
+        filterBtn.textContent = shown ? 'Show More Filters ▽' : 'Hide Filters △';
+      };
+    }
+    if (idxSearchBtn) {
+      idxSearchBtn.onclick = () => {
+        // Perform in-place filtering on homepage: reuse search inputs and update view
+        const q = (idxInput && idxInput.value || '').trim().toLowerCase();
+        const min = (document.getElementById('minBudget') && document.getElementById('minBudget').value) || '';
+        const max = (document.getElementById('maxBudget') && document.getElementById('maxBudget').value) || '';
+        const model = (document.getElementById('filterModel') && document.getElementById('filterModel').value) || '';
+        const year = (document.getElementById('filterYear') && document.getElementById('filterYear').value) || '';
+        // set search query and filter values globally used by home functions
+        setSearch(q);
+        // store filter values on window so home pagination/filtering can use them
+        window.__homeFilters = { min, max, model: model.toLowerCase(), year: year.toLowerCase() };
+        updateHomeView();
+      };
+    }
+  }
 });
 
 /* Scroll reveal uses shared reveal-common.js: window.reveal.observe(el) */
@@ -135,9 +165,37 @@ let searchQuery = '';
 
 function getFilteredCards() {
   return cards.filter(card => {
-    if (!searchQuery) return true;
-    return card.textContent.toLowerCase().includes(searchQuery);
+    // basic text search
+    if (searchQuery && !card.textContent.toLowerCase().includes(searchQuery)) return false;
+    // advanced filters from homepage
+    const f = window.__homeFilters || {};
+    if (f.min) {
+      const price = extractPriceFromCard(card);
+      if (price < Number(f.min)) return false;
+    }
+    if (f.max) {
+      const price = extractPriceFromCard(card);
+      if (price > Number(f.max)) return false;
+    }
+    if (f.model) {
+      const model = (card.querySelector('.car-name')?.textContent || '') + ' ' + (card.querySelector('.car-meta-item')?.textContent || '');
+      if (!model.toLowerCase().includes(f.model)) return false;
+    }
+    if (f.year) {
+      const y = (card.querySelector('.car-meta-item')?.textContent || '');
+      if (!y.toLowerCase().includes(f.year)) return false;
+    }
+    return true;
   });
+}
+
+function extractPriceFromCard(card) {
+  try {
+    const priceText = (card.querySelector('.car-price')?.textContent || card.textContent || '');
+    const m = priceText.replace(/,/g, '').match(/(\d{1,3}(?:\d{3})*)/);
+    if (m) return Number(m[0]);
+  } catch (e) {}
+  return 0;
 }
 
 function buildHomePagination() {
@@ -220,6 +278,54 @@ function initHomePagination() {
   }
 
   updateHomeView();
+
+  // populate model datalist for homepage
+  try {
+    const dl = document.getElementById('detailModel');
+    if (dl) {
+      const set = new Set();
+      cards.forEach(card => {
+        const nm = (card.querySelector('.car-name')?.textContent || '').trim();
+        if (nm) set.add(nm);
+      });
+      dl.innerHTML = '';
+      set.forEach(m => {
+        const opt = document.createElement('option'); opt.value = m; dl.appendChild(opt);
+      });
+    }
+  } catch (e) {}
+
+  // Apply filters button (homepage)
+  const applyBtn = document.querySelector('.apply-filters');
+  if (applyBtn && !applyBtn.dataset.homeAttached) {
+    applyBtn.onclick = () => {
+      const q = (document.getElementById('searchInput')?.value || '').trim().toLowerCase();
+      const min = (document.getElementById('minBudget')?.value) || '';
+      const max = (document.getElementById('maxBudget')?.value) || '';
+      const model = (document.getElementById('filterModel')?.value) || '';
+      const year = (document.getElementById('filterYear')?.value) || '';
+      setSearch(q);
+      window.__homeFilters = { min, max, model: model.toLowerCase(), year: year.toLowerCase() };
+      updateHomeView();
+    };
+    applyBtn.dataset.homeAttached = '1';
+  }
+
+  // popular search tags on homepage (delegated)
+  if (!document.body.dataset.poptagAttached) {
+    document.addEventListener('click', (e) => {
+      const t = e.target;
+      if (t.classList && t.classList.contains('pop-tag')) {
+        const q = (t.textContent || '').trim();
+        const si = document.getElementById('searchInput');
+        if (si) si.value = q;
+        setSearch(q.toLowerCase());
+        window.__homeFilters = {};
+        updateHomeView();
+      }
+    });
+    document.body.dataset.poptagAttached = '1';
+  }
 }
 
 window.refreshHomePagination = initHomePagination;

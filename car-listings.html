@@ -46,21 +46,31 @@
   <h1>YOUR ONE STOP<br/>CAR SHOPPING</h1>
   <div class="search-wrap">
     <div class="search-input-wrap">
-      <input class="search-input" type="text" placeholder="Search by vehicle name"/>
+      <input id="searchInput" class="search-input" type="text" placeholder="Search by vehicle name"/>
       <span class="search-icon"><img src="Pic/Search.svg" alt="Search"></span>
     </div>
     <button class="btn btn-gold btn-lg">Search</button>
   </div>
   <button class="btn btn-dark btn-filter">Show More Filters ▽</button>
-   <div class="popular-searches">
+    <div class="advanced-filters">
+      <div class="advanced-filters-row">
+        <input id="minBudget" class="filter-input" type="number" placeholder="Min budget (KSH)" />
+        <input id="maxBudget" class="filter-input" type="number" placeholder="Max budget (KSH)" />
+        <input id="filterModel" class="filter-input" list="detailModel" type="text" placeholder="Model (e.g. Corolla)" />
+        <datalist id="detailModel"></datalist>
+        <input id="filterYear" class="filter-input" type="text" placeholder="Year (e.g. 2020)" />
+        <button class="btn btn-gold apply-filters">Apply Filters</button>
+      </div>
+    </div>
+    <div class="popular-searches">
       <span>Popular Searches:</span>
-       <span class="pop-tag" onclick="document.getElementById('searchInput').value='Toyota'">Toyota</span> •
-      <span class="pop-tag" onclick="document.getElementById('searchInput').value='BMW'">BMW</span>
-        • <span class="pop-tag" onclick="document.getElementById('searchInput').value='Porsche'">Mercedes</span> •
-      <span class="pop-tag" onclick="document.getElementById('searchInput').value='Audi'">Audi</span> •
-      <span class="pop-tag" onclick="document.getElementById('searchInput').value='Dodge'">Isuzu</span>•
-       <span class="pop-tag" onclick="document.getElementById('searchInput').value='Audi'">Subaru</span> •
-      <span class="pop-tag" onclick="document.getElementById('searchInput').value='Dodge'">Range Rover</span>
+       <span class="pop-tag">Toyota</span> •
+      <span class="pop-tag">BMW</span>
+        • <span class="pop-tag">Mercedes</span> •
+      <span class="pop-tag">Audi</span> •
+      <span class="pop-tag">Isuzu</span>•
+       <span class="pop-tag">Subaru</span> •
+      <span class="pop-tag">Range Rover</span>
     </div>
 </section>
 

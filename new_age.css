@@ -439,6 +439,12 @@
     }
     .pop-tag:hover { border-color: var(--gold); color: var(--gold); }
 
+    /* Advanced filters panel (homepage) */
+    .advanced-filters { margin-top: 12px; display: none; }
+    .advanced-filters-row { display:flex; gap:12px; flex-wrap:wrap; align-items:center; }
+    .filter-input { padding:10px 12px; min-width:160px; background:var(--dark-3); border:1.5px solid var(--border); border-radius:8px; color:var(--text); }
+    .filter-input:focus { outline:none; border-color:var(--gold); }
+
     /* ─────────────── FEATURED CARS ─────────────── */
     .section { padding: 60px 0; }
     .section-header {

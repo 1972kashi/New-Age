@@ -306,6 +306,12 @@
       padding: 11px 28px;
     }
 
+    /* Advanced filters panel */
+    .advanced-filters { margin-top: 12px; display: none; }
+    .advanced-filters-row { display:flex; gap:12px; flex-wrap:wrap; align-items:center; }
+    .filter-input { padding:10px 12px; min-width:160px; background:var(--dark-3); border:1.5px solid var(--border); border-radius:8px; color:var(--text); }
+    .filter-input:focus { outline:none; border-color:var(--gold); }
+
     .btn-gold-full {
       width: 100%;
       justify-content: center;

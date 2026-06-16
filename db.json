@@ -105,19 +105,6 @@
       "createdAt": "2026-06-02T12:34:54.879Z"
     },
     {
-      "id": "mpwzgvqwrznuvt",
-      "createdAt": "2026-06-02T18:41:00.344Z",
-      "name": "TEST CAR",
-      "miles": "100",
-      "trans": "Automatic",
-      "fuel": "Petrol",
-      "year": "2026",
-      "price": "2,000,000",
-      "link": "car-detail.html?id=mpwyy4o26c9di7",
-      "img": "Pic/Car 1.svg",
-      "badge": true
-    },
-    {
       "id": "mpxpgb6o92xu22",
       "createdAt": "2026-06-03T06:48:23.712Z",
       "name": "Isuzu D-Max",
@@ -577,16 +564,6 @@
       "phone": "0757822470",
       "role": "user",
       "password": "S2FsZWxpQDIxNTU="
-    },
-    {
-      "id": "mpz4rnvgunhn6u",
-      "createdAt": "2026-06-04T06:44:53.788Z",
-      "fname": "Imran",
-      "lname": "Emmuh",
-      "email": "emranmuh@gmail.com",
-      "phone": "0724105521",
-      "role": "user",
-      "password": "MjQxMDU1MjFtdWg="
     }
   ]
 }

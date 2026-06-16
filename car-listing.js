@@ -12,9 +12,35 @@ let listingSearchQuery = '';
 let listingSearchAttached = false;
 
 function getFilteredListingCards() {
+  // Advanced filters
+  const minBudget = Number((document.getElementById('minBudget') && document.getElementById('minBudget').value) || 0) || 0;
+  const maxBudget = Number((document.getElementById('maxBudget') && document.getElementById('maxBudget').value) || 0) || 0;
+  const modelFilter = (document.getElementById('filterModel') && document.getElementById('filterModel').value || '').trim().toLowerCase();
+  const yearFilter = (document.getElementById('filterYear') && document.getElementById('filterYear').value || '').trim().toLowerCase();
+
   return listingCards.filter(card => {
-    if (!listingSearchQuery) return true;
-    return card.textContent.toLowerCase().includes(listingSearchQuery);
+    const text = (card.textContent || '').toLowerCase();
+    // Basic search query match
+    if (listingSearchQuery && !text.includes(listingSearchQuery)) return false;
+
+    // Model filter (matches any text)
+    if (modelFilter && !text.includes(modelFilter)) return false;
+    // Year filter
+    if (yearFilter && !text.includes(yearFilter)) return false;
+
+    // Price filter: attempt to extract numbers from text
+    if (minBudget || maxBudget) {
+      const m = text.match(/\d{1,3}(?:[\,\s]\d{3})*(?:\d*)/g);
+      let price = 0;
+      if (m && m.length) {
+        // choose largest number as price candidate
+        price = Math.max(...m.map(s => Number(s.replace(/[,\s]/g, ''))));
+      }
+      if (minBudget && price < minBudget) return false;
+      if (maxBudget && price > maxBudget) return false;
+    }
+
+    return true;
   });
 }
 
@@ -90,6 +116,83 @@ function initListingPagination() {
     });
     listingSearchAttached = true;
   }
+
+  // Search button
+  const searchBtn = document.querySelector('.hero-banner .btn-gold');
+  if (searchBtn) searchBtn.onclick = () => {
+    if (listingSearchInput) {
+      listingSearchQuery = (listingSearchInput.value || '').trim().toLowerCase();
+      listingCurrentPage = 1;
+      initListingPagination();
+    }
+  };
+
+  // Pop-tag clicks (popular searches)
+  document.addEventListener('click', (e) => {
+    const t = e.target;
+    if (t.classList && t.classList.contains('pop-tag')) {
+      const q = (t.textContent || '').trim();
+      if (listingSearchInput) {
+        listingSearchInput.value = q;
+        listingSearchQuery = q.toLowerCase();
+        listingCurrentPage = 1;
+        initListingPagination();
+      }
+    }
+  });
+
+  // Filter toggle
+  const filterBtn = document.querySelector('.btn-filter');
+  const adv = document.querySelector('.advanced-filters');
+  if (filterBtn && adv) {
+    filterBtn.onclick = () => {
+      const shown = adv.style.display !== 'none';
+      adv.style.display = shown ? 'none' : 'block';
+      filterBtn.textContent = shown ? 'Show More Filters ▽' : 'Hide Filters △';
+    };
+  }
+
+  // Apply filters button
+  const applyBtn = document.querySelector('.apply-filters');
+  if (applyBtn) applyBtn.onclick = () => {
+    listingSearchQuery = (listingSearchInput && listingSearchInput.value || '').trim().toLowerCase();
+    listingCurrentPage = 1;
+    initListingPagination();
+  };
+
+  // Populate model datalist from cards
+  try {
+    const modelSet = new Set();
+    listingCards.forEach(card => {
+      const txt = (card.querySelector('.card-name') || card.querySelector('.car-name'))?.textContent || '';
+      const parts = txt.split(' ');
+      if (parts.length > 1) modelSet.add(parts.slice(1).join(' '));
+    });
+    const dl = document.getElementById('detailModel');
+    if (dl) {
+      modelSet.forEach(m => {
+        const opt = document.createElement('option'); opt.value = m; dl.appendChild(opt);
+      });
+    }
+  } catch (e) {}
+
+  // Read URL params to prefill filters (q, min, max, model, year)
+  try {
+    const params = new URLSearchParams(window.location.search);
+    const q = params.get('q');
+    if (q && listingSearchInput) {
+      listingSearchInput.value = q;
+      listingSearchQuery = q.toLowerCase();
+    }
+    const min = params.get('min');
+    const max = params.get('max');
+    const model = params.get('model');
+    const year = params.get('year');
+    if (min && document.getElementById('minBudget')) document.getElementById('minBudget').value = min;
+    if (max && document.getElementById('maxBudget')) document.getElementById('maxBudget').value = max;
+    if (model && document.getElementById('filterModel')) document.getElementById('filterModel').value = model;
+    if (year && document.getElementById('filterYear')) document.getElementById('filterYear').value = year;
+  } catch (e) {}
 
   const filtered = getFilteredListingCards();
   listingTotalPages = Math.max(1, Math.ceil(filtered.length / LISTING_CARDS_PER_PAGE));
