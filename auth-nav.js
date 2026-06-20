@@ -54,8 +54,8 @@ function logout(){
 function onLoginSuccess(session){
   localStorage.setItem('naa_session', JSON.stringify(session));
 
-  const redirect = localStorage.getItem('naa_redirect') || 'index.html';
-  localStorage.removeItem('naa_redirect');
+  const redirect = localStorage.getItem('post_login_redirect') || 'index.html';
+  localStorage.removeItem('post_login_redirect');
   window.location.href = redirect;
 }
 
@@ -78,24 +78,33 @@ function loadAuthNav(){
   const loginBtn = document.getElementById('nav-login');
   const signupBtn = document.getElementById('nav-signup');
   const profileBtn = document.getElementById('nav-profile');
-  if(!loginBtn||!signupBtn||!profileBtn) return;
+  console.debug('auth-nav: loadAuthNav elements', { loginBtn: !!loginBtn, signupBtn: !!signupBtn, profileBtn: !!profileBtn });
+  if(!loginBtn||!signupBtn||!profileBtn) {
+    console.warn('auth-nav: missing nav elements — aborting');
+    return;
+  }
 
   // Save current page before going to login, so we can return after
   loginBtn.onclick = () => {
-    localStorage.setItem('naa_redirect', window.location.href);
+    localStorage.setItem('post_login_redirect', window.location.href);
     window.location.href = 'login.html';
   };
   signupBtn.onclick = () => {
-    localStorage.setItem('naa_redirect', window.location.href);
+    localStorage.setItem('post_login_redirect', window.location.href);
     window.location.href = 'login.html';
   };
 
   ensureAuthPopup();
   const session = JSON.parse(localStorage.getItem('naa_session')||'null');
+  console.debug('auth-nav: session', session);
   if(session){
     loginBtn.classList.add('hidden');
     signupBtn.classList.add('hidden');
+    // JS fallback: hide login/signup explicitly in case CSS or other scripts override
+    try { loginBtn.style.display = 'none'; signupBtn.style.display = 'none'; } catch(e) {}
     profileBtn.classList.remove('hidden');
+    // JS fallback: ensure the profile button is visible even if CSS fails
+    try { profileBtn.style.display = ''; } catch(e) {}
     profileBtn.title = 'Signed in as ' + session.name;
     profileBtn.onclick = e => { e.preventDefault(); toggleAuthPopup(); };
     const nameEl = document.getElementById('auth-popup-name');
@@ -103,7 +112,10 @@ function loadAuthNav(){
   } else {
     loginBtn.classList.remove('hidden');
     signupBtn.classList.remove('hidden');
+    try { loginBtn.style.display = ''; signupBtn.style.display = ''; } catch(e) {}
     profileBtn.classList.add('hidden');
+    // JS fallback: force-hide profile button if CSS didn't take effect
+    try { profileBtn.style.display = 'none'; } catch(e) {}
     profileBtn.onclick = null;
     hideAuthPopup();
   }
@@ -115,4 +127,10 @@ function loadAuthNav(){
 
 
 
-document.addEventListener('DOMContentLoaded', loadAuthNav);
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', loadAuthNav);
+} else {
+  // If the document is already loaded, run immediately
+  console.debug('auth-nav: DOM already loaded — initializing nav');
+  loadAuthNav();
+}

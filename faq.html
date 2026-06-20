@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>FAQ – New Age Automotive</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:wght@300;400;500;600;700&family=Barlow+Condensed:wght@500;600;700&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="faq.css">
+</head>
+<body>
+  <!-- NAVBAR-->
+<nav class="navbar">
+  <div class="container">
+    <div class="age">
+    <div class="logo">
+      <div class="logo-icon"><img class="main" src="Pic/Main2.png" alt="Logo"></div>
+      <div class="logo-text">
+        <span>Your One<br>Stop Car<br>Shopping</span>
+      </div>
+    </div>
+    </div>
+    <ul class="nav-links">
+      <li><a href="index.html" >Home</a></li>
+      <li><a href="about.html">About us</a></li>
+      <li><a href="faq.html" class="active">FAQ</a></li>
+      <li><a href="sell-your-car.html">Sell your Car</a></li>
+    </ul>
+    <div class="nav-auth">
+      <a href="login.html" class="btn btn-outline" id="nav-login">Login</a>
+      <a href="login.html" class="btn btn-gold" id="nav-signup">Sign Up</a>
+      <button class="profile hidden" id="nav-profile" title="Profile"><img class="logo-img" src="Pic/profile.svg" alt="Profile"></button>
+    </div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<header class="hero">
+  <h1>New Age Automotive where you can:<span class="sub">Frequently Asked Questions about Cars</span></h1>
+
+  <div class="faq-search-wrap">
+    <input type="text" id="faqSearch" class="faq-search" placeholder="What do you want to know?" autocomplete="off"/>
+    <div class="faq-search-icon"><img alt="Search" src="Pic/Search.svg"></div>
+  </div>
+
+  <div class="hero-badges">
+    <div class="hero-badge">
+      <div class="hero-badge-icon"><img alt="Verified Prices" src="Pic/Verified.svg"></div>
+      <div><div class="hero-badge-title">Verified Dealers</div><div class="hero-badge-desc">Only Trusted Partners</div></div>
+    </div>
+    <div class="hero-badge">
+      <div class="hero-badge-icon"><img alt="No Charges" src="Pic/Price.svg"></div>
+      <div><div class="hero-badge-title">Best Prices</div><div class="hero-badge-desc">No Hidden Charges</div></div>
+    </div>
+    <div class="hero-badge">
+      <div class="hero-badge-icon"><img alt="Contact Us" src="Pic/Contact.svg"></div>
+      <div><div class="hero-badge-title">Expert Support</div><div class="hero-badge-desc">Here For You</div></div>
+    </div>
+  </div>
+</header>
+
+<!-- FAQ SECTION -->
+<section class="faq-section">
+  <div class="container">
+    <div class="faq-layout">
+
+      <!-- CATEGORY SIDEBAR -->
+      <aside class="category-panel">
+        <h3>Categories</h3>
+        <div class="category-list" id="categoryList">
+          <button class="category-btn active" data-category="all">All Questions <span class="count">12</span></button>
+          <button class="category-btn" data-category="payment">Payment <span class="count">3</span></button>
+          <button class="category-btn" data-category="financing">Financing <span class="count">3</span></button>
+          <button class="category-btn" data-category="buying">Buying a Car <span class="count">3</span></button>
+          <button class="category-btn" data-category="selling">Selling a Car <span class="count">3</span></button>
+        </div>
+      </aside>
+
+      <!-- ACCORDION -->
+      <div>
+        <div class="accordion-wrap">
+          <ul class="accordion-list" id="accordionList">
+
+            <li class="faq-item" data-category="payment">
+              <button class="faq-question" aria-expanded="false">
+                <span class="faq-question-text"><span class="cat-tag">Payment</span>How do you handle payment of cars?</span>
+                <span class="faq-icon"><svg viewBox="0 0 12 8" fill="none"><path d="M1 1l5 5 5-5" stroke="#fff" stroke-width="2"/></svg></span>
+              </button>
+              <div class="faq-panel">
+                <div class="faq-panel-inner">
+                  We accept secure escrow payments, verified bank transfers, and financed purchases through our partner banks. Full payment is only released to the dealer once you confirm vehicle inspection and satisfaction.
+                </div>
+              </div>
+            </li>
+
+            <li class="faq-item" data-category="payment">
+              <button class="faq-question" aria-expanded="false">
+                <span class="faq-question-text"><span class="cat-tag">Payment</span>Can I pay in installments?</span>
+                <span class="faq-icon"><svg viewBox="0 0 12 8" fill="none"><path d="M1 1l5 5 5-5" stroke="#fff" stroke-width="2"/></svg></span>
+              </button>
+              <div class="faq-panel">
+                <div class="faq-panel-inner">
+                  Yes. Through our "Bring Your Own Bank" financing option, you can generate a Proforma Invoice and apply for asset financing with your preferred bank, spreading payments over 12–72 months.
+                </div>
+              </div>
+            </li>
+
+            <li class="faq-item" data-category="payment">
+              <button class="faq-question" aria-expanded="false">
+                <span class="faq-question-text"><span class="cat-tag">Payment</span>Is my payment information secure?</span>
+                <span class="faq-icon"><svg viewBox="0 0 12 8" fill="none"><path d="M1 1l5 5 5-5" stroke="#fff" stroke-width="2"/></svg></span>
+              </button>
+              <div class="faq-panel">
+                <div class="faq-panel-inner">
+                  Absolutely. All transactions are processed through encrypted, PCI-compliant payment gateways. We never store your full card or bank details on our servers.
+                </div>
+              </div>
+            </li>
+
+            <li class="faq-item" data-category="financing">
+              <button class="faq-question" aria-expanded="false">
+                <span class="faq-question-text"><span class="cat-tag">Financing</span>How does the loan calculator work?</span>
+                <span class="faq-icon"><svg viewBox="0 0 12 8" fill="none"><path d="M1 1l5 5 5-5" stroke="#fff" stroke-width="2"/></svg></span>
+              </button>
+              <div class="faq-panel">
+                <div class="faq-panel-inner">
+                  Enter the vehicle price, down payment, loan tenure, and interest rate. We calculate your estimated monthly instalment using the standard reducing-balance method used by Kenyan banks.
+                </div>
+              </div>
+            </li>
+
+            <li class="faq-item" data-category="financing">
+              <button class="faq-question" aria-expanded="false">
+                <span class="faq-question-text"><span class="cat-tag">Financing</span>What documents does my bank need?</span>
+                <span class="faq-icon"><svg viewBox="0 0 12 8" fill="none"><path d="M1 1l5 5 5-5" stroke="#fff" stroke-width="2"/></svg></span>
+              </button>
+              <div class="faq-panel">
+                <div class="faq-panel-inner">
+                  Most banks require a Proforma Invoice, the vehicle logbook or import documents, your ID, and proof of income. You can generate the Proforma Invoice directly from our loan calculator page.
+                </div>
+              </div>
+            </li>
+
+            <li class="faq-item" data-category="financing">
+              <button class="faq-question" aria-expanded="false">
+                <span class="faq-question-text"><span class="cat-tag">Financing</span>Do you partner with specific banks?</span>
+                <span class="faq-icon"><svg viewBox="0 0 12 8" fill="none"><path d="M1 1l5 5 5-5" stroke="#fff" stroke-width="2"/></svg></span>
+              </button>
+              <div class="faq-panel">
+                <div class="faq-panel-inner">
+                  We work with an open marketplace model — you can use any bank you prefer. We simply prepare the paperwork that your bank's asset finance department requires.
+                </div>
+              </div>
+            </li>
+
+            <li class="faq-item" data-category="buying">
+              <button class="faq-question" aria-expanded="false">
+                <span class="faq-question-text"><span class="cat-tag">Buying</span>How are vehicles verified?</span>
+                <span class="faq-icon"><svg viewBox="0 0 12 8" fill="none"><path d="M1 1l5 5 5-5" stroke="#fff" stroke-width="2"/></svg></span>
+              </button>
+              <div class="faq-panel">
+                <div class="faq-panel-inner">
+                  Every listed vehicle is inspected by our certified partners for mechanical condition, ownership history, and accident records before being marked "Verified" on our platform.
+                </div>
+              </div>
+            </li>
+
+            <li class="faq-item" data-category="buying">
+              <button class="faq-question" aria-expanded="false">
+                <span class="faq-question-text"><span class="cat-tag">Buying</span>Can I negotiate the listed price?</span>
+                <span class="faq-icon"><svg viewBox="0 0 12 8" fill="none"><path d="M1 1l5 5 5-5" stroke="#fff" stroke-width="2"/></svg></span>
+              </button>
+              <div class="faq-panel">
+                <div class="faq-panel-inner">
+                  Yes, our team can help negotiate directly with the dealer on your behalf to ensure you get the best possible price with no hidden charges.
+                </div>
+              </div>
+            </li>
+
+            <li class="faq-item" data-category="buying">
+              <button class="faq-question" aria-expanded="false">
+                <span class="faq-question-text"><span class="cat-tag">Buying</span>Do you offer a test drive before purchase?</span>
+                <span class="faq-icon"><svg viewBox="0 0 12 8" fill="none"><path d="M1 1l5 5 5-5" stroke="#fff" stroke-width="2"/></svg></span>
+              </button>
+              <div class="faq-panel">
+                <div class="faq-panel-inner">
+                  Yes, we can arrange a scheduled test drive with the dealer at a convenient location before you commit to any purchase.
+                </div>
+              </div>
+            </li>
+
+            <li class="faq-item" data-category="selling">
+              <button class="faq-question" aria-expanded="false">
+                <span class="faq-question-text"><span class="cat-tag">Selling</span>How do I list my car for sale?</span>
+                <span class="faq-icon"><svg viewBox="0 0 12 8" fill="none"><path d="M1 1l5 5 5-5" stroke="#fff" stroke-width="2"/></svg></span>
+              </button>
+              <div class="faq-panel">
+                <div class="faq-panel-inner">
+                  Click "Sell your Car" in the navigation, fill out the vehicle details form, upload clear photos, and submit. Our team reviews and verifies listings within 24 hours.
+                </div>
+              </div>
+            </li>
+
+            <li class="faq-item" data-category="selling">
+              <button class="faq-question" aria-expanded="false">
+                <span class="faq-question-text"><span class="cat-tag">Selling</span>Are there fees for selling my car?</span>
+                <span class="faq-icon"><svg viewBox="0 0 12 8" fill="none"><path d="M1 1l5 5 5-5" stroke="#fff" stroke-width="2"/></svg></span>
+              </button>
+              <div class="faq-panel">
+                <div class="faq-panel-inner">
+                  Listing your vehicle is completely free. We only charge a small commission once your car is successfully sold through the platform.
+                </div>
+              </div>
+            </li>
+
+            <li class="faq-item" data-category="selling">
+              <button class="faq-question" aria-expanded="false">
+                <span class="faq-question-text"><span class="cat-tag">Selling</span>How long does it take to sell?</span>
+                <span class="faq-icon"><svg viewBox="0 0 12 8" fill="none"><path d="M1 1l5 5 5-5" stroke="#fff" stroke-width="2"/></svg></span>
+              </button>
+              <div class="faq-panel">
+                <div class="faq-panel-inner">
+                  This varies by vehicle and market demand, but verified listings with competitive pricing typically sell within 2–4 weeks on our platform.
+                </div>
+              </div>
+            </li>
+
+          </ul>
+        </div>
+
+        <div class="no-results" id="noResults">
+          <div class="nr-icon">🔍</div>
+          <p>No questions match your search. Try a different keyword.</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- NEWS BANNER -->
+<section class="news-banner-section">
+  <div class="container">
+    <div class="news-banner">
+      <img src="https://images.unsplash.com/photo-1552519507-da3b142c6e3d?w=1400&q=80" alt="Latest car news"/>
+      <div class="news-dots"><span></span><span></span><span></span></div>
+      <div class="news-overlay">
+        <h3>Get the latest news and<br/>trends about cars</h3>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand"><h3>New Age Automotive</h3><p>Your one-stop destination for buying, selling, and sourcing your dream car.</p></div>
+      <div class="footer-links-grid">
+        <div class="footer-col"><h4>Navigation</h4><ul><li><a href="index.html">Home</a></li><li><a href="about.html">About us</a></li><li><a href="#">Services</a></li><li><a href="#">Sell your Car</a></li></ul></div>
+        <div class="footer-col"><h4>Connect With Us</h4><ul><li><a href="#">Facebook</a></li><li><a href="#">Twitter / X</a></li><li><a href="#">Instagram</a></li></ul></div>
+        <div class="footer-col"><h4>Contact Us</h4><ul><li><a href="#">Support</a></li><li><a href="#">Privacy Policy</a></li><li><a href="#">Terms</a></li></ul></div>
+      </div>
+      <div class="footer-newsletter">
+        <h4>Connect via Email</h4>
+        <input type="email" class="nl-input" placeholder="Your email address"/>
+        <button class="btn btn-gold" style="width:100%;justify-content:center;letter-spacing:1px;">SUBMIT</button>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>© 2024 New Age Automotive. All rights reserved.</p>
+      <nav class="footer-nav"><a href="#">Privacy</a><a href="#">Terms</a><a href="#">Cookies</a></nav>
+    </div>
+  </div>
+</footer>
+
+<script src="new_age.js"></script>
+<script src="faq.js"></script>
+<script src="auth-nav.js"></script>
+</body>
+</html>

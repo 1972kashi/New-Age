@@ -206,7 +206,7 @@
     .card-body{padding:14px 16px;}
     .card-name{font-size:13px;font-weight:700;margin-bottom:10px;line-height:1.35;}
     .card-meta{display:grid;grid-template-columns:repeat(2,1fr);gap:6px 8px;margin-bottom:12px;}
-    .meta-item{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text-muted);}
+    .meta-item{display:flex;align-items:center;gap:5px;font: size 17px;color:whitesmoke;}
     .card-footer{display:flex;justify-content:space-between;align-items:center;border-top:1px solid var(--border);padding-top:11px;}
     .card-price{font-family:'Barlow Condensed',sans-serif;font-size:17px;font-weight:700;color:var(--white);}
     .card-price small{font-size:11px;color:var(--text-muted);font-weight:400;margin-right:2px;}
@@ -307,7 +307,7 @@
     }
 
     /* Advanced filters panel */
-    .advanced-filters { margin-top: 12px; display: none; }
+    .advanced-filters { margin-top: 12px; }
     .advanced-filters-row { display:flex; gap:12px; flex-wrap:wrap; align-items:center; }
     .filter-input { padding:10px 12px; min-width:160px; background:var(--dark-3); border:1.5px solid var(--border); border-radius:8px; color:var(--text); }
     .filter-input:focus { outline:none; border-color:var(--gold); }

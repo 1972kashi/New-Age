@@ -1,87 +1,97 @@
-// Car Loan Calculator Logic
+// Car Loan Calculator Logic (guarded)
 document.addEventListener('DOMContentLoaded', function () {
 
-  // Grab inputs
-  const purchasePriceInput = document.querySelectorAll('.calc-input')[0];
-  const downPaymentInput   = document.querySelectorAll('.calc-input')[1];
-  const loanTenureSelect   = document.querySelector('.select-input');
-  const interestRateInput  = document.querySelectorAll('.calc-input')[3];
+  // Guarded calculator initialization: only wire calculator behavior when the page contains the expected elements
+  try {
+    const calcInputs = document.querySelectorAll('.calc-input');
+    const calcBtns = document.querySelectorAll('.calc-btn-row .btn');
+    const loanTenureSelectEl = document.querySelector('.select-input');
+    const resultAmountEl = document.querySelector('.result-amount');
 
-  // Grab result elements
-  const resultAmount   = document.querySelector('.result-amount');
-  const loanAmountEl   = document.querySelectorAll('.result-row strong')[0];
-  const totalInterestEl = document.querySelectorAll('.result-row strong')[1];
-  const totalPaymentEl = document.querySelectorAll('.result-row strong')[2];
+    const hasCalculator = calcInputs.length >= 4 && calcBtns.length >= 2 && loanTenureSelectEl && resultAmountEl;
 
-  // Grab buttons
-  const calculateBtn = document.querySelectorAll('.calc-btn-row .btn')[0];
-  const resetBtn     = document.querySelectorAll('.calc-btn-row .btn')[1];
+    if (hasCalculator) {
+      const purchasePriceInput = calcInputs[0];
+      const downPaymentInput = calcInputs[1];
+      const interestRateInput = calcInputs[3];
+      const loanTenureSelect = loanTenureSelectEl;
 
-  // Helper: parse a number string (removes commas)
-  function parseNumber(val) {
-    return parseFloat(val.replace(/,/g, '')) || 0;
+      // Grab result elements (with fallbacks)
+      const resultAmount   = resultAmountEl;
+      const resultRowStrong = document.querySelectorAll('.result-row strong');
+      const loanAmountEl = resultRowStrong[0] || { textContent: '' };
+      const totalInterestEl = resultRowStrong[1] || { textContent: '' };
+      const totalPaymentEl = resultRowStrong[2] || { textContent: '' };
+
+      const calculateBtn = calcBtns[0];
+      const resetBtn = calcBtns[1];
+
+      function parseNumber(val) {
+        return parseFloat((val || '').toString().replace(/,/g, '')) || 0;
+      }
+
+      function formatNumber(num) {
+        return Number(num).toLocaleString('en-KE', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+      }
+
+      if (calculateBtn) {
+        calculateBtn.addEventListener('click', function () {
+          const purchasePrice = parseNumber(purchasePriceInput.value);
+          const downPayment = parseNumber(downPaymentInput.value);
+          const tenureText = (loanTenureSelect && loanTenureSelect.value) || '';
+          const annualRate = parseNumber(interestRateInput.value);
+
+          if (!purchasePrice || tenureText === 'Loan Tenure' || !annualRate) {
+            alert('Please fill in all fields correctly.');
+            return;
+          }
+
+          let downPaymentAmount = downPayment;
+          if ((downPaymentInput.value || '').includes('%') || downPayment <= 100) {
+            downPaymentAmount = (downPayment / 100) * purchasePrice;
+          }
+
+          const loanAmount = purchasePrice - downPaymentAmount;
+          const months = parseInt(tenureText) || 0;
+          const monthlyRate = annualRate / 100 / 12;
+
+          let monthlyPayment;
+          if (monthlyRate === 0) {
+            monthlyPayment = months ? loanAmount / months : 0;
+          } else {
+            const factor = Math.pow(1 + monthlyRate, months);
+            monthlyPayment = months ? loanAmount * (monthlyRate * factor) / (factor - 1) : 0;
+          }
+
+          const totalPayment = monthlyPayment * months;
+          const totalInterest = totalPayment - loanAmount;
+
+          resultAmount.innerHTML = `<small>KES </small>${formatNumber(Math.round(monthlyPayment))}`;
+          loanAmountEl.textContent = `KES ${formatNumber(Math.round(loanAmount))}`;
+          totalInterestEl.textContent = `KES ${formatNumber(Math.round(totalInterest))}`;
+          totalPaymentEl.textContent = `KES ${formatNumber(Math.round(totalPayment))}`;
+        });
+      }
+
+      if (resetBtn) {
+        resetBtn.addEventListener('click', function () {
+          try { purchasePriceInput.value = ''; } catch (e) {}
+          try { downPaymentInput.value = ''; } catch (e) {}
+          try { loanTenureSelect.value = 'Loan Tenure'; } catch (e) {}
+          try { interestRateInput.value = ''; } catch (e) {}
+
+          resultAmount.innerHTML = `<small>KES </small>0`;
+          loanAmountEl.textContent = 'KES 0';
+          totalInterestEl.textContent = 'KES 0';
+          totalPaymentEl.textContent = 'KES 0';
+        });
+      }
+    }
+  } catch (err) {
+    // Fail silently — don't block other scripts on the page
+    console.warn('Calculator init skipped or failed:', err);
   }
 
-  // Helper: format number with commas
-  function formatNumber(num) {
-    return num.toLocaleString('en-KE', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
-  }
-
-  // Calculate button click
-  calculateBtn.addEventListener('click', function () {
-    const purchasePrice = parseNumber(purchasePriceInput.value);
-    const downPayment   = parseNumber(downPaymentInput.value);
-    const tenureText    = loanTenureSelect.value;
-    const annualRate    = parseNumber(interestRateInput.value);
-
-    // Validate inputs
-    if (!purchasePrice || tenureText === 'Loan Tenure' || !annualRate) {
-      alert('Please fill in all fields correctly.');
-      return;
-    }
-
-    // Determine if down payment is a percentage or a fixed amount
-    let downPaymentAmount = downPayment;
-    if (downPaymentInput.value.includes('%') || downPayment <= 100) {
-      // Treat as percentage
-      downPaymentAmount = (downPayment / 100) * purchasePrice;
-    }
-
-    const loanAmount   = purchasePrice - downPaymentAmount;
-    const months       = parseInt(tenureText);         // e.g. "12 months" → 12
-    const monthlyRate  = annualRate / 100 / 12;
-
-    // Monthly payment formula: M = P * [r(1+r)^n] / [(1+r)^n - 1]
-    let monthlyPayment;
-    if (monthlyRate === 0) {
-      monthlyPayment = loanAmount / months;
-    } else {
-      const factor = Math.pow(1 + monthlyRate, months);
-      monthlyPayment = loanAmount * (monthlyRate * factor) / (factor - 1);
-    }
-
-    const totalPayment  = monthlyPayment * months;
-    const totalInterest = totalPayment - loanAmount;
-
-    // Update the UI
-    resultAmount.innerHTML   = `<small>KES </small>${formatNumber(Math.round(monthlyPayment))}`;
-    loanAmountEl.textContent  = `KES ${formatNumber(Math.round(loanAmount))}`;
-    totalInterestEl.textContent = `KES ${formatNumber(Math.round(totalInterest))}`;
-    totalPaymentEl.textContent  = `KES ${formatNumber(Math.round(totalPayment))}`;
-  });
-
-  // Reset button click
-  resetBtn.addEventListener('click', function () {
-    purchasePriceInput.value = '';
-    downPaymentInput.value   = '';
-    loanTenureSelect.value   = 'Loan Tenure';
-    interestRateInput.value  = '';
-
-    resultAmount.innerHTML      = `<small>KES </small>0`;
-    loanAmountEl.textContent    = 'KES 0';
-    totalInterestEl.textContent = 'KES 0';
-    totalPaymentEl.textContent  = 'KES 0';
-  });
   // Index page search & filters wiring
   const indexSearchWrap = document.querySelector('.search-bar-section');
   if (indexSearchWrap) {
@@ -348,13 +358,17 @@ function updateNavForSession(){
     if(session){
       loginBtn.classList.add('hidden');
       signupBtn.classList.add('hidden');
+      try { loginBtn.style.display = 'none'; signupBtn.style.display = 'none'; } catch(e) {}
       profileBtn.classList.remove('hidden');
+      try { profileBtn.style.display = ''; } catch(e) {}
       profileBtn.title = 'Signed in as ' + session.name;
       profileBtn.href = session.role === 'admin' ? 'users.html' : 'index.html';
     } else {
       loginBtn.classList.remove('hidden');
       signupBtn.classList.remove('hidden');
+      try { loginBtn.style.display = ''; signupBtn.style.display = ''; } catch(e) {}
       profileBtn.classList.add('hidden');
+      try { profileBtn.style.display = 'none'; } catch(e) {}
     }
   }
   updateNavForSession();
@@ -400,27 +414,30 @@ const LOGOS = {
 const logoNames = Object.keys(LOGOS);
 const stage = document.getElementById('stage');
 
-function spawn(delay) {
-  const name = logoNames[Math.floor(Math.random() * logoNames.length)];
-  const size = 44 + Math.random() * 56;
-  const x = Math.random() * (stage.offsetWidth - size);
-  const y = Math.random() * (stage.offsetHeight - size);
-  const dur = 16 + Math.random() * 20;
-  const angle = Math.random() * Math.PI * 2;
-  const dist = 50 + Math.random() * 100;
-  const tx = Math.cos(angle) * dist;
-  const ty = Math.sin(angle) * dist;
-  const rot = (Math.random() - 0.5) * 16;
-  const op = (0.08 + Math.random() * 0.07).toFixed(3);
+if (stage) {
+  function spawn(delay) {
+    if (!stage) return;
+    const name = logoNames[Math.floor(Math.random() * logoNames.length)];
+    const size = 44 + Math.random() * 56;
+    const x = Math.random() * (Math.max(0, stage.offsetWidth - size));
+    const y = Math.random() * (Math.max(0, stage.offsetHeight - size));
+    const dur = 16 + Math.random() * 20;
+    const angle = Math.random() * Math.PI * 2;
+    const dist = 50 + Math.random() * 100;
+    const tx = Math.cos(angle) * dist;
+    const ty = Math.sin(angle) * dist;
+    const rot = (Math.random() - 0.5) * 16;
+    const op = (0.08 + Math.random() * 0.07).toFixed(3);
 
-  const el = document.createElement('div');
-  el.className = 'particle';
-  el.style.cssText = `left:${x}px;top:${y}px;width:${size}px;height:${size}px;--op:${op};--tx:${tx}px;--ty:${ty}px;--rot:${rot}deg;animation-duration:${dur}s;animation-delay:${delay}s;`;
-  const img = document.createElement('img');
-  img.src = LOGOS[name];
-  el.appendChild(img);
-  stage.appendChild(el);
-  el.addEventListener('animationend', () => { el.remove(); spawn(Math.random() * 3); });
+    const el = document.createElement('div');
+    el.className = 'particle';
+    el.style.cssText = `left:${x}px;top:${y}px;width:${size}px;height:${size}px;--op:${op};--tx:${tx}px;--ty:${ty}px;--rot:${rot}deg;animation-duration:${dur}s;animation-delay:${delay}s;`;
+    const img = document.createElement('img');
+    img.src = LOGOS[name];
+    el.appendChild(img);
+    stage.appendChild(el);
+    el.addEventListener('animationend', () => { el.remove(); spawn(Math.random() * 3); });
+  }
+
+  for (let i = 0; i < 28; i++) spawn(Math.random() * 15);
 }
-
-for (let i = 0; i < 28; i++) spawn(Math.random() * 15);

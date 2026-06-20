@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Sell Your Car – Coming Soon | New Age Automotive</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Playfair+Display:wght@600;700&family=Barlow:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="sell.css">
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar">
+  <div class="container">
+    <div class="age">
+    <div class="logo">
+      <div class="logo-icon"><img class="main" src="Pic/Main2.png" alt="Logo"></div>
+      <div class="logo-text">
+        <span>Your One<br>Stop Car<br>Shopping</span>
+      </div>
+    </div>
+    </div>
+    <ul class="nav-links">
+      <li><a href="index.html" >Home</a></li>
+      <li><a href="about.html">About us</a></li>
+      <li><a href="faq.html">FAQ</a></li>
+      <li><a href="sell-your-car.html" class="active">Sell your Car</a></li>
+    </ul>
+    <div class="nav-auth">
+      <a href="login.html" class="btn btn-outline" id="nav-login">Login</a>
+      <a href="login.html" class="btn btn-gold" id="nav-signup">Sign Up</a>
+      <button class="profile hidden" id="nav-profile" title="Profile"><img class="logo-img" src="Pic/profile.svg" alt="Profile"></button>
+    </div>
+  </div>
+</nav>
+
+<!-- HERO / COMING SOON -->
+<section class="hero">
+  <div class="hero-title">YOUR ONE<br/>STOP CAR<br/>SHOPPING</div>
+  <div class="coming-soon-wrap">
+    <div class="coming-soon">COMING SOON</div>
+    <div class="coming-soon-sub">Sell your car the easy way — launching shortly</div>
+
+    <!-- Countdown -->
+    <div class="countdown" id="countdown">
+      <div class="cd-box"><div class="cd-num" id="cd-days">--</div><div class="cd-label">Days</div></div>
+      <div class="cd-box"><div class="cd-num" id="cd-hours">--</div><div class="cd-label">Hours</div></div>
+      <div class="cd-box"><div class="cd-num" id="cd-mins">--</div><div class="cd-label">Minutes</div></div>
+      <div class="cd-box"><div class="cd-num" id="cd-secs">--</div><div class="cd-label">Seconds</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- NOTIFY ME -->
+<section class="notify-section">
+  <div class="container">
+    <h2>Be the first to know</h2>
+    <p>We're putting the finishing touches on our "Sell your Car" experience. Drop your email and we'll notify you the moment it goes live.</p>
+
+    <form class="notify-form" id="notifyForm">
+      <input type="email" class="notify-input" id="notifyEmail" placeholder="Enter your email address" required/>
+      <button type="submit" class="btn btn-gold">Notify Me</button>
+    </form>
+    <div class="notify-success" id="notifySuccess">✓ Thanks! We'll let you know the moment this launches.</div>
+
+    <!-- What's coming -->
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon">📸</div>
+        <div class="feature-title">Instant Listings</div>
+        <div class="feature-desc">Upload photos and details, get your car listed in minutes.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">✅</div>
+        <div class="feature-title">Free Verification</div>
+        <div class="feature-desc">We verify and inspect your vehicle at no extra cost.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">💰</div>
+        <div class="feature-title">No Upfront Fees</div>
+        <div class="feature-desc">Pay a small commission only after your car sells.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand"><h3>New Age Automotive</h3><p>Your one-stop destination for buying, selling, and sourcing your dream car.</p></div>
+      <div class="footer-links-grid">
+        <div class="footer-col"><h4>Navigation</h4><ul><li><a href="index.html">Home</a></li><li><a href="about.html">About us</a></li><li><a href="#">Services</a></li><li><a href="sell-your-car.html">Sell your Car</a></li></ul></div>
+        <div class="footer-col"><h4>Connect With Us</h4><ul><li><a href="#">Facebook</a></li><li><a href="#">Twitter / X</a></li><li><a href="#">Instagram</a></li></ul></div>
+        <div class="footer-col"><h4>Contact Us</h4><ul><li><a href="#">Support</a></li><li><a href="#">Privacy Policy</a></li><li><a href="#">Terms</a></li></ul></div>
+      </div>
+      <div class="footer-newsletter">
+        <h4>Connect via Email</h4>
+        <input type="email" class="nl-input" placeholder="Your email address"/>
+        <button class="btn btn-gold" style="width:100%;justify-content:center;letter-spacing:1px;">SUBMIT</button>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>© 2024 New Age Automotive. All rights reserved.</p>
+      <nav class="footer-nav"><a href="#">Privacy</a><a href="#">Terms</a><a href="#">Cookies</a></nav>
+    </div>
+  </div>
+</footer>
+<script src="new_age.js"></script>
+<script src="sell.js"></script>
+<script src="auth-nav.js"></script>
+</body>
+</html>

@@ -201,6 +201,8 @@
       transition: all 0.2s;
      }
 
+      /* Ensure profile respects hidden state */
+      .profile.hidden{ display: none !important; visibility: hidden !important; pointer-events: none !important; }
     .profile:hover{
       transform: translateY(-2px); 
       color: rgba(245,166,35,0.3);
