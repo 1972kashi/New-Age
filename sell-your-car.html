@@ -6,6 +6,7 @@
 <title>Sell Your Car – Coming Soon | New Age Automotive</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Playfair+Display:wght@600;700&family=Barlow:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
 <link rel="stylesheet" href="sell.css">
+<link rel="stylesheet" href="media-overrides.css">
 </head>
 <body>
 
@@ -20,12 +21,21 @@
       </div>
     </div>
     </div>
-    <ul class="nav-links">
-      <li><a href="index.html" >Home</a></li>
+    <ul class="nav-links desktop-nav-links">
+      <li><a href="index.html">Home</a></li>
       <li><a href="about.html">About us</a></li>
       <li><a href="faq.html">FAQ</a></li>
       <li><a href="sell-your-car.html" class="active">Sell your Car</a></li>
     </ul>
+    <details class="mobile-nav-menu">
+      <summary>Menu</summary>
+      <ul class="nav-links mobile-nav-links">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="about.html">About us</a></li>
+        <li><a href="faq.html">FAQ</a></li>
+        <li><a href="sell-your-car.html" class="active">Sell your Car</a></li>
+      </ul>
+    </details>
     <div class="nav-auth">
       <a href="login.html" class="btn btn-outline" id="nav-login">Login</a>
       <a href="login.html" class="btn btn-gold" id="nav-signup">Sign Up</a>

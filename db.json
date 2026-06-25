@@ -311,6 +311,19 @@
       "link": "car-detail.html?id=73af1ea30d87413",
       "img": "Pic/BMW 3.svg",
       "badge": true
+    },
+    {
+      "id": "2ec0864e923b451",
+      "createdAt": "2026-06-22T02:42:20.425587+00:00",
+      "name": "BMW COUPE 8",
+      "miles": "1000",
+      "trans": "Automatic",
+      "fuel": "Hybrid",
+      "year": "2020",
+      "price": "4,500,000",
+      "link": "car-detail.html?id=73af1ea30d87413",
+      "img": "Pic/BMW 3.svg",
+      "badge": true
     }
   ],
   "carDetails": [

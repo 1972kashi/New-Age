@@ -416,25 +416,36 @@
     .reveal-bottom:nth-child(n+4) { animation-delay: calc(0.15s * (var(--reveal-index, 1) - 1)); }
 
     @media only screen and (max-width: 599px) {
- 
       .container { width: 100%; padding: 0 14px; }
- 
-      /* Navbar */
+
       .navbar .container {
-        grid-template-columns: auto auto;
-        justify-content: space-between;
-        gap: 8px;
+        display: grid;
+        grid-template-columns: auto 1fr auto;
+        gap: 6px;
         padding-top: 10px;
         padding-bottom: 10px;
+        align-items: center;
       }
-      .nav-links { display: none; }
+      .nav-links {
+        display: flex;
+        grid-column: 1 / -1;
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 4px;
+        margin-top: 2px;
+      }
+      .nav-links a {
+        padding: 5px 7px;
+        font-size: 8px;
+        line-height: 1.2;
+        white-space: nowrap;
+      }
       .main { height: 70px; width: 65px; }
       .logo-icon { width: 70px; height: 34px; }
       .logo-text span { font-size: 9px; letter-spacing: 1.5px; }
       .nav-auth { gap: 6px; }
       .btn { padding: 7px 12px; font-size: 12px; }
- 
-      /* Hero Banner */
+
       .hero-banner { min-height: 220px; padding: 32px 16px; gap: 16px; }
       .hero-banner h1 { font-size: 36px; letter-spacing: 1px; }
       .search-wrap {
@@ -447,8 +458,7 @@
       .btn-filter { width: 100%; }
       .popular-searches { gap: 6px; justify-content: center; }
       .pop-tag { font-size: 13px; }
- 
-      /* Listings */
+
       .listings-section { padding: 32px 0; }
       .listings-title { font-size: 26px; margin-bottom: 20px; }
       .listings-title span { font-size: 18px; }
@@ -459,12 +469,10 @@
       .meta-item { font-size: 10px; }
       .card-price { font-size: 14px; }
       .card-body { padding: 10px 12px; }
- 
-      /* Pagination */
+
       .pagination { gap: 6px; margin-top: 28px; }
       .pg-btn { width: 32px; height: 32px; font-size: 12px; }
- 
-      /* Footer */
+
       .footer { padding: 36px 0 20px; }
       .footer-grid { grid-template-columns: 1fr; gap: 28px; margin-bottom: 24px; }
       .footer-links-grid { grid-template-columns: repeat(2, 1fr); gap: 20px; }
@@ -481,11 +489,25 @@
  
       /* Navbar */
       .navbar .container {
-        grid-template-columns: auto auto;
-        justify-content: space-between;
+        display: grid;
+        grid-template-columns: auto 1fr auto;
+        align-items: center;
         gap: 10px;
       }
-      .nav-links { display: none; }
+      .nav-links {
+        display: flex;
+        grid-column: 1 / -1;
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin-top: 2px;
+      }
+      .nav-links a {
+        padding: 6px 8px;
+        font-size: 9px;
+        line-height: 1.2;
+        white-space: nowrap;
+      }
       .main { height: 80px; width: 75px; }
       .logo-icon { width: 80px; height: 38px; }
       .logo-text span { font-size: 10px; letter-spacing: 2px; }
@@ -511,34 +533,34 @@
     }
  
     /* ══════════════════════════════════════════
-       Medium — landscape tablets (768px – 991px)
+       Tablet / small laptop — up to 1024px
+       Consolidated rules for the car listings layout.
     ══════════════════════════════════════════ */
-    @media only screen and (min-width: 768px) and (max-width: 991px) {
+    @media only screen and (max-width: 1024px) {
  
-      .container { width: 100%; padding: 0 24px; }
+      .container { padding: 0 20px; }
  
       /* Navbar */
-      .navbar .container { grid-template-columns: auto 1fr auto; gap: 16px; }
-      .nav-links { display: flex; margin-left: 0; justify-content: center; gap: 2px; }
-      .nav-links a { padding: 6px 10px; font-size: 13px; }
-      .main { height: 90px; width: 85px; }
-      .logo-icon { width: 90px; height: 40px; }
+      .navbar .container { gap: 16px; }
+      .nav-links { gap: 2px; }
+      .nav-links a { padding: 7px 11px; font-size: 12px; }
+      .logo-text { font-size: 13px; }
  
       /* Hero Banner */
-      .hero-banner { min-height: 280px; padding: 40px 24px; gap: 20px; }
-      .hero-banner h1 { font-size: 56px; }
-      .search-wrap { max-width: 580px; }
+      .hero-banner { min-height: 280px; padding: 40px 20px; gap: 18px; }
+      .hero-banner h1 { font-size: 50px; }
+      .search-wrap { max-width: 540px; }
  
       /* Listings */
-      .listings-section { padding: 44px 0; }
+      .listings-section { padding: 40px 0; }
       .listings-title { font-size: 30px; }
-      .g-3 { grid-template-columns: repeat(2, 1fr); gap: 18px; }
-      .card-img-wrap img { height: 170px; }
+      .g-3 { gap: 14px; }
+      .card-img-wrap img { height: 150px; }
  
       /* Footer */
-      .footer-grid { grid-template-columns: 1fr 2fr; gap: 32px; }
-      .footer-links-grid { grid-template-columns: repeat(3, 1fr); gap: 20px; }
-      .footer-bottom { grid-template-columns: 1fr auto; }
+      .footer-grid { grid-template-columns: 1fr 1fr; gap: 28px; }
+      .footer-newsletter { grid-column: 1 / -1; }
+      .footer-links-grid { grid-template-columns: repeat(3, 1fr); gap: 18px; }
     }
  
     /* ══════════════════════════════════════════
