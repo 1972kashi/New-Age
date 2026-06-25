@@ -418,7 +418,9 @@ ul{list-style:none;}
   .hero-badge-desc{font-size:8px;}
   .faq-section{padding:24px 0;}
   .faq-layout{grid-template-columns:1fr;gap:14px;}
-  .category-panel{display:none;}
+  .category-panel{display:block;position:static;order:-1;}
+  .category-list{flex-direction:row;flex-wrap:wrap;gap:8px;}
+  .category-btn{width:auto;flex:1 1 auto;justify-content:center;text-align:center;}
   .accordion-wrap{padding:8px;}
   .accordion-list{gap:7px;}
   .faq-question{padding:13px 14px;font-size:12.5px;gap:8px;}
@@ -444,7 +446,9 @@ ul{list-style:none;}
   .faq-search-wrap{max-width:560px;}
   .hero-badges{gap:12px;flex-wrap:wrap;}
   .faq-layout{grid-template-columns:1fr;gap:16px;}
-  .category-panel{display:none;}
+  .category-panel{display:block;position:static;order:-1;}
+  .category-list{flex-direction:row;flex-wrap:wrap;gap:8px;}
+  .category-btn{width:auto;flex:1 1 auto;justify-content:center;text-align:center;}
   .faq-question{font-size:13px;padding:14px 16px;}
   .news-banner{height:220px;}
   .news-overlay h3{font-size:18px;}

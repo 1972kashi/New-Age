@@ -1,3 +1,23 @@
+const shouldIgnoreChannelError = (message) => message && (
+  message.includes('A listener indicated an asynchronous response') ||
+  message.includes('message channel closed') ||
+  message.includes('Message channel closed')
+);
+
+window.addEventListener('unhandledrejection', (event) => {
+  const message = event?.reason?.message || '';
+  if (shouldIgnoreChannelError(message)) {
+    event.preventDefault();
+  }
+});
+
+window.addEventListener('error', (event) => {
+  const message = event?.error?.message || event?.message || '';
+  if (shouldIgnoreChannelError(message)) {
+    event.preventDefault();
+  }
+});
+
 /* ════════════════════════════════════════
    ACCORDION TOGGLE LOGIC
 ════════════════════════════════════════ */
