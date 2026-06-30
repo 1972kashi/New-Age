@@ -16,14 +16,18 @@ html,body{overflow-x:hidden;}
 /* Containers: keep default widths but ensure padding on small screens */
 .container{width:100%;max-width:var(--site-max-width);margin-left:auto;margin-right:auto;padding-left:16px;padding-right:16px}
 
-/* Make media elements scale down */
+/* Make media elements scale down and preserve aspect ratio */
 img,svg,video,canvas,picture,
 .hero-section img,.background-section img,.car-card img,.card-media img{
-  width:100%;
+  display:block;
+  height:auto;
+  object-fit:contain;
+}
+
+/* For images that are not inside a standard card/hero wrapper, keep them inside the viewport */
+img:not(.logo-img):not(.hero-image):not(.card-media img){
   max-width:100%;
   height:auto;
-  object-fit:cover;
-  display:block;
 }
 
 /* Improve hit target sizes for small touch devices */
@@ -39,7 +43,7 @@ img,svg,video,canvas,picture,
     display:flex;
     align-items:center;
     justify-content:center;
-    
+   
     gap:6px;
     width:100%;
     padding:8px 10px;

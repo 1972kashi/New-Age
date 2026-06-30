@@ -350,6 +350,29 @@ if (document.readyState === 'loading') {
   initHomePagination();
   triggerScrollReveal();
 }
+// Register service worker for offline caching and enable lazy-loading for images
+try {
+  // Only register the service worker in non-local environments to avoid
+  // SW caching interfering with development and MFA flows on localhost.
+  if ('serviceWorker' in navigator && location.hostname !== 'localhost' && location.hostname !== '127.0.0.1') {
+    navigator.serviceWorker.register('/sw.js').catch(() => {});
+  }
+} catch (e) {}
+
+// Apply native lazy-loading to images that look like content images
+(function applyLazyLoading(){
+  try{
+    document.querySelectorAll('img').forEach(img => {
+      if (img.loading) return; // browser supports attribute, respect existing
+      const src = img.getAttribute('src') || '';
+      if (!src || src.startsWith('data:')) return;
+      // Skip tiny UI icons (heuristic: file size unknown — skip images with width/height <=48)
+      const w = img.width || img.naturalWidth || 0;
+      const h = img.height || img.naturalHeight || 0;
+      if (w > 48 || h > 48) img.setAttribute('loading', 'lazy');
+    });
+  }catch(e){}
+})();
 function updateNavForSession(){
     const session = JSON.parse(localStorage.getItem('naa_session')||'null');
     const loginBtn = document.getElementById('nav-login');

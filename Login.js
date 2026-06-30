@@ -208,10 +208,16 @@ function doSignUp(){
     role: 'user'
   };
   
-  fetch(`${API_BASE}/api/users`, {
+  fetch(`${API_BASE}/auth/register`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(userData)
+    body: JSON.stringify({
+      fname: fname,
+      lname: lname,
+      email: email,
+      phone: phone,
+      password: pass
+    })
   })
     .then(res => {
       if (!res.ok) return res.json().then(e => Promise.reject(e));
@@ -220,7 +226,7 @@ function doSignUp(){
     .then(savedUser => {
       const sessionData = {name: fname+' '+lname, email: email, role: 'user'};
       localStorage.setItem('naa_session', JSON.stringify(sessionData));
-      showMsg('su-ok', 'Account created! Redirecting to home…');
+      showMsg('su-ok', 'Account created! A welcome email will be sent if email delivery is configured.');
       setTimeout(() => {
         const redirect = localStorage.getItem('post_login_redirect');
         if (redirect) { 

@@ -102,7 +102,33 @@ function triggerScrollReveal() {
   });
 }
 
+function collectEnquiryDetails() {
+  const name = document.querySelector('.enq-fields .enq-input[placeholder="*Your Name"]')?.value?.trim() || 'Customer';
+  const email = document.querySelector('.enq-fields .enq-input[placeholder="*Email Address"]')?.value?.trim() || 'no-email-provided';
+  const phone = document.querySelector('.phone-input')?.value?.trim() || 'Not provided';
+  const message = document.querySelector('.enq-msg')?.value?.trim() || 'Interested in this vehicle.';
+  return { name, email, phone, message };
+}
+
+function sendEnquiryEmail() {
+  const { name, email, phone, message } = collectEnquiryDetails();
+  const subject = encodeURIComponent('Enquiry for car listing');
+  const body = encodeURIComponent(`Name: ${name}\nEmail: ${email}\nPhone: ${phone}\n\nMessage:\n${message}`);
+  window.location.href = `mailto:sales@newageautomotive.co.ke?subject=${subject}&body=${body}`;
+}
+
+function openWhatsApp() {
+  const { name, email, phone, message } = collectEnquiryDetails();
+  const text = encodeURIComponent(`Hello New Age Automotive, I am ${name}. Email: ${email}. Phone: ${phone}. Message: ${message}`);
+  window.open(`https://wa.me/254700000000?text=${text}`, '_blank', 'noopener,noreferrer');
+}
+
 /* ── Init on DOM ready — same pattern as new_age.js ── */
 document.addEventListener("DOMContentLoaded", () => {
   triggerScrollReveal();
+
+  const enquiryBtn = document.getElementById('send-enquiry-btn');
+  const whatsappBtn = document.getElementById('whatsapp-btn');
+  if (enquiryBtn) enquiryBtn.addEventListener('click', sendEnquiryEmail);
+  if (whatsappBtn) whatsappBtn.addEventListener('click', openWhatsApp);
 });

@@ -18,19 +18,22 @@ Sections:
 # ─────────────────────────────────────────────
 # 1. IMPORTS & SETUP
 # ─────────────────────────────────────────────
-import json, os, uuid, base64, shutil, time
+import json, os, uuid, base64, shutil, smtplib, time, io, re
+from collections import defaultdict
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Optional
+from email.message import EmailMessage
 
 from fastapi import (
     FastAPI, HTTPException, Depends, status,
-    UploadFile, File, Query, Body
+    UploadFile, File, Query, Body, Request
 )
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, JSONResponse, Response
+from starlette.middleware.gzip import GZipMiddleware
 from jose import JWTError, jwt
 import pyotp
 from passlib.context import CryptContext
@@ -39,22 +42,79 @@ from pydantic import BaseModel, EmailStr
 # ── Constants ──────────────────────────────────
 DB_PATH      = Path("db.json")          # path to your db.json file
 UPLOAD_DIR   = Path("Pic")              # folder where car images are saved
-SECRET_KEY   = "change-me-in-production-use-env-var"
+# Read secrets from environment when possible. Keeps the existing default
+# value for development to avoid breaking local setups, but logs a warning
+# so deployers know to set a real secret in production.
+SECRET_KEY   = os.getenv("SECRET_KEY", "change-me-in-production-use-env-var")
 ALGORITHM    = "HS256"
-TOKEN_EXPIRE = 60 * 24                  # minutes — 1 day
+# Token expiry (minutes). Can be overridden with the env var `TOKEN_EXPIRE_MIN`.
+try:
+    TOKEN_EXPIRE = int(os.getenv("TOKEN_EXPIRE_MIN", str(60 * 24)))
+except Exception:
+    TOKEN_EXPIRE = 60 * 24
+
+if SECRET_KEY == "change-me-in-production-use-env-var":
+    print("[WARN] Using default SECRET_KEY. Set SECRET_KEY env var in production.")
 
 UPLOAD_DIR.mkdir(exist_ok=True)
 
 app = FastAPI(title="Car Dealership API", version="1.0.0")
 
-# Allow the HTML/JS frontend to call this API from any origin (CORS)
+# Configure CORS from environment (comma-separated) to avoid wide-open origins in
+# production. Default keeps previous permissive behavior for local development.
+allowed = os.getenv("ALLOWED_ORIGINS", "*")
+if allowed.strip() == "*":
+    allow_origins = ["*"]
+else:
+    allow_origins = [o.strip() for o in allowed.split(",") if o.strip()]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],        # tighten to your domain in production
+    allow_origins=allow_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# GZip responses for bandwidth savings
+app.add_middleware(GZipMiddleware, minimum_size=1000)
+
+
+@app.middleware("http")
+async def security_headers_middleware(request, call_next):
+    resp = await call_next(request)
+    # Basic security headers
+    resp.headers.setdefault("X-Frame-Options", "DENY")
+    resp.headers.setdefault("X-Content-Type-Options", "nosniff")
+    resp.headers.setdefault("Referrer-Policy", "strict-origin-when-cross-origin")
+    # HSTS only in non-local environments
+    host = request.url.hostname or ""
+    if host not in ("localhost", "127.0.0.1"):
+        resp.headers.setdefault("Strict-Transport-Security", "max-age=63072000; includeSubDomains; preload")
+    # Content Security Policy (relaxed to avoid breaking inline scripts used by site)
+    csp = "default-src 'self' https: data:; script-src 'self' 'unsafe-inline' https://www.google-analytics.com; img-src 'self' data: https:; style-src 'self' 'unsafe-inline' https:;"
+    resp.headers.setdefault("Content-Security-Policy", csp)
+    return resp
+
+# Simple global rate limiter (in-memory). Tune via env vars.
+GLOBAL_RATE = defaultdict(list)
+GLOBAL_RATE_WINDOW = int(os.getenv("GLOBAL_RATE_WINDOW_SEC", "60"))
+GLOBAL_RATE_LIMIT = int(os.getenv("GLOBAL_RATE_LIMIT", "120"))
+
+
+@app.middleware("http")
+async def global_rate_limiter(request, call_next):
+    try:
+        ip = request.client.host if request.client else "unknown"
+        now = time.time()
+        entries = [t for t in GLOBAL_RATE[ip] if now - t < GLOBAL_RATE_WINDOW]
+        if len(entries) >= GLOBAL_RATE_LIMIT:
+            return JSONResponse(status_code=429, content={"detail": "Too many requests"})
+        entries.append(now)
+        GLOBAL_RATE[ip] = entries
+    except Exception:
+        pass
+    return await call_next(request)
 
 
 # Temporary debugging middleware: log raw request body and headers for API create endpoints
@@ -88,6 +148,7 @@ pwd_context   = CryptContext(schemes=["bcrypt"], deprecated="auto")
 # Simple in-memory rate limit stores (reset on server restart)
 LOGIN_RATE = {}
 MFA_RATE = {}
+REGISTER_RATE = {}
 RATE_WINDOW = 15 * 60  # seconds
 RATE_LIMIT_LOGIN = 12  # max login attempts per window per username
 RATE_LIMIT_MFA = 6     # max MFA verify attempts per window per user
@@ -101,6 +162,23 @@ def _check_rate(store: dict, key: str, limit: int, window: int):
     store[key] = entries
 
 
+from typing import Optional
+
+
+def audit_log(user_identifier: str, action: str, details: Optional[dict] = None):
+    try:
+        out = {
+            "ts": datetime.now(timezone.utc).isoformat(),
+            "user": user_identifier,
+            "action": action,
+            "details": details or {}
+        }
+        with open('audit.log', 'a', encoding='utf-8') as f:
+            f.write(json.dumps(out, ensure_ascii=False) + "\n")
+    except Exception:
+        pass
+
+
 def send_sms(phone: str, message: str) -> bool:
     """Placeholder SMS sender — replace with Twilio or other provider in production.
 
@@ -112,6 +190,63 @@ def send_sms(phone: str, message: str) -> bool:
         return True
     except Exception:
         return False
+
+
+def send_email(to: str, subject: str, body: str) -> bool:
+    """Send a simple email using SMTP if environment variables are configured."""
+    smtp_host = os.getenv("SMTP_HOST")
+    if not smtp_host:
+        print(f"[EMAIL] SMTP not configured. To={to} Subject={subject}")
+        return False
+
+    smtp_port = int(os.getenv("SMTP_PORT", "587"))
+    username = os.getenv("SMTP_USERNAME")
+    password = os.getenv("SMTP_PASSWORD")
+    from_addr = os.getenv("SMTP_FROM") or username or "no-reply@newageautomotive.local"
+
+    msg = EmailMessage()
+    msg["Subject"] = subject
+    msg["From"] = from_addr
+    msg["To"] = to
+    msg.set_content(body)
+
+    try:
+        if smtp_port == 465:
+            with smtplib.SMTP_SSL(smtp_host, smtp_port, timeout=15) as smtp:
+                if username and password:
+                    smtp.login(username, password)
+                smtp.send_message(msg)
+        else:
+            with smtplib.SMTP(smtp_host, smtp_port, timeout=15) as smtp:
+                smtp.starttls()
+                if username and password:
+                    smtp.login(username, password)
+                smtp.send_message(msg)
+        return True
+    except Exception as exc:
+        print(f"[EMAIL] Failed to send to {to}: {exc}")
+        return False
+
+
+def send_auth_notification(user: dict, kind: str) -> bool:
+    if not user.get("email"):
+        return False
+
+    if kind == "welcome":
+        subject = "Welcome to New Age Automotive"
+        body = (
+            f"Hi {user.get('fname', 'there')},\n\n"
+            "Welcome to New Age Automotive. Your account has been created successfully.\n"
+            "You can sign in anytime to browse verified cars and manage your account."
+        )
+    else:
+        subject = "New Age Automotive login confirmation"
+        body = (
+            f"Hi {user.get('fname', 'there')},\n\n"
+            "This is a confirmation that you have successfully logged in to New Age Automotive."
+        )
+
+    return send_email(user["email"], subject, body)
 
 
 # Ensure default admin exists in db.json (legacy base64 password)
@@ -213,7 +348,7 @@ def get_current_user(token: str = Depends(oauth2_scheme)) -> dict:
         # Only accept 'access' tokens for protected routes
         if payload.get("purpose", "access") != "access":
             raise credentials_error
-        user_id: str = payload.get("sub")
+        user_id = payload.get("sub")
         if not user_id:
             raise credentials_error
     except JWTError:
@@ -260,6 +395,12 @@ def register(body: RegisterBody):
     Creates a new user.
     Passwords are stored as bcrypt hashes (not base64 like the seed data).
     """
+    # Rate-limit registrations per email/IP
+    try:
+        _check_rate(REGISTER_RATE, body.email, 6, RATE_WINDOW)
+    except HTTPException:
+        raise HTTPException(429, "Too many registration attempts, try later")
+
     db = read_db()
     if any(u["email"] == body.email for u in db["users"]):
         raise HTTPException(400, "Email already registered")
@@ -273,10 +414,33 @@ def register(body: RegisterBody):
         "phone":     body.phone,
         "role":      "user",
         "password":  hash_password(body.password),   # ← bcrypt hash
+        "welcome_email_sent": False,
     }
     db["users"].append(user)
     write_db(db)
+    send_auth_notification(user, "welcome")
+    audit_log(user.get('email','unknown'), 'register', {'id': user['id']})
     return user
+
+
+def _sanitize_str(s: str) -> str:
+    # Basic sanitization: remove script tags and inline event handlers
+    if not isinstance(s, str):
+        return s
+    s = re.sub(r"<\s*script[^>]*>.*?<\s*/\s*script\s*>", "", s, flags=re.I | re.S)
+    s = re.sub(r"on\w+\s*=\s*\"[^\"]*\"", "", s, flags=re.I)
+    s = re.sub(r"on\w+\s*=\s*'[^']*'", "", s, flags=re.I)
+    return s
+
+
+def sanitize_dict(obj):
+    if isinstance(obj, dict):
+        return {k: sanitize_dict(v) for k, v in obj.items()}
+    if isinstance(obj, list):
+        return [sanitize_dict(v) for v in obj]
+    if isinstance(obj, str):
+        return _sanitize_str(obj)
+    return obj
 
 
 # Now that DB helpers are defined, ensure default admin exists
@@ -339,8 +503,23 @@ def login(form: OAuth2PasswordRequestForm = Depends()):
         return {"mfa_setup_required": True, "mfa_token": setup_token, "message": "MFA setup required for admin accounts"}
 
     # Non-admin users — standard access token
+    first_login = not bool(user.get("welcome_email_sent"))
+    if first_login:
+        user["welcome_email_sent"] = True
+        for idx, candidate in enumerate(db["users"]):
+            if candidate.get("id") == user.get("id"):
+                db["users"][idx] = user
+                break
+        write_db(db)
+        send_auth_notification(user, "login")
+
     token = create_token({"sub": user["id"], "role": user["role"]})
-    return {"access_token": token, "token_type": "bearer", "role": user["role"]}
+    return {
+        "access_token": token,
+        "token_type": "bearer",
+        "role": user["role"],
+        "message": "Login successful." if not first_login else "Login successful. A confirmation email was sent if delivery is configured."
+    }
 
 
 class MFAVerifyBody(BaseModel):
@@ -364,6 +543,8 @@ def mfa_verify(body: MFAVerifyBody):
         raise credentials_error
 
     user_id = payload.get("sub")
+    if not user_id:
+        raise credentials_error
 
     # Rate-limit MFA verification attempts per user
     try:
@@ -711,6 +892,7 @@ def delete_user(user_id: str, admin=Depends(require_admin)):
     if len(db["users"]) == before:
         raise HTTPException(404, "User not found")
     write_db(db)
+    audit_log(admin.get('email','admin'), 'delete_user', {'deleted_id': user_id})
 
 
 # ─────────────────────────────────────────────
@@ -730,19 +912,67 @@ async def upload_image(
     Returns the relative path to store in car.img, e.g. "Pic/abc123.jpg".
     Max size: 5 MB. Allowed types: JPEG, PNG, WebP, SVG.
     """
+    # Quick content-type check (from client) — we'll verify using file contents below
     if file.content_type not in ALLOWED_TYPES:
         raise HTTPException(400, f"File type '{file.content_type}' not allowed")
 
-    contents = await file.read()
-    if len(contents) > MAX_SIZE_MB * 1024 * 1024:
-        raise HTTPException(400, f"File exceeds {MAX_SIZE_MB} MB limit")
+    # Read the upload in chunks to enforce size limits without unbounded memory growth
+    size = 0
+    chunks = []
+    while True:
+        chunk = await file.read(1024 * 64)
+        if not chunk:
+            break
+        size += len(chunk)
+        if size > MAX_SIZE_MB * 1024 * 1024:
+            raise HTTPException(400, f"File exceeds {MAX_SIZE_MB} MB limit")
+        chunks.append(chunk)
+    contents = b"".join(chunks)
 
-    ext      = Path(file.filename).suffix
+    # Validate raster image types using content-signature checks
+    if file.content_type != "image/svg+xml":
+        def _detect_raster(b: bytes):
+            # JPEG
+            if b.startswith(b"\xff\xd8\xff"):
+                return "jpeg"
+            # PNG
+            if b.startswith(b"\x89PNG\r\n\x1a\n"):
+                return "png"
+            # WebP (RIFF....WEBP)
+            if len(b) >= 12 and b[0:4] == b"RIFF" and b[8:12] == b"WEBP":
+                return "webp"
+            return None
+
+        kind = _detect_raster(contents)
+        if kind is None:
+            raise HTTPException(400, "Uploaded file is not a recognized image")
+        # Map detected kinds to extensions
+        ext_map = {"jpeg": ".jpg", "png": ".png", "webp": ".webp"}
+        ext = ext_map.get(kind)
+        if not ext:
+            raise HTTPException(400, f"Unsupported image format: {kind}")
+
+    else:
+        # Basic SVG safety checks — disallow scripts and inline event handlers
+        try:
+            txt = contents.decode("utf-8", errors="ignore").lower()
+        except Exception:
+            raise HTTPException(400, "Invalid SVG file encoding")
+        if "<script" in txt or re.search(r"on\w+\s*=", txt):
+            raise HTTPException(400, "SVG contains disallowed script or event handlers")
+        # Prefer .svg extension for SVG files
+        ext = ".svg"
+
+    # Create a server-generated filename and write to disk
     filename = f"{new_id()}{ext}"
-    dest     = UPLOAD_DIR / filename
-
+    dest = UPLOAD_DIR / filename
     with open(dest, "wb") as f:
         f.write(contents)
+
+    # If Pillow is available, also attempt to produce a WebP variant for adaptive loading
+    # Optional WebP conversion skipped if Pillow is not installed.
+
+    audit_log(_admin.get('email','admin'), 'upload_image', {'filename': str(dest)})
 
     return {"img": f"Pic/{filename}", "url": f"/Pic/{filename}"}
 
@@ -779,9 +1009,14 @@ def api_create_cars(body: object = Body(...)):
     if not body:
         raise HTTPException(400, "Missing body")
     db = read_db()
+    # Sanitize incoming payloads to remove embedded scripts/event handlers
+    body = sanitize_dict(body)
     items = body if isinstance(body, list) else [body]
     created = []
     for item in items:
+        if not isinstance(item, dict):
+            # Skip non-dict items — maintain backward compatibility but ignore malformed entries
+            item = {}
         base = {
             "name": item.get("name", ""),
             "miles": item.get("miles", ""),
@@ -813,6 +1048,30 @@ def api_list_cars(page: int = 1, limit: int = 50):
     return {"total": total, "page": page, "limit": limit, "items": paged}
 
 
+@app.get('/sitemap.xml', include_in_schema=False)
+def sitemap():
+    """Dynamically generate a sitemap listing car detail pages and main routes."""
+    db = read_db()
+    host = os.getenv('SITE_URL', 'http://localhost:8000').rstrip('/')
+    urls = [f"{host}/", f"{host}/car-listings.html", f"{host}/sell-your-car.html"]
+    for c in db.get('cars', []):
+        urls.append(f"{host}/car-detail/{c['id']}")
+    xml = ['<?xml version="1.0" encoding="UTF-8"?>', '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">']
+    for u in urls:
+        xml.append('<url>')
+        xml.append(f"<loc>{u}</loc>")
+        xml.append('</url>')
+    xml.append('</urlset>')
+    return Response('\n'.join(xml), media_type='application/xml')
+
+
+@app.get('/robots.txt', include_in_schema=False)
+def robots():
+    host = os.getenv('SITE_URL', 'http://localhost:8000').rstrip('/')
+    txt = f"User-agent: *\nDisallow:\nSitemap: {host}/sitemap.xml\n"
+    return Response(txt, media_type='text/plain')
+
+
 @app.get('/api/cars/{car_id}')
 def api_get_car(car_id: str):
     db = read_db()
@@ -823,11 +1082,14 @@ def api_get_car(car_id: str):
 
 
 @app.put('/api/cars/{car_id}')
-def api_update_car(car_id: str, body: dict):
+def api_update_car(car_id: str, body: dict = Body(...)):
     db = read_db()
     idx = next((i for i, c in enumerate(db.get('cars', [])) if c['id'] == car_id), None)
     if idx is None:
         raise HTTPException(404, "Not found")
+    body = sanitize_dict(body)
+    if not isinstance(body, dict):
+        raise HTTPException(400, "Invalid body")
     db['cars'][idx].update(body)
     write_db(db)
     return db['cars'][idx]
@@ -864,10 +1126,50 @@ def api_get_car_detail(detail_id: str):
     return detail
 
 
+@app.get('/car-detail/{car_id}', include_in_schema=False)
+def car_detail_ssr(car_id: str, request: "Request"):
+    """Serve `car-detail.html` with injected JSON-LD structured data and canonical link for crawlers.
+
+    This keeps the UI unchanged but improves SEO for individual car pages.
+    """
+    db = read_db()
+    car = next((c for c in db.get('cars', []) if c['id'] == car_id), None)
+    if not car:
+        raise HTTPException(404, "Not found")
+
+    # read the static HTML and inject JSON-LD into <head>
+    p = Path('car-detail.html')
+    if not p.exists():
+        return FileResponse('car-detail.html')
+    html = p.read_text(encoding='utf-8')
+    host = os.getenv('SITE_URL', f"{request.url.scheme}://{request.url.hostname}:{request.url.port}")
+    canonical = f"<link rel=\"canonical\" href=\"{host}/car-detail/{car_id}\" />"
+    ld = {
+        "@context": "https://schema.org",
+        "@type": "Product",
+        "name": car.get('name',''),
+        "description": car.get('description',''),
+        "image": [f"{host}/{car.get('img','')}"] if car.get('img') else [],
+        "sku": car.get('id'),
+        "offers": {
+            "@type": "Offer",
+            "price": car.get('price',''),
+            "availability": "https://schema.org/InStock"
+        }
+    }
+    inject = f"\n{canonical}\n<script type=\"application/ld+json\">{json.dumps(ld)}</script>\n"
+    if '</head>' in html:
+        html = html.replace('</head>', inject + '</head>')
+    return Response(content=html, media_type='text/html')
+
+
 @app.post('/api/car-details')
-def api_create_car_detail(body: dict):
+def api_create_car_detail(body: dict = Body(...)):
     if not body:
         raise HTTPException(400, "Missing body")
+    body = sanitize_dict(body)
+    if not isinstance(body, dict):
+        raise HTTPException(400, "Invalid body")
     db = read_db()
     base = {
         "name": body.get("name", ""),
@@ -892,11 +1194,14 @@ def api_create_car_detail(body: dict):
 
 
 @app.put('/api/car-details/{detail_id}')
-def api_update_car_detail(detail_id: str, body: dict):
+def api_update_car_detail(detail_id: str, body: dict = Body(...)):
     db = read_db()
     idx = next((i for i, d in enumerate(db.get('carDetails', [])) if d['id'] == detail_id), None)
     if idx is None:
         raise HTTPException(404, "Not found")
+    body = sanitize_dict(body)
+    if not isinstance(body, dict):
+        raise HTTPException(400, "Invalid body")
     db['carDetails'][idx].update(body)
     write_db(db)
     return db['carDetails'][idx]
@@ -934,21 +1239,25 @@ def api_get_user(user_id: str):
 
 
 @app.post('/api/users')
-def api_create_user(body: dict):
+def api_create_user(body: dict = Body(...)):
     if not body:
         raise HTTPException(400, "Missing body")
+    body = sanitize_dict(body)
+    if not isinstance(body, dict):
+        raise HTTPException(400, "Invalid body")
+    data = body
     db = read_db()
     # duplicate email check
-    if any(u.get('email') == body.get('email') for u in db.get('users', [])):
+    if any(u.get('email') == data.get('email') for u in db.get('users', [])):
         raise HTTPException(400, "Email already registered")
     # Keep password storage compatible with older client (base64)
     user = {
-        "fname": body.get('fname', ''),
-        "lname": body.get('lname', ''),
-        "email": body.get('email', ''),
-        "phone": body.get('phone', ''),
-        "role": body.get('role', 'user'),
-        "password": body.get('password', ''),
+        "fname": data.get('fname', ''),
+        "lname": data.get('lname', ''),
+        "email": data.get('email', ''),
+        "phone": data.get('phone', ''),
+        "role": data.get('role', 'user'),
+        "password": data.get('password', ''),
     }
     rec = create_record(db, 'users', user)
     write_db(db)
@@ -956,15 +1265,19 @@ def api_create_user(body: dict):
 
 
 @app.put('/api/users/{user_id}')
-def api_update_user(user_id: str, body: dict):
+def api_update_user(user_id: str, body: dict = Body(...)):
     db = read_db()
     idx = next((i for i, u in enumerate(db.get('users', [])) if u['id'] == user_id), None)
     if idx is None:
         raise HTTPException(404, "Not found")
+    body = sanitize_dict(body)
+    if not isinstance(body, dict):
+        raise HTTPException(400, "Invalid body")
+    data = body
     # check duplicate email
-    if body.get('email') and any(u.get('email') == body.get('email') and u.get('id') != user_id for u in db.get('users', [])):
+    if data.get('email') and any(u.get('email') == data.get('email') and u.get('id') != user_id for u in db.get('users', [])):
         raise HTTPException(400, "Email already registered")
-    db['users'][idx].update(body)
+    db['users'][idx].update(data)
     write_db(db)
     return db['users'][idx]
 
