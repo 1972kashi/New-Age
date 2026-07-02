@@ -1,4 +1,5 @@
  const TOTAL = 6;
+  const PENDING_CARDS_KEY = 'naa_pending_car_cards';
   let showBadge = true;
   const API_PORT = 8000;
   const API_BASE = `http://localhost:${API_PORT}`;  // API now served by FastAPI (port 8000)
@@ -8,6 +9,146 @@
   let savedCars = [];
   let editingSavedIndex = null;
   let editingSavedId = null;
+  let liveDashboardData = { cars: [], stats: {}, users: [], updatedAt: null };
+  let liveRefreshTimer = null;
+
+  function formatCurrency(value) {
+    return new Intl.NumberFormat('en-KE', {
+      style: 'currency',
+      currency: 'KES',
+      maximumFractionDigits: 0
+    }).format(value);
+  }
+
+  function getDashboardEntries() {
+    const saved = Array.isArray(savedCars) ? savedCars : [];
+    const drafts = cards.filter(c => (c.name && c.name.trim()) || (c.img && c.img.trim()) || (c.price && c.price.trim()));
+    const seen = new Set();
+    const entries = [];
+
+    [...saved, ...drafts].forEach((entry) => {
+      const key = `${entry.name || ''}-${entry.price || ''}-${entry.img || ''}-${entry.fuel || ''}`;
+      if (seen.has(key)) return;
+      seen.add(key);
+      entries.push(entry);
+    });
+
+    return entries;
+  }
+
+  function parsePrice(value) {
+    if (!value && value !== 0) return 0;
+    const normalized = String(value).replace(/[^0-9.-]/g, '');
+    const parsed = Number(normalized);
+    return Number.isFinite(parsed) ? parsed : 0;
+  }
+
+  function getViewCount(car) {
+    const candidates = [car?.views, car?.viewCount, car?.view_count, car?.viewsCount];
+    for (const candidate of candidates) {
+      if (candidate === undefined || candidate === null || candidate === '') continue;
+      const parsed = Number(candidate);
+      if (Number.isFinite(parsed) && parsed >= 0) return parsed;
+    }
+    return 0;
+  }
+
+  function getSoldCount(cars) {
+    return cars.filter((car) => {
+      const status = String(car?.status || car?.saleStatus || '').toLowerCase();
+      const sold = car?.sold === true || car?.isSold === true || car?.available === false;
+      return sold || status === 'sold' || status === 'reserved';
+    }).length;
+  }
+
+  function renderDashboard() {
+    const statsHost = document.getElementById('dashboard-stats');
+    const salesHost = document.getElementById('sales-bars');
+    const viewedHost = document.getElementById('viewed-list');
+    const fuelHost = document.getElementById('fuel-list');
+
+    if (!statsHost || !salesHost || !viewedHost || !fuelHost) return;
+
+    const entries = getDashboardEntries();
+    const totalCars = entries.length;
+    const soldCars = getSoldCount(entries);
+    const pendingListings = Math.max(totalCars - soldCars, 0);
+    const newUsers = Array.isArray(liveDashboardData.users) ? liveDashboardData.users.length : 0;
+    const revenue = entries
+      .filter((car) => {
+        const status = String(car?.status || car?.saleStatus || '').toLowerCase();
+        return car?.sold === true || car?.isSold === true || car?.available === false || status === 'sold' || status === 'reserved';
+      })
+      .reduce((sum, car) => sum + parsePrice(car?.price), 0);
+    const views = entries.reduce((sum, car) => sum + getViewCount(car), 0);
+    const fuelStats = liveDashboardData.stats?.by_fuel || {};
+
+    statsHost.innerHTML = [
+      { label: 'Total Cars', value: totalCars || 0, note: 'Active listings online' },
+      { label: 'Cars Sold', value: soldCars, note: 'From live listing status' },
+      { label: 'Pending Listings', value: pendingListings, note: 'Awaiting review' },
+      { label: 'New Users', value: newUsers || 0, note: 'Registered accounts' },
+      { label: 'Revenue', value: formatCurrency(revenue), note: 'Sold inventory value' },
+      { label: 'Views', value: views.toLocaleString(), note: 'Live view count' }
+    ].map(stat => `
+      <div class="stat-card">
+        <span>${stat.label}</span>
+        <strong>${stat.value}</strong>
+        <small>${stat.note}</small>
+      </div>
+    `).join('');
+
+    const salesSeries = Array.from({ length: 6 }, (_, index) => {
+      const monthCars = entries.filter((car) => {
+        const createdAt = car?.createdAt || car?.created_at;
+        if (!createdAt) return false;
+        const date = new Date(createdAt);
+        if (Number.isNaN(date.getTime())) return false;
+        const monthIndex = date.getMonth();
+        return monthIndex === (new Date().getMonth() - (5 - index) + 12) % 12;
+      });
+      return monthCars.length;
+    });
+    const salesMax = Math.max(...salesSeries, 1);
+    salesHost.innerHTML = salesSeries.map((value, index) => {
+      const month = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'][index];
+      const height = Math.max(18, Math.round((value / salesMax) * 100));
+      return `
+        <div class="sales-bar-wrap">
+          <div class="sales-bar" style="height:${height}%"></div>
+          <span>${month}</span>
+        </div>
+      `;
+    }).join('');
+
+    const viewedCars = entries
+      .slice()
+      .sort((a, b) => getViewCount(b) - getViewCount(a))
+      .slice(0, 4)
+      .map((car) => {
+        const name = car.name || 'Draft Listing';
+        const count = getViewCount(car);
+        return `
+          <div class="rank-item">
+            <div class="label"><span class="rank-dot"></span><span>${name}</span></div>
+            <strong>${count ? count.toLocaleString() : '0'} views</strong>
+          </div>
+        `;
+      });
+
+    viewedHost.innerHTML = viewedCars.length ? viewedCars.join('') : '<div class="rank-item"><span>No listings yet</span></div>';
+
+    const fuelItems = Object.entries(fuelStats)
+      .sort((a, b) => b[1] - a[1])
+      .map(([fuel, count]) => `
+        <div class="fuel-item">
+          <span>${fuel || 'Unknown'}</span>
+          <strong>${count}</strong>
+        </div>
+      `);
+
+    fuelHost.innerHTML = fuelItems.length ? fuelItems.join('') : '<div class="fuel-item"><span>No fuel data</span></div>';
+  }
 
   function ensureAdminSession(){
     const session = JSON.parse(localStorage.getItem('naa_session')||'null');
@@ -22,6 +163,40 @@
     name: '', miles: '', fuel: '', trans: '', year: '',
     price: '', link: 'car-detail.html', img: '', badge: true
   }));
+
+  function getPendingCards() {
+    try {
+      const raw = localStorage.getItem(PENDING_CARDS_KEY);
+      if (!raw) return [];
+      const parsed = JSON.parse(raw);
+      return Array.isArray(parsed) ? parsed : [];
+    } catch (e) {
+      return [];
+    }
+  }
+
+  function savePendingCards(queue) {
+    localStorage.setItem(PENDING_CARDS_KEY, JSON.stringify(queue));
+  }
+
+  function queueCardsForDetails(cardsToQueue) {
+    const queue = getPendingCards();
+    cardsToQueue.forEach((card) => {
+      const normalized = {
+        ...card,
+        id: card.id || `pending-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+        queuedAt: new Date().toISOString()
+      };
+      const duplicateIndex = queue.findIndex((item) => item.name === normalized.name && item.img === normalized.img && item.price === normalized.price);
+      if (duplicateIndex >= 0) {
+        queue[duplicateIndex] = normalized;
+      } else {
+        queue.push(normalized);
+      }
+    });
+    savePendingCards(queue);
+    return queue;
+  }
 
   function setBadge(val) {
     showBadge = val;
@@ -47,6 +222,7 @@
   function liveUpdate() {
     Object.assign(cards[activeCard], getFormVals());
     renderGrid();
+    renderDashboard();
   }
 
   function loadCard() {
@@ -80,20 +256,63 @@
     showToast('Card ' + (activeCard + 1) + ' deleted');
   }
 
+  function getAuthHeaders() {
+    const token = localStorage.getItem('naa_token') || localStorage.getItem('token');
+    return token ? { Authorization: `Bearer ${token}` } : {};
+  }
+
   async function fetchSavedCars() {
     try {
-      const res = await fetch(API_BASE + '/api/cars?limit=100');
+      const res = await fetch(API_BASE + '/api/cars?limit=100', { headers: getAuthHeaders() });
       if (!res.ok) return [];
       const data = await res.json();
-      return data.items || [];
+      return Array.isArray(data.items) ? data.items : Array.isArray(data) ? data : [];
     } catch (e) {
       return [];
     }
   }
 
+  async function fetchDashboardMetrics() {
+    try {
+      const [carsRes, statsRes, usersRes] = await Promise.all([
+        fetch(API_BASE + '/api/cars?limit=100', { headers: getAuthHeaders() }),
+        fetch(API_BASE + '/admin/stats', { headers: getAuthHeaders() }),
+        fetch(API_BASE + '/admin/users', { headers: getAuthHeaders() })
+      ]);
+
+      if (!carsRes.ok || !statsRes.ok || !usersRes.ok) {
+        return null;
+      }
+
+      const carsData = await carsRes.json();
+      const statsData = await statsRes.json();
+      const usersData = await usersRes.json();
+
+      return {
+        cars: Array.isArray(carsData.items) ? carsData.items : Array.isArray(carsData) ? carsData : [],
+        stats: statsData || {},
+        users: Array.isArray(usersData) ? usersData : []
+      };
+    } catch (e) {
+      return null;
+    }
+  }
+
   async function loadSavedCars() {
-    savedCars = await fetchSavedCars();
+    const metrics = await fetchDashboardMetrics();
+    if (metrics) {
+      savedCars = metrics.cars;
+      liveDashboardData = {
+        cars: metrics.cars,
+        stats: metrics.stats,
+        users: metrics.users,
+        updatedAt: new Date().toISOString()
+      };
+    } else {
+      savedCars = await fetchSavedCars();
+    }
     renderSavedCars();
+    renderDashboard();
   }
 
   function setSavedSearch(value) {
@@ -167,36 +386,14 @@
   async function saveToStorage() {
     const car = getFormVals();
     if (!car.name && !car.img && !car.price) {
-      return showToast('Fill in a car name, image, or price before saving.');
+      return showToast('Fill in a car name, image, or price before sending it for editing.');
     }
 
-    if (editingSavedId) {
-      const response = await fetch(API_BASE + '/api/cars/' + encodeURIComponent(editingSavedId), {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(car)
-      });
-      if (!response.ok) {
-        showToast('Failed to update saved car');
-        return;
-      }
-      showToast('Saved car updated');
-      editingSavedIndex = null;
-      editingSavedId = null;
-    } else {
-      const response = await fetch(API_BASE + '/api/cars', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(car)
-      });
-      if (!response.ok) {
-        showToast('Failed to save car to database');
-        return;
-      }
-      showToast('Saved car added');
-    }
-
-    await loadSavedCars();
+    queueCardsForDetails([{ ...car, source: 'admin-upload' }]);
+    editingSavedIndex = null;
+    editingSavedId = null;
+    showToast('Card sent to the details upload queue');
+    renderDashboard();
   }
 
   function setSearch(value) {
@@ -228,6 +425,7 @@
 
     if (!visible.length) {
       grid.innerHTML = '<div class="no-results">No cars match your search.</div>';
+      renderDashboard();
       return;
     }
 
@@ -259,6 +457,7 @@
           </div>
         </div>`;
     }).join('');
+    renderDashboard();
   }
 
   function selectCard(i) {
@@ -276,26 +475,20 @@
 
   async function uploadCards() {
     const toSave = cards.filter(c => (c.name && c.name.trim()) || (c.img && c.img.trim()) || (c.price && c.price.trim()));
-    if (!toSave.length) return showToast('No cards to upload');
+    if (!toSave.length) return showToast('No cards to queue');
 
-    const response = await fetch(API_BASE + '/api/cars', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(toSave)
-    });
-
-    if (!response.ok) {
-      showToast('Failed to upload cards to database');
-      return;
-    }
-
-    await loadSavedCars();
-    showToast('Cards uploaded to database!');
+    queueCardsForDetails(toSave.map(c => ({ ...c, source: 'admin-upload' })));
+    renderDashboard();
+    showToast(`${toSave.length} card(s) queued for editing in the details page`);
   }
 
   if (ensureAdminSession()) {
     loadSavedCars();
     renderGrid();
+    if (liveRefreshTimer) clearInterval(liveRefreshTimer);
+    liveRefreshTimer = setInterval(() => {
+      loadSavedCars();
+    }, 15000);
   }
 
   function logout(){

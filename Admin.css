@@ -102,6 +102,180 @@
   background:rgba(220,38,38,.1)
 } 
 
+  /* ── DASHBOARD ── */
+  .dashboard-section {
+    max-width: 1100px;
+    margin: 28px auto 0;
+    padding: 28px;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border);
+    background: linear-gradient(135deg, rgba(212,160,23,0.12), rgba(22,163,74,0.08));
+    box-shadow: 0 18px 45px rgba(0,0,0,0.24);
+  }
+
+  .dashboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+
+  .dashboard-eyebrow {
+    color: var(--gold);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+
+  .dashboard-header h2 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 28px;
+    letter-spacing: 1.2px;
+  }
+
+  .dashboard-pill {
+    padding: 8px 12px;
+    border-radius: 999px;
+    background: rgba(255,255,255,0.08);
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    font-size: 12px;
+  }
+
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 14px;
+    margin-bottom: 18px;
+  }
+
+  .stat-card {
+    padding: 16px 18px;
+    border-radius: var(--radius-lg);
+    background: var(--dark-card);
+    border: 1px solid var(--border);
+    min-height: 112px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  .stat-card span {
+    color: var(--text-muted);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+  }
+
+  .stat-card strong {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 30px;
+    letter-spacing: 0.04em;
+    color: var(--text);
+  }
+
+  .stat-card small {
+    color: var(--text-muted);
+    font-size: 12px;
+  }
+
+  .charts-grid {
+    display: grid;
+    grid-template-columns: 1.2fr 0.95fr 0.95fr;
+    gap: 14px;
+  }
+
+  .chart-card {
+    padding: 18px;
+    border-radius: var(--radius-lg);
+    background: var(--dark-card);
+    border: 1px solid var(--border);
+  }
+
+  .chart-card h3 {
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 12px;
+  }
+
+  .sales-bars {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    align-items: end;
+    gap: 10px;
+    height: 160px;
+    margin-top: 8px;
+  }
+
+  .sales-bar-wrap {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 6px;
+    height: 100%;
+  }
+
+  .sales-bar {
+    width: 100%;
+    border-radius: 999px 999px 4px 4px;
+    background: linear-gradient(180deg, var(--gold), rgba(212,160,23,0.3));
+    min-height: 20px;
+  }
+
+  .sales-bar-wrap span {
+    font-size: 11px;
+    color: var(--text-muted);
+  }
+
+  .rank-list,
+  .fuel-list {
+    display: grid;
+    gap: 8px;
+  }
+
+  .rank-item,
+  .fuel-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    background: rgba(255,255,255,0.04);
+    font-size: 13px;
+  }
+
+  .rank-item strong,
+  .fuel-item strong {
+    color: var(--gold);
+  }
+
+  .rank-item .label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+  }
+
+  .rank-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--gold);
+    flex-shrink: 0;
+  }
+
+  .rank-item .label span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
   /* ── LAYOUT ── */
   .page {
     max-width: 1100px;
@@ -513,6 +687,36 @@
   }
 
   .btn-upload-final:hover { background: var(--green-light); }
+
+  @media (max-width: 980px) {
+    .page {
+      grid-template-columns: 1fr;
+    }
+
+    .form-card {
+      position: relative;
+      top: auto;
+    }
+
+    .charts-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 720px) {
+    .dashboard-section {
+      padding: 20px;
+    }
+
+    .dashboard-header {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    .grid-3 {
+      grid-template-columns: 1fr;
+    }
+  }
 
   /* ── TOAST ── */
   .toast {

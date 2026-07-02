@@ -5,6 +5,9 @@
 	let existingCars = [];
 	let existingCarDetails = [];
 	let selectedDetailId = null;
+	let pendingQueue = [];
+	let activePendingCard = null;
+	const PENDING_CARDS_KEY = 'naa_pending_car_cards';
 
 	window.setNav = function(el) {
 		document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
@@ -72,9 +75,83 @@
 		return match ? match[0] : '';
 	}
 
+	function getPendingQueue() {
+		try {
+			const raw = localStorage.getItem(PENDING_CARDS_KEY);
+			if (!raw) return [];
+			const parsed = JSON.parse(raw);
+			return Array.isArray(parsed) ? parsed : [];
+		} catch (e) {
+			return [];
+		}
+	}
+
+	function savePendingQueue(queue) {
+		pendingQueue = queue;
+		localStorage.setItem(PENDING_CARDS_KEY, JSON.stringify(queue));
+	}
+
+	function escapeHtml(value) {
+		return String(value ?? '')
+			.replace(/&/g, '&amp;')
+			.replace(/</g, '&lt;')
+			.replace(/>/g, '&gt;')
+			.replace(/"/g, '&quot;')
+			.replace(/'/g, '&#39;');
+	}
+
+	function renderPendingQueue() {
+		const tbody = document.getElementById('pendingQueueBody');
+		if (!tbody) return;
+		pendingQueue = getPendingQueue();
+		if (!pendingQueue.length) {
+			tbody.innerHTML = '<tr><td colspan="6" class="pending-empty">No pending cards yet. Send cards from the upload page to populate this queue.</td></tr>';
+			return;
+		}
+		tbody.innerHTML = pendingQueue.map((card, index) => `
+			<tr>
+				<td>${escapeHtml(card.name || 'Untitled Car')}</td>
+				<td>${escapeHtml(card.price || '—')}</td>
+				<td>${escapeHtml(card.fuel || '—')}</td>
+				<td>${escapeHtml(card.year || '—')}</td>
+				<td>${escapeHtml(card.queuedAt ? new Date(card.queuedAt).toLocaleString() : '—')}</td>
+				<td><button class="pending-action-btn" type="button" onclick="loadPendingCard(${index})">Edit</button></td>
+			</tr>
+		`).join('');
+	}
+
+	window.refreshPendingQueue = function() {
+		renderPendingQueue();
+		showToast('Pending queue refreshed');
+	}
+
+	window.loadPendingCard = function(index) {
+		const card = pendingQueue[index];
+		if (!card) return;
+		activePendingCard = card;
+		document.getElementById('carName').value = card.name || '';
+		document.getElementById('price').value = card.price || '';
+		document.getElementById('imgPath').value = card.img || '';
+		document.getElementById('year').value = card.year || '';
+		document.getElementById('trans').value = card.trans || '';
+		document.getElementById('fuel').value = card.fuel || '';
+		document.getElementById('miles').value = card.miles || '';
+		document.getElementById('make').value = card.make || extractMakeFromName(card.name || '');
+		document.getElementById('model').value = card.model || extractModelFromName(card.name || '');
+		document.getElementById('bodyType').value = card.bodyType || '';
+		document.getElementById('condition').value = card.condition || '';
+		document.getElementById('drive').value = card.drive || '';
+		document.getElementById('location').value = card.location || '';
+		document.getElementById('color').value = card.color || '';
+		document.getElementById('description').value = card.description || '';
+		updatePreview();
+		showToast('Pending car loaded for editing');
+	}
+
 	async function loadExistingData() {
 		extractExistingCars();
 		extractExistingCarDetails();
+		renderPendingQueue();
 	}
 
 	async function extractExistingCars() {
@@ -354,6 +431,13 @@
 				throw new Error(text || 'Failed to save listing card');
 			}
 
+			if (activePendingCard) {
+				const remaining = pendingQueue.filter((item) => item.id !== activePendingCard.id);
+				savePendingQueue(remaining);
+				activePendingCard = null;
+				renderPendingQueue();
+			}
+
 			showToast('✓ DETAILS UPLOADED', 'var(--accent2)');
 			await extractExistingCars();
 			await extractExistingCarDetails();
@@ -366,6 +450,12 @@
 	window.addEventListener('DOMContentLoaded', () => {
 		loadExistingData();
 		updatePreview();
+	});
+
+	window.addEventListener('storage', (event) => {
+		if (event.key === PENDING_CARDS_KEY) {
+			renderPendingQueue();
+		}
 	});
 })();
 

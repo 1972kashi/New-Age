@@ -133,6 +133,20 @@ main { max-width: 1440px; margin: 0 auto; padding: 36px 24px 80px; }
 .page-header h1 { font-family: 'Bebas Neue', sans-serif; font-size: 36px; letter-spacing: 3px; color: var(--text); }
 .page-header .badge { font-family: 'DM Mono', monospace; font-size: 10px; padding: 3px 8px; background: color-mix(in srgb, var(--gold) 15%, transparent); border: 1px solid color-mix(in srgb, var(--gold) 40%, transparent); color: var(--gold); border-radius: 2px; letter-spacing: 1px; }
 
+/* PENDING QUEUE */
+.pending-section { background: var(--dark-card); border: 1px solid var(--border); border-radius: 8px; padding: 24px; margin-bottom: 24px; }
+.pending-header { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 16px; }
+.pending-header h2 { font-family: 'Bebas Neue', sans-serif; font-size: 24px; letter-spacing: 1.5px; }
+.section-kicker { color: var(--gold); font-size: 10px; font-family: 'DM Mono', monospace; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 4px; }
+.pending-table-wrap { overflow-x: auto; }
+.pending-table { width: 100%; border-collapse: collapse; min-width: 620px; }
+.pending-table th, .pending-table td { padding: 12px 10px; border-bottom: 1px solid var(--border); text-align: left; font-size: 13px; }
+.pending-table th { color: var(--text-muted); font-size: 10px; font-family: 'DM Mono', monospace; letter-spacing: 1.4px; text-transform: uppercase; }
+.pending-table td { color: var(--text); }
+.pending-empty { color: var(--text-muted); }
+.pending-action-btn { background: var(--gold); color: #000; border: none; border-radius: 4px; padding: 7px 10px; cursor: pointer; font-size: 12px; font-weight: 700; }
+.btn-refresh { padding: 9px 16px; font-size: 16px; }
+
 /* FORM CARD */
 .form-card { background: var(--dark-card); border: 1px solid var(--border); border-radius: 8px; padding: 28px; margin-bottom: 40px; }
 

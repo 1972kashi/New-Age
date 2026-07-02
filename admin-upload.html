@@ -17,7 +17,7 @@
 <nav class="nav">
   <div class="nav-brand">NEW AGE <span>AUTOMOTIVE</span></div>
   <div class="nav-links">
-    <a class="nav-btn active" href="admin-upload.html">Upload</a>
+    <a class="nav-btn active" href="admin-upload.html">Dashboard</a>
     <a class="nav-btn" href="users.html">Users</a>
     <a class="nav-btn" href="login.html">Dealers</a>
     <a class="nav-btn" href="car-detail-upload.html">Car Details</a>
@@ -27,6 +27,33 @@
     <button class="btn-logout" onclick="logout()">Sign Out</button>
   </div>
 </nav>
+
+<section class="dashboard-section">
+  <div class="dashboard-header">
+    <div>
+      <div class="dashboard-eyebrow">Admin Dashboard</div>
+      <h2>Performance at a glance</h2>
+    </div>
+    <div class="dashboard-pill">Live overview</div>
+  </div>
+
+  <div class="stats-grid" id="dashboard-stats"></div>
+
+  <div class="charts-grid">
+    <div class="chart-card">
+      <h3>Monthly Sales</h3>
+      <div class="sales-bars" id="sales-bars"></div>
+    </div>
+    <div class="chart-card">
+      <h3>Most Viewed Cars</h3>
+      <div class="rank-list" id="viewed-list"></div>
+    </div>
+    <div class="chart-card">
+      <h3>Fuel Types</h3>
+      <div class="fuel-list" id="fuel-list"></div>
+    </div>
+  </div>
+</section>
 
 <div class="page">
 
@@ -116,7 +143,7 @@
 
     <div class="submit-row">
       <button class="btn-submit primary" onclick="saveCard()">Save Card</button>
-      <button class="btn-submit secondary" onclick="saveToStorage()">Save to Database</button>
+      <button class="btn-submit secondary" onclick="saveToStorage()">Send to Details</button>
       <button class="btn-submit secondary" onclick="clearForm()">Clear</button>
       <button class="btn-submit secondary" onclick="deleteCard()">Delete Card</button>
     </div>
@@ -131,7 +158,7 @@
       </div>
       <div class="grid-3" id="cards-grid"></div>
       <div class="upload-row">
-        <button class="btn-upload-final" onclick="uploadCards()">Upload</button>
+        <button class="btn-upload-final" onclick="uploadCards()">Queue for Editing</button>
       </div>
       <div class="saved-panel">
         <div class="panel-title">Saved Cars <span>Manage Saved Listings</span></div>

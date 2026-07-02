@@ -337,6 +337,71 @@
       "link": "car-detail.html?id=73af1ea30d87413",
       "img": "Pic/BMW 3.svg",
       "badge": true
+    },
+    {
+      "id": "e9801b9529d04b3",
+      "createdAt": "2026-06-30T13:30:10.371130+00:00",
+      "name": "BMW COUPE RWD",
+      "miles": "1000",
+      "trans": "Automatic",
+      "fuel": "Hybrid",
+      "year": "2020",
+      "price": "4,500,000",
+      "link": "car-detail.html?id=73af1ea30d87413",
+      "img": "Pic/BMW 3.svg",
+      "badge": true
+    },
+    {
+      "id": "2d533e1dbbc547a",
+      "createdAt": "2026-06-30T13:30:10.371178+00:00",
+      "name": "BMW COUPE GT",
+      "miles": "1000",
+      "trans": "Automatic",
+      "fuel": "Diesel",
+      "year": "2024",
+      "price": "6,200,000",
+      "link": "car-detail.html?id=mq0y5obysf4lyi",
+      "img": "Pic/BMW 3.svg",
+      "badge": true
+    },
+    {
+      "id": "2ae37acd7f58428",
+      "createdAt": "2026-06-30T13:33:14.569672+00:00",
+      "name": "BMW COUPE GT",
+      "miles": "1000",
+      "trans": "Automatic",
+      "fuel": "Diesel",
+      "year": "2024",
+      "price": "6,200,000",
+      "link": "car-detail.html?id=b6db5ff7b7c443a",
+      "img": "Pic/BMW 3.svg",
+      "badge": true
+    },
+    {
+      "id": "5baf75ea2ef94ce",
+      "createdAt": "2026-06-30T15:25:54.809210+00:00",
+      "name": "BMW COUPE JK",
+      "miles": "1000",
+      "trans": "Automatic",
+      "fuel": "Diesel",
+      "year": "2024",
+      "price": "6,200,000",
+      "link": "car-detail.html?id=67f0338e8aab456",
+      "img": "Pic/BMW 3.svg",
+      "badge": true
+    },
+    {
+      "id": "f0c0c60fda70464",
+      "createdAt": "2026-06-30T15:30:28.710623+00:00",
+      "name": "BMW COUPE JK",
+      "miles": "1000",
+      "trans": "Automatic",
+      "fuel": "Diesel",
+      "year": "2024",
+      "price": "6,200,000",
+      "link": "car-detail.html?id=368f3c3a435a435",
+      "img": "Pic/BMW 1.svg",
+      "badge": true
     }
   ],
   "carDetails": [
@@ -566,6 +631,63 @@
       "drive": "FWD",
       "location": "Port, Mombasa",
       "description": ""
+    },
+    {
+      "id": "b6db5ff7b7c443a",
+      "createdAt": "2026-06-30T13:33:14.537841+00:00",
+      "name": "BMW COUPE GT",
+      "miles": "1000",
+      "trans": "Automatic",
+      "fuel": "Diesel",
+      "year": "2024",
+      "price": "6,200,000",
+      "img": "Pic/BMW 3.svg",
+      "badge": true,
+      "model": "COUPE GT",
+      "engine": "",
+      "bodyType": "Hatchback",
+      "condition": "New",
+      "drive": "RWD",
+      "location": "Port, Mombasa",
+      "description": "Just like the old days."
+    },
+    {
+      "id": "67f0338e8aab456",
+      "createdAt": "2026-06-30T15:25:54.764279+00:00",
+      "name": "BMW COUPE JK",
+      "miles": "1000",
+      "trans": "Automatic",
+      "fuel": "Diesel",
+      "year": "2024",
+      "price": "6,200,000",
+      "img": "Pic/BMW 3.svg",
+      "badge": true,
+      "model": "COUPE JK",
+      "engine": "",
+      "bodyType": "Hatchback",
+      "condition": "Foreign Used",
+      "drive": "AWD",
+      "location": "Port, Mombasa",
+      "description": "One Coming soon."
+    },
+    {
+      "id": "368f3c3a435a435",
+      "createdAt": "2026-06-30T15:30:28.682238+00:00",
+      "name": "BMW COUPE JK",
+      "miles": "1000",
+      "trans": "Automatic",
+      "fuel": "Diesel",
+      "year": "2024",
+      "price": "6,200,000",
+      "img": "Pic/BMW 1.svg",
+      "badge": true,
+      "model": "COUPE JK",
+      "engine": "",
+      "bodyType": "",
+      "condition": "",
+      "drive": "AWD",
+      "location": "",
+      "description": "GARI YA KABROO"
     }
   ],
   "users": [
@@ -589,7 +711,18 @@
       "email": "jacksonmurithi47@gmail.com",
       "phone": "0757822470",
       "role": "user",
-      "password": "S2FsZWxpQDIxNTU="
+      "password": "S2FsZWxpQDIxNTU=",
+      "welcome_email_sent": true
+    },
+    {
+      "id": "062316f923e2442",
+      "createdAt": "2026-06-30T13:31:26.565665+00:00",
+      "fname": "James",
+      "lname": "Doe",
+      "email": "jamesdoe@gmail.com",
+      "phone": "0724105521",
+      "role": "user",
+      "password": "SmFtZXNAamFtZXM="
     }
   ]
 }

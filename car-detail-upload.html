@@ -29,6 +29,35 @@
 </nav>
 
 <main>
+  <section class="pending-section">
+    <div class="pending-header">
+      <div>
+        <div class="section-kicker">Pending Queue</div>
+        <h2>Waiting list of car cards</h2>
+      </div>
+      <button class="btn btn-refresh" type="button" onclick="refreshPendingQueue()">Refresh</button>
+    </div>
+    <div class="pending-table-wrap">
+      <table class="pending-table">
+        <thead>
+          <tr>
+            <th>Car</th>
+            <th>Price</th>
+            <th>Fuel</th>
+            <th>Year</th>
+            <th>Queued</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody id="pendingQueueBody">
+          <tr>
+            <td colspan="6" class="pending-empty">No pending cards yet. Send cards from the upload page to populate this queue.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
   <div class="form-card">
     <!-- TOP ROW -->
     <div class="top-row">
