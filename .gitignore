@@ -1,1 +1,47 @@
+# Python artifacts
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.pytest_cache/
+.python-version
+.venv/
+venv/
+env/
+*.env
+*.env.*
+
+# Node artifacts
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+package-lock.json
+pnpm-lock.yaml
+yarn.lock
+
+# Editor and OS files
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Build and packaging
+build/
+dist/
+*.egg-info/
+pip-wheel-metadata/
+*.egg
+
+# Local database / secrets
 db.json
+db.env
+*.sqlite3
+*.db
+
+# Misc
+coverage.xml
+htmlcov/
+.coverage
+.ipynb_checkpoints/
+
