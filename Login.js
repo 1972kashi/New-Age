@@ -13,6 +13,25 @@ function togglePwd(id,btn){
   btn.textContent=el.type==='password'?'👁':'🙈';
 }
 
+function getPostLoginRedirect(role){
+  const raw = localStorage.getItem('post_login_redirect');
+  if(!raw) return null;
+  try{
+    const url = new URL(raw, window.location.origin);
+    if(url.origin !== window.location.origin) return null;
+    const page = url.pathname.replace(/^\//, '');
+    const adminPages = ['users.html','admin-upload.html','car-detail-upload.html'];
+    const ignorePages = ['login.html','signup.html','register.html'];
+    if(ignorePages.includes(page)) return null;
+    if(role === 'admin'){
+      return adminPages.includes(page) ? page : 'admin-upload.html';
+    }
+    return adminPages.includes(page) ? 'index.html' : (page || 'index.html');
+  }catch(e){
+    return null;
+  }
+}
+
 function checkStrength(inp,barId){
   const v=inp.value;
   const bar=document.getElementById(barId);
@@ -31,6 +50,58 @@ function showMsg(id,msg,type){
   el.textContent=msg;el.style.display='block';
   setTimeout(()=>el.style.display='none',4000);
 }
+
+function showResetPassword(){
+  document.querySelectorAll('.form-panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById('panel-reset').classList.add('active');
+}
+
+function requestPasswordReset(){
+  const email = document.getElementById('reset-email').value.trim().toLowerCase();
+  if(!email){showMsg('reset-err','Please enter your email.');return;}
+  fetch(`${API_BASE}/auth/password-reset/request`,{
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({email})
+  })
+  .then(res => res.json().then(j=>({ok:res.ok, body:j})))
+  .then(({ok,body})=>{
+    if(!ok){
+      showMsg('reset-err', body && body.detail ? body.detail : 'Reset request failed');
+      return;
+    }
+    if(body.reset_token){
+      document.getElementById('reset-token').value = body.reset_token;
+      showMsg('reset-ok','Reset token generated. Paste it below and set a new password.');
+    } else {
+      showMsg('reset-ok', body.message || 'Reset instructions sent to your email.');
+    }
+  })
+  .catch(err=> showMsg('reset-err','Reset request failed.'));
+}
+
+function confirmPasswordReset(){
+  const token = document.getElementById('reset-token').value.trim();
+  const pass = document.getElementById('reset-pass').value;
+  const pass2 = document.getElementById('reset-pass2').value;
+  if(!token){showMsg('reset-err','Please enter your reset token.');return;}
+  if(!pass||pass.length<8){showMsg('reset-err','Please enter a password with at least 8 characters.');return;}
+  if(pass !== pass2){showMsg('reset-err','Passwords do not match.');return;}
+  fetch(`${API_BASE}/auth/password-reset/confirm`,{
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({token, new_password: pass})
+  })
+  .then(res => res.json().then(j=>({ok:res.ok, body:j})))
+  .then(({ok,body})=>{
+    if(!ok){
+      showMsg('reset-err', body && body.detail ? body.detail : 'Password reset failed');
+      return;
+    }
+    showMsg('reset-ok','Password updated successfully. Please sign in.');
+    setTimeout(()=> switchTab('login'), 800);
+  })
+  .catch(err=> showMsg('reset-err','Password reset failed.'));
+}
+
 function ensureDefaultAdmin(){
   const users = JSON.parse(localStorage.getItem('naa_users')||'[]');
   if(!users.some(u=>u.email==='admin@gmail.com')){
@@ -90,7 +161,15 @@ function doLogin(){
       const sessionData = {name: body.name || id, email: id, role};
       localStorage.setItem('naa_session', JSON.stringify(sessionData));
       showMsg('login-ok', 'Welcome back! Redirecting…');
-      setTimeout(()=>{ window.location.href = role==='admin'?'car-detail-upload.html':'index.html'; },800);
+      setTimeout(()=>{
+        const redirect = getPostLoginRedirect(role);
+        if(redirect){
+          localStorage.removeItem('post_login_redirect');
+          window.location.href = redirect;
+        } else {
+          window.location.href = role==='admin'?'admin-upload.html':'index.html';
+        }
+      },800);
       return;
     }
   })
@@ -104,18 +183,23 @@ function doLogin(){
       showMsg('login-err', 'Invalid credentials.');
       return;
     }
+    if (user.role === 'admin') {
+      showMsg('login-err', 'Admin accounts must sign in through the server and complete MFA.');
+      return;
+    }
     
     // Successfully authenticated from localStorage
     const sessionData = {name: user.fname+' '+user.lname, email: user.email, role: user.role};
     localStorage.setItem('naa_session', JSON.stringify(sessionData));
     showMsg('login-ok', 'Welcome back, '+user.fname+'! Redirecting…');
     setTimeout(() => {
-      const redirect = localStorage.getItem('post_login_redirect');
-      if (redirect) { 
-        localStorage.removeItem('post_login_redirect'); 
-        window.location.href = redirect; 
+      const redirect = getPostLoginRedirect(user.role);
+      if (redirect) {
+        localStorage.removeItem('post_login_redirect');
+        window.location.href = redirect;
+      } else {
+        window.location.href = user.role==='admin'?'admin-upload.html':'index.html';
       }
-      else window.location.href = user.role==='admin'?'car-detail-upload.html':'index.html';
     }, 800);
   });
 }
@@ -165,7 +249,21 @@ function confirmMfaSetup(){
   .then(res=>res.json().then(j=>({ok:res.ok, body:j})))
   .then(({ok,body})=>{
     if(!ok){ showMsg('mfa-err', body && body.detail ? body.detail : 'MFA confirm failed'); return; }
-    if(body.access_token){ localStorage.setItem('naa_token', body.access_token); localStorage.setItem('naa_session', JSON.stringify({email:document.getElementById('login-id').value.trim(), role: body.role||'admin'})); showMsg('mfa-ok','MFA setup complete. Redirecting…'); setTimeout(()=> window.location.href = body.role==='admin'?'car-detail-upload.html':'index.html',800); }
+    if(body.access_token){
+      const role = body.role || 'admin';
+      localStorage.setItem('naa_token', body.access_token);
+      localStorage.setItem('naa_session', JSON.stringify({email:document.getElementById('login-id').value.trim(), role}));
+      showMsg('mfa-ok','MFA setup complete. Redirecting…');
+      setTimeout(() => {
+        const redirect = getPostLoginRedirect(role);
+        if (redirect) {
+          localStorage.removeItem('post_login_redirect');
+          window.location.href = redirect;
+        } else {
+          window.location.href = role==='admin'?'admin-upload.html':'index.html';
+        }
+      },800);
+    }
   })
   .catch(err=> showMsg('mfa-err','MFA confirmation failed'));
 }
@@ -181,7 +279,21 @@ function verifyMfaChallenge(){
   .then(res=>res.json().then(j=>({ok:res.ok, body:j})))
   .then(({ok,body})=>{
     if(!ok){ showMsg('mfa-err', body && body.detail ? body.detail : 'MFA verify failed'); return; }
-    if(body.access_token){ localStorage.setItem('naa_token', body.access_token); localStorage.setItem('naa_session', JSON.stringify({email:document.getElementById('login-id').value.trim(), role: body.role||'admin'})); showMsg('mfa-ok','Login successful. Redirecting…'); setTimeout(()=> window.location.href = body.role==='admin'?'car-detail-upload.html':'index.html',800); }
+    if(body.access_token){
+      const role = body.role || 'admin';
+      localStorage.setItem('naa_token', body.access_token);
+      localStorage.setItem('naa_session', JSON.stringify({email:document.getElementById('login-id').value.trim(), role}));
+      showMsg('mfa-ok','Login successful. Redirecting…');
+      setTimeout(()=>{
+        const redirect = getPostLoginRedirect(role);
+        if(redirect){
+          localStorage.removeItem('post_login_redirect');
+          window.location.href = redirect;
+        } else {
+          window.location.href = role==='admin'?'admin-upload.html':'index.html';
+        }
+      },800);
+    }
   })
   .catch(err=> showMsg('mfa-err','MFA verify error'));
 }

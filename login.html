@@ -44,12 +44,51 @@
 
     <div class="check-row">
       <label><input type="checkbox" id="remember"/> Remember me</label>
-      <a class="forgot" href="activation.html">Forgot password?</a>
+      <a class="forgot" href="#" onclick="showResetPassword();return false">Forgot password?</a>
     </div>
 
     <button class="btn-main" onclick="doLogin()">Sign In</button>
 
     <div class="msg">No account? <a href="#" onclick="switchTab('signup');return false">Register here</a></div>
+  </div>
+
+  <div class="form-panel" id="panel-reset">
+    <div class="error-box" id="reset-err"></div>
+    <div class="success-box" id="reset-ok"></div>
+
+    <div class="field">
+      <label>Email Address</label>
+      <div class="input-wrap">
+        <input type="email" id="reset-email" placeholder="Enter your email"/>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Reset Token</label>
+      <div class="input-wrap">
+        <input type="text" id="reset-token" placeholder="Paste reset token here"/>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>New Password</label>
+      <div class="input-wrap">
+        <input type="password" id="reset-pass" placeholder="••••••••"/>
+        <button class="eye-btn" onclick="togglePwd('reset-pass',this)">👁</button>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Confirm New Password</label>
+      <div class="input-wrap">
+        <input type="password" id="reset-pass2" placeholder="Repeat password"/>
+        <button class="eye-btn" onclick="togglePwd('reset-pass2',this)">👁</button>
+      </div>
+    </div>
+
+    <button class="btn-main" onclick="requestPasswordReset()">Request Reset Token</button>
+    <button class="btn-main" onclick="confirmPasswordReset()">Reset Password</button>
+    <div class="msg"><a href="#" onclick="switchTab('login');return false">Back to Sign In</a></div>
   </div>
 
   <!-- MFA Setup / Verify UI (hidden until needed) -->
@@ -130,7 +169,7 @@
     <div class="msg">Already registered? <a href="#" onclick="switchTab('login');return false">Sign in</a></div>
   </div>
 </div>
-
+<script src="auth-nav.js"></script>
 <script src="Login.js"></script>
 <script src="reveal-common.js"></script>
 

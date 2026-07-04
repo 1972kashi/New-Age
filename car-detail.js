@@ -103,24 +103,44 @@ function triggerScrollReveal() {
 }
 
 function collectEnquiryDetails() {
-  const name = document.querySelector('.enq-fields .enq-input[placeholder="*Your Name"]')?.value?.trim() || 'Customer';
-  const email = document.querySelector('.enq-fields .enq-input[placeholder="*Email Address"]')?.value?.trim() || 'no-email-provided';
-  const phone = document.querySelector('.phone-input')?.value?.trim() || 'Not provided';
-  const message = document.querySelector('.enq-msg')?.value?.trim() || 'Interested in this vehicle.';
-  return { name, email, phone, message };
+  const name = document.querySelector('.enq-fields .enq-input[placeholder="*Your Name"]')?.value?.trim() || '';
+  const email = document.querySelector('.enq-fields .enq-input[placeholder="*Email Address"]')?.value?.trim() || '';
+  const phone = document.querySelector('.phone-input')?.value?.trim() || '';
+  const carName = document.getElementById('breadcrumbName')?.textContent?.trim() || 'this vehicle';
+  const defaultMessage = `Hello, I'm interested in ${carName}. Please send me more details.`;
+  const message = document.querySelector('.enq-msg')?.value?.trim() || defaultMessage;
+  return { name, email, phone, message, carName };
 }
 
-function sendEnquiryEmail() {
-  const { name, email, phone, message } = collectEnquiryDetails();
-  const subject = encodeURIComponent('Enquiry for car listing');
-  const body = encodeURIComponent(`Name: ${name}\nEmail: ${email}\nPhone: ${phone}\n\nMessage:\n${message}`);
-  window.location.href = `mailto:sales@newageautomotive.co.ke?subject=${subject}&body=${body}`;
+async function sendEnquiryEmail() {
+  const { name, email, phone, message, carName } = collectEnquiryDetails();
+  if (!name || !email) {
+    alert('Please enter your name and email before sending an enquiry.');
+    return;
+  }
+
+  try {
+    const response = await fetch(`${API_BASE}/api/enquiry`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, email, phone, carName, message })
+    });
+    const result = await response.json();
+    if (!response.ok) {
+      throw new Error(result.detail || result.message || 'Failed to send enquiry');
+    }
+    alert(result.message || 'Your enquiry has been sent.');
+  } catch (err) {
+    const subject = encodeURIComponent(`Enquiry for ${carName}`);
+    const body = encodeURIComponent(`Name: ${name}\nEmail: ${email}\nPhone: ${phone || 'Not provided'}\nCar: ${carName}\n\nMessage:\n${message}`);
+    window.location.href = `mailto:jacksonmurithi47@gmail.com?subject=${subject}&body=${body}`;
+  }
 }
 
 function openWhatsApp() {
   const { name, email, phone, message } = collectEnquiryDetails();
   const text = encodeURIComponent(`Hello New Age Automotive, I am ${name}. Email: ${email}. Phone: ${phone}. Message: ${message}`);
-  window.open(`https://wa.me/254700000000?text=${text}`, '_blank', 'noopener,noreferrer');
+  window.open(`https://wa.me/254757822470?text=${text}`, '_blank', 'noopener,noreferrer');
 }
 
 /* ── Init on DOM ready — same pattern as new_age.js ── */

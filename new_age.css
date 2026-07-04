@@ -387,6 +387,58 @@
       transition: background 0.2s;
       margin-top: 10px;
     }
+
+    .stats-panel {
+      width: min(1120px, 100%);
+      margin: 32px auto 0;
+      padding: 0;
+      display: grid;
+      gap: 24px;
+      background: transparent;
+      border: none;
+      border-radius: 0;
+      box-shadow: none;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 24px;
+      align-items: start;
+    }
+
+    .stat-card {
+      background: transparent;
+      border: none;
+      padding: 0;
+      text-align: left;
+    }
+
+    .stats-copy {
+      color: var(--text);
+      line-height: 1.6;
+      font-size: 14px;
+      padding-top: 4px;
+    }
+    .stat-value {
+      font-size: 32px;
+      font-weight: 700;
+      color: var(--gold);
+      margin-bottom: 8px;
+    }
+    .stat-label {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+    }
+    .stats-copy {
+      color: var(--text);
+      line-height: 1.6;
+      font-size: 14px;
+      padding-top: 4px;
+    }
     .car-listings-btn:hover { background: #2a2f42; }
 
     /* ─────────────── SEARCH ─────────────── */

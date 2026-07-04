@@ -14,28 +14,37 @@
   function setImageSources(src, images) {
     const galleryGrid = document.querySelector('.gallery-grid');
     if (!galleryGrid) return;
-    
-    // If images array is provided, use those; otherwise use single src
-    const imgArray = images && images.length > 0 ? images : [src || 'Pic/Car 3.svg'];
-    
+
+    const imgArray = Array.isArray(images) && images.length > 0 ? images : (src ? [src] : ['Pic/Car 3.svg']);
     const photoElements = galleryGrid.querySelectorAll('.photo');
-    
-    // Update image elements with available images
+    const totalImages = imgArray.length;
+
+    const normalizeImageSrc = (value) => {
+      if (!value) return '';
+      if (value.startsWith('http://') || value.startsWith('https://')) return value;
+      if (value.startsWith('/')) return `${API_BASE}${value}`;
+      return `${API_BASE}/${value}`;
+    };
+
     photoElements.forEach((photoEl, index) => {
-      const img = photoEl.querySelector('img');
-      const overlay = photoEl.querySelector('.photo-overlay');
-      const overlayText = photoEl.querySelector('.overlay-text');
-      
-      if (index < imgArray.length) {
-        if (img) {
-          img.src = imgArray[index];
-          img.alt = `Car photo ${index + 1}`;
-        }
-      } else if (index === photoElements.length - 1 && imgArray.length > photoElements.length - 1) {
-        // Show "+X more photos" on the last cell if there are more images
-        if (overlayText) {
-          overlayText.textContent = `+${imgArray.length - (photoElements.length - 1)} PHOTOS`;
-        }
+      photoEl.innerHTML = '';
+      if (index < totalImages) {
+        const img = document.createElement('img');
+        img.src = normalizeImageSrc(imgArray[index]);
+        img.alt = `Car photo ${index + 1}`;
+        photoEl.appendChild(img);
+      } else {
+        const placeholder = document.createElement('div');
+        placeholder.className = 'placeholder';
+        photoEl.appendChild(placeholder);
+      }
+
+      const extraCount = totalImages - photoElements.length;
+      if (index === photoElements.length - 1 && extraCount > 0) {
+        const overlayText = document.createElement('div');
+        overlayText.className = 'overlay-text';
+        overlayText.textContent = `+${extraCount} PHOTOS`;
+        photoEl.appendChild(overlayText);
       }
     });
   }
@@ -88,6 +97,17 @@
     setText('detailMake', car.make || extractMakeFromName(car.name));
     setText('detailDriveAlt', car.drive || '—');
     
+    // Prefill enquiry message with the selected car name
+    const enquiryTextarea = document.querySelector('.enq-msg');
+    const carName = car.name || 'this vehicle';
+    if (enquiryTextarea) {
+      const currentText = enquiryTextarea.value.trim();
+      const defaultText = `Hello, I'm interested in ${carName}. Please send me more details.`;
+      if (!currentText || currentText.startsWith('Hello, I\'m interested in') || currentText === 'Interested in this vehicle.') {
+        enquiryTextarea.value = defaultText;
+      }
+    }
+
     // Handle images - check if car.images is an array or if car.img exists
     const imageArray = Array.isArray(car.images) ? car.images : (car.img ? [car.img] : []);
     setImageSources(car.img, imageArray);

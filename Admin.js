@@ -402,7 +402,12 @@
   }
 
   function clearForm() {
-    ['f-name','f-miles','f-year','f-price','f-img'].forEach(id => document.getElementById(id).value = '');
+    ['f-name','f-miles','f-year','f-price','f-img','f-img-path'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.value = '';
+    });
+    const preview = document.getElementById('imagePreview');
+    if (preview) preview.innerHTML = '';
     document.getElementById('f-trans').value = '';
     document.getElementById('f-fuel').value  = '';
     document.getElementById('f-link').value  = 'car-detail.html';
@@ -485,6 +490,7 @@
   if (ensureAdminSession()) {
     loadSavedCars();
     renderGrid();
+    initAdminImageDrop();
     if (liveRefreshTimer) clearInterval(liveRefreshTimer);
     liveRefreshTimer = setInterval(() => {
       loadSavedCars();

@@ -17,7 +17,7 @@ const Auth = {
   setToken: (t)       => (localStorage.setItem("token", t), localStorage.setItem("naa_token", t)),
   clearToken: ()      => (localStorage.removeItem("token"), localStorage.removeItem("naa_token")),
   getRole: ()         => localStorage.getItem("role") || (JSON.parse(localStorage.getItem('naa_session')||'{}').role),
-  setRole: (r)        => (localStorage.setItem("role", r), (()=>{try{const s=JSON.parse(localStorage.getItem('naa_session')||'{}'); s.role=r; localStorage.setItem('naa_session', JSON.stringify(s);}catch(e){}})()),
+  setRole: (r)        => (localStorage.setItem("role", r), (()=>{try{const s=JSON.parse(localStorage.getItem('naa_session')||'{}'); s.role=r; localStorage.setItem('naa_session', JSON.stringify(s));}catch(e){}})()),
   isLoggedIn: ()      => !!(localStorage.getItem("naa_token") || localStorage.getItem("token")),
   isAdmin: ()         => (localStorage.getItem("role") === "admin") || (JSON.parse(localStorage.getItem('naa_session')||'{}').role === 'admin'),
 };

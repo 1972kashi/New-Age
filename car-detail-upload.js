@@ -364,34 +364,33 @@
 			price: document.getElementById('price').value.trim(),
 			description: document.getElementById('description').value.trim(),
 			img: document.getElementById('imgPath').value.trim(),
+			images: [],
 			badge: true
-		};
+	};
 
-		try {
-			let savedDetail;
-			if (selectedDetailId) {
-				const res = await fetch(`${API_BASE}/api/car-details/${encodeURIComponent(selectedDetailId)}`, {
-					method: 'PUT',
-					headers: { 'Content-Type': 'application/json' },
-					body: JSON.stringify(detailItem)
-				});
-				if (!res.ok) {
-					const text = await res.text();
-					throw new Error(text || 'Failed to update car detail');
+	try {
+		if (uploadedFiles.length > 0) {
+			const uploadedImagePaths = await uploadImages(uploadedFiles);
+			if (uploadedImagePaths.length) {
+				detailItem.images = uploadedImagePaths;
+				if (!detailItem.img) {
+					detailItem.img = uploadedImagePaths[0];
 				}
-				savedDetail = await res.json();
-			} else {
-				const res = await fetch(`${API_BASE}/api/car-details`, {
-					method: 'POST',
-					headers: { 'Content-Type': 'application/json' },
-					body: JSON.stringify(detailItem)
-				});
-				if (!res.ok) {
-					const text = await res.text();
-					throw new Error(text || 'Failed to save car detail');
-				}
-				savedDetail = await res.json();
 			}
+		}
+
+		let savedDetail;
+		const url = selectedDetailId ? `${API_BASE}/api/car-details/${encodeURIComponent(selectedDetailId)}` : `${API_BASE}/api/car-details`;
+		const res = await fetch(url, {
+			method: selectedDetailId ? 'PUT' : 'POST',
+			headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' },
+			body: JSON.stringify(detailItem)
+		});
+		if (!res.ok) {
+			const text = await res.text();
+			throw new Error(text || 'Failed to save car detail');
+		}
+		savedDetail = await res.json();
 
 			selectedDetailId = savedDetail.id;
 			const detailLinkText = document.getElementById('detailLinkText');
