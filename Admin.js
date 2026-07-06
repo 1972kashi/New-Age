@@ -501,3 +501,203 @@
   localStorage.removeItem('naa_session');
   window.location.href='login.html';
 }
+
+  /**
+   * Initialize admin image drag-and-drop
+   */
+  function initAdminImageDrop() {
+    const dropZone = document.getElementById('adminDropZone');
+    const fileInput = document.getElementById('adminFileInput');
+    const preview = document.getElementById('adminImagePreview');
+    const imgField = document.getElementById('f-img');
+    
+    if (!dropZone || !fileInput) return;
+
+    let selectedFile = null;
+
+    // Click to browse
+    dropZone.onclick = () => fileInput.click();
+
+    // Drag and drop
+    dropZone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      dropZone.style.borderColor = 'var(--gold)';
+      dropZone.style.background = 'rgba(212,160,23,0.1)';
+    });
+
+    dropZone.addEventListener('dragleave', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      dropZone.style.borderColor = 'rgba(255,255,255,0.2)';
+      dropZone.style.background = 'rgba(212,160,23,0.02)';
+    });
+
+    dropZone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      dropZone.style.borderColor = 'rgba(255,255,255,0.2)';
+      dropZone.style.background = 'rgba(212,160,23,0.02)';
+      
+      const files = e.dataTransfer.files;
+      if (files && files.length > 0) {
+        processImageFile(files[0]);
+      }
+    });
+
+    // File input change
+    fileInput.addEventListener('change', (e) => {
+      if (e.target.files && e.target.files.length > 0) {
+        processImageFile(e.target.files[0]);
+      }
+    });
+
+    async function processImageFile(file) {
+      if (!file.type.startsWith('image/')) {
+        showToast('Please select a valid image file');
+        return;
+      }
+
+      selectedFile = file;
+      
+      // Show preview with blob URL (temporary)
+      const url = URL.createObjectURL(file);
+      preview.innerHTML = `
+        <div style="position:relative; display:inline-block;">
+          <img src="${url}" alt="preview" style="height:60px; width:60px; object-fit:cover; border-radius:4px; cursor:pointer; onerror='this.src=\\'Pic/Car 3.svg\\'';" onclick="window.editAdminImage(this)" title="Click to edit image">
+          <button type="button" style="position:absolute; top:-8px; right:-8px; width:24px; height:24px; border-radius:50%; background:#dc2626; color:white; border:none; cursor:pointer; font-weight:bold; padding:0; font-size:14px;" onclick="clearAdminImage()">✕</button>
+        </div>
+      `;
+
+      // Upload and set image path
+      try {
+        const token = localStorage.getItem('naa_token') || localStorage.getItem('token');
+        const formData = new FormData();
+        formData.append('file', file);
+
+        let res = await fetch(API_BASE + '/upload/image', {
+          method: 'POST',
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+          body: formData
+        });
+
+        if ((res.status === 401 || res.status === 403)) {
+          // Try refreshing token
+          const loginRes = await fetch(API_BASE + '/auth/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: new URLSearchParams({
+              username: 'admin@gmail.com',
+              password: 'Admin@admin'
+            }).toString()
+          });
+          const loginData = await loginRes.json();
+          if (loginData.access_token) {
+            localStorage.setItem('naa_token', loginData.access_token);
+            localStorage.setItem('token', loginData.access_token);
+            res = await fetch(API_BASE + '/upload/image', {
+              method: 'POST',
+              headers: { Authorization: `Bearer ${loginData.access_token}` },
+              body: formData
+            });
+          }
+        }
+
+        if (!res.ok) {
+          throw new Error('Upload failed: ' + res.status);
+        }
+
+        const data = await res.json();
+        if (data?.img) {
+          imgField.value = data.img;  // Store SERVER PATH, not blob URL
+          liveUpdate();
+          showToast('✓ Image uploaded successfully', 'var(--accent2)');
+        }
+        
+        // Revoke the temporary blob URL to free memory
+        URL.revokeObjectURL(url);
+      } catch (err) {
+        console.error('Image upload error:', err);
+        showToast('Error uploading image: ' + err.message, 'var(--danger)');
+        URL.revokeObjectURL(url);  // Clean up on error too
+      }
+    }
+  }
+
+  window.clearAdminImage = function() {
+    document.getElementById('adminImagePreview').innerHTML = '';
+    document.getElementById('f-img').value = '';
+    document.getElementById('adminFileInput').value = '';
+    liveUpdate();
+    showToast('Image removed');
+  }
+
+  window.editAdminImage = async function(imgElement) {
+    const fileInput = document.getElementById('adminFileInput');
+    if (!fileInput.files || !fileInput.files[0]) return;
+
+    try {
+      const result = await showImageEditorModal(fileInput.files[0], {
+        targetWidth: 529,
+        targetHeight: 319
+      });
+
+      // Upload edited image
+      try {
+        const token = localStorage.getItem('naa_token') || localStorage.getItem('token');
+        const formData = new FormData();
+        
+        // Convert blob to file
+        const editedFile = new File([result.blob], 'edited-image.jpg', { type: 'image/jpeg' });
+        formData.append('file', editedFile);
+
+        let res = await fetch(API_BASE + '/upload/image', {
+          method: 'POST',
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+          body: formData
+        });
+
+        if (res.status === 401 || res.status === 403) {
+          const loginRes = await fetch(API_BASE + '/auth/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: new URLSearchParams({
+              username: 'admin@gmail.com',
+              password: 'Admin@admin'
+            }).toString()
+          });
+          const loginData = await loginRes.json();
+          if (loginData.access_token) {
+            localStorage.setItem('naa_token', loginData.access_token);
+            localStorage.setItem('token', loginData.access_token);
+            res = await fetch(API_BASE + '/upload/image', {
+              method: 'POST',
+              headers: { Authorization: `Bearer ${loginData.access_token}` },
+              body: formData
+            });
+          }
+        }
+
+        if (!res.ok) throw new Error('Upload failed');
+
+        const data = await res.json();
+        if (data?.img) {
+          // Store SERVER PATH in the form field (NOT data URL or blob URL)
+          document.getElementById('f-img').value = data.img;
+          // Update preview image with data URL for display
+          imgElement.src = result.dataUrl;
+          imgElement.onerror = () => { imgElement.src = 'Pic/Car 3.svg'; };
+          liveUpdate();
+          showToast('✓ Image edited & uploaded (529×319px)', 'var(--accent2)');
+        }
+      } catch (err) {
+        console.error('Upload error:', err);
+        showToast('Error uploading edited image: ' + err.message, 'var(--danger)');
+      }
+    } catch (err) {
+      if (err.message !== 'User cancelled') {
+        console.error('Image edit error:', err);
+        showToast('Error editing image: ' + err.message, 'var(--danger)');
+      }
+    }
+  }

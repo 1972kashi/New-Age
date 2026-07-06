@@ -179,9 +179,32 @@
 				<td>${escapeHtml(card.fuel || '—')}</td>
 				<td>${escapeHtml(card.year || '—')}</td>
 				<td>${escapeHtml(card.queuedAt ? new Date(card.queuedAt).toLocaleString() : '—')}</td>
-				<td><button class="pending-action-btn" type="button" onclick="loadPendingCard(${index})">Edit</button></td>
+				<td style="display:flex; gap:6px; align-items:center;">
+					<button class="pending-action-btn" type="button" onclick="loadPendingCard(${index})" style="background:var(--gold); color:#000;">Edit</button>
+					<button class="pending-action-btn" type="button" onclick="removePendingCard(${index})" style="background:#dc2626; color:white;">Remove</button>
+				</td>
 			</tr>
 		`).join('');
+	}
+
+	window.removePendingCard = function(index) {
+		if (index < 0 || index >= pendingQueue.length) return;
+		const card = pendingQueue[index];
+		
+		// Clear the form if this was the active card
+		if (activePendingCard && activePendingCard.id === card.id) {
+			activePendingCard = null;
+			document.getElementById('carName').value = '';
+			document.getElementById('price').value = '';
+			document.getElementById('imgPath').value = '';
+			updateImgPathDisplay('');
+		}
+		
+		// Remove from queue
+		pendingQueue.splice(index, 1);
+		savePendingQueue(pendingQueue);
+		renderPendingQueue();
+		showToast('✓ Pending car removed', 'var(--accent2)');
 	}
 
 	window.refreshPendingQueue = function() {
@@ -208,6 +231,7 @@
 		document.getElementById('location').value = card.location || '';
 		document.getElementById('color').value = card.color || '';
 		document.getElementById('description').value = card.description || '';
+		updateImgPathDisplay(card.img || '');
 		updatePreview();
 		showToast('Pending car loaded for editing');
 	}
@@ -293,6 +317,7 @@
 		document.getElementById('price').value = detail.price || '';
 		document.getElementById('description').value = detail.description || '';
 		document.getElementById('imgPath').value = detail.img || '';
+		updateImgPathDisplay(detail.img || '');
 		selectedDetailId = detail.id;
 	}
 
@@ -313,6 +338,7 @@
 	const fileInput = document.getElementById('fileInput');
 	const previewStrip = document.getElementById('previewStrip');
 	let uploadedFiles = [];
+	let editedImages = {}; // Store edited image data URLs
 
 	if (dropZone) {
 		dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
@@ -328,6 +354,59 @@
 		fileInput.addEventListener('change', () => handleFiles(fileInput.files));
 	}
 
+	/**
+	 * Open image editor modal for an image
+	 */
+	window.editImage = async function(fileIndex) {
+		const file = uploadedFiles[fileIndex];
+		if (!file) return;
+
+		try {
+			const result = await showImageEditorModal(file, {
+				targetWidth: 529,
+				targetHeight: 319
+			});
+
+			editedImages[fileIndex] = result;
+			
+			// Update preview
+			const img = document.querySelectorAll('.preview-thumb')[fileIndex];
+			if (img && result.dataUrl) {
+				img.src = result.dataUrl;
+			}
+
+			// Set as primary image if it's the first one
+			if (fileIndex === 0) {
+				document.getElementById('imgPath').value = result.dataUrl;
+				updatePhotoGrid(uploadedFiles);
+				updateImgPathDisplay(result.dataUrl);
+			}
+
+			showToast('✓ Image edited successfully', 'var(--accent2)');
+		} catch (err) {
+			if (err.message !== 'User cancelled') {
+				console.error('Image edit error:', err);
+				showToast('Error editing image', 'var(--danger)');
+			}
+		}
+	}
+
+	function updateImgPathDisplay(imagePath) {
+		const display = document.getElementById('imgPathDisplay');
+		if (!display) return;
+		
+		if (imagePath && imagePath.startsWith('data:')) {
+			display.textContent = '✓ Image edited (529×319px)';
+			display.style.color = 'var(--green-light)';
+		} else if (imagePath) {
+			display.textContent = imagePath.substring(0, 50) + (imagePath.length > 50 ? '...' : '');
+			display.style.color = 'var(--gold)';
+		} else {
+			display.textContent = 'No image selected';
+			display.style.color = 'var(--gold)';
+		}
+	}
+
 	function handleFiles(files) {
 		if (!files || !files.length) return;
 		const arr = Array.from(files);
@@ -335,23 +414,110 @@
 		if (previewStrip) previewStrip.innerHTML = '';
 
 		uploadedFiles.slice(0, 6).forEach((file, index) => {
-			const url = URL.createObjectURL(file);
+			const url = editedImages[index]?.dataUrl || URL.createObjectURL(file);
 			const wrapper = document.createElement('div');
 			wrapper.style.position = 'relative';
 			wrapper.style.display = 'inline-block';
 			wrapper.style.marginRight = '8px';
+			wrapper.style.cursor = 'pointer';
+			wrapper.title = 'Click to edit';
 			
 			const img = document.createElement('img');
 			img.src = url;
 			img.className = 'preview-thumb';
+			img.style.cursor = 'pointer';
+			img.onclick = () => window.editImage(index);
 			
 			const removeBtn = document.createElement('button');
 			removeBtn.type = 'button';
 			removeBtn.textContent = '✕';
 			removeBtn.style.cssText = 'position:absolute; top:-8px; right:-8px; width:24px; height:24px; border-radius:50%; background:#dc2626; color:white; border:none; cursor:pointer; font-weight:bold; padding:0;';
-			removeBtn.onclick = () => removeImage(index);
+			removeBtn.onclick = (e) => {
+				e.stopPropagation();
+				removeImage(index);
+			};
+			
+			const editLabel = document.createElement('div');
+			editLabel.textContent = '✎ Edit';
+			editLabel.style.cssText = 'position:absolute; bottom:0; left:0; right:0; background:rgba(212,160,23,0.8); color:white; text-align:center; font-size:10px; padding:2px; display:none;';
+			wrapper.style.opacity = '0.9';
+			wrapper.onmouseover = () => editLabel.style.display = 'block';
+			wrapper.onmouseout = () => editLabel.style.display = 'none';
 			
 			wrapper.appendChild(img);
+			wrapper.appendChild(editLabel);
+			wrapper.appendChild(removeBtn);
+			if (previewStrip) previewStrip.appendChild(wrapper);
+		});
+
+		const imageControls = document.getElementById('imageControls');
+		if (imageControls) {
+			imageControls.style.display = uploadedFiles.length > 0 ? 'block' : 'none';
+		}
+
+		updatePhotoGrid(uploadedFiles);
+		
+		// Set first image as primary if none selected
+		if (uploadedFiles.length > 0 && !document.getElementById('imgPath').value) {
+			const firstImageUrl = editedImages[0]?.dataUrl || URL.createObjectURL(uploadedFiles[0]);
+			document.getElementById('imgPath').value = firstImageUrl;
+			updateImgPathDisplay(firstImageUrl);
+		}
+	}
+
+	window.removeImage = function(index) {
+		uploadedFiles.splice(index, 1);
+		delete editedImages[index];
+		
+		// Rebuild edited images map with correct indices
+		const newEditedImages = {};
+		Object.entries(editedImages).forEach(([oldIndex, data]) => {
+			const newIndex = parseInt(oldIndex);
+			if (newIndex > index) {
+				newEditedImages[newIndex - 1] = data;
+			} else if (newIndex !== index) {
+				newEditedImages[newIndex] = data;
+			}
+		});
+		editedImages = newEditedImages;
+		
+		// Regenerate preview with updated files
+		const previewStrip = document.getElementById('previewStrip');
+		if (previewStrip) previewStrip.innerHTML = '';
+
+		uploadedFiles.slice(0, 6).forEach((file, fileIndex) => {
+			const url = editedImages[fileIndex]?.dataUrl || URL.createObjectURL(file);
+			const wrapper = document.createElement('div');
+			wrapper.style.position = 'relative';
+			wrapper.style.display = 'inline-block';
+			wrapper.style.marginRight = '8px';
+			wrapper.style.cursor = 'pointer';
+			wrapper.title = 'Click to edit';
+			
+			const img = document.createElement('img');
+			img.src = url;
+			img.className = 'preview-thumb';
+			img.style.cursor = 'pointer';
+			img.onclick = () => window.editImage(fileIndex);
+			
+			const removeBtn = document.createElement('button');
+			removeBtn.type = 'button';
+			removeBtn.textContent = '✕';
+			removeBtn.style.cssText = 'position:absolute; top:-8px; right:-8px; width:24px; height:24px; border-radius:50%; background:#dc2626; color:white; border:none; cursor:pointer; font-weight:bold; padding:0;';
+			removeBtn.onclick = (e) => {
+				e.stopPropagation();
+				removeImage(fileIndex);
+			};
+			
+			const editLabel = document.createElement('div');
+			editLabel.textContent = '✎ Edit';
+			editLabel.style.cssText = 'position:absolute; bottom:0; left:0; right:0; background:rgba(212,160,23,0.8); color:white; text-align:center; font-size:10px; padding:2px; display:none;';
+			wrapper.style.opacity = '0.9';
+			wrapper.onmouseover = () => editLabel.style.display = 'block';
+			wrapper.onmouseout = () => editLabel.style.display = 'none';
+			
+			wrapper.appendChild(img);
+			wrapper.appendChild(editLabel);
 			wrapper.appendChild(removeBtn);
 			if (previewStrip) previewStrip.appendChild(wrapper);
 		});
@@ -364,21 +530,15 @@
 		updatePhotoGrid(uploadedFiles);
 	}
 
-	window.removeImage = function(index) {
-		uploadedFiles.splice(index, 1);
-		handleFiles([]);
-		if (uploadedFiles.length === 0) {
-			const imageControls = document.getElementById('imageControls');
-			if (imageControls) imageControls.style.display = 'none';
-		}
-	}
-
 	window.clearAllImages = function() {
 		uploadedFiles = [];
+		editedImages = {};
 		const previewStrip = document.getElementById('previewStrip');
 		if (previewStrip) previewStrip.innerHTML = '';
 		const imageControls = document.getElementById('imageControls');
 		if (imageControls) imageControls.style.display = 'none';
+		document.getElementById('imgPath').value = '';
+		updateImgPathDisplay('');
 		updatePhotoGrid([]);
 	}
 
@@ -452,9 +612,10 @@
 
 		let savedDetail;
 		const url = selectedDetailId ? `${API_BASE}/api/car-details/${encodeURIComponent(selectedDetailId)}` : `${API_BASE}/api/car-details`;
+		const authHeaders = await getAuthHeaders();
 		const res = await fetch(url, {
 			method: selectedDetailId ? 'PUT' : 'POST',
-			headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' },
+			headers: { ...authHeaders, 'Content-Type': 'application/json' },
 			body: JSON.stringify(detailItem)
 		});
 		if (!res.ok) {

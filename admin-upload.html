@@ -129,8 +129,15 @@
     </div>
 
     <div class="field">
-      <label>Image Path</label>
-      <input id="f-img" type="text" placeholder="Pic/Car1.svg" oninput="liveUpdate()"/>
+      <label>Image Upload</label>
+      <div id="adminDropZone" class="admin-drop-zone">
+        <input type="file" id="adminFileInput" accept="image/*" class="admin-file-input" title="Upload car image">
+        <div class="drop-icon-emoji">📸</div>
+        <div class="drop-label-main">Drag & drop images here</div>
+        <div class="drop-label-sub">or click to browse</div>
+      </div>
+      <div id="adminImagePreview" class="admin-image-preview"></div>
+      <input id="f-img" type="text" placeholder="Image path will appear here" oninput="liveUpdate()" class="admin-img-field"/>
     </div>
 
     <div class="field">
@@ -172,6 +179,7 @@
 
 <div class="toast" id="toast"></div>
 
+<script src="image-editor.js"></script>
 <script src="Admin.js"></script>
 <script src="reveal-common.js"></script>
 </body>

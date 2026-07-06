@@ -28,9 +28,15 @@
     const div = document.createElement('div');
     div.className = 'car-card';
     if(pageNum) div.setAttribute('data-page', pageNum);
+    const imgSrc = normalizeImagePath(c.img);
+    const carLink = c.link || (c.id ? `car-detail.html?id=${c.id}` : 'car-detail.html');
+    
     div.innerHTML = `
       <div class="car-img-wrap">
-        <img src="${c.img || 'Pic/Car 3.svg'}" alt="${c.name || 'Car'}" />
+        <img src="${imgSrc}" 
+             alt="${c.name || 'Car'}"
+             onerror="this.src='Pic/Car 3.svg'" 
+             style="width:100%; height:100%; object-fit:cover;"/>
         ${c.badge ? '<span class="verified-badge">Verified</span>' : ''}
       </div>
       <div class="car-body">
@@ -43,18 +49,34 @@
         </div>
         <div class="car-footer">
           <div class="car-price"><small>KSH</small> ${c.price || '—'}</div>
-          <a href="${c.link || 'car-detail.html'}" class="btn-details">More Details</a>
+          <a href="${carLink}" class="btn-details">More Details</a>
         </div>
       </div>`;
     return div;
   }
 
+  function normalizeImagePath(imgPath) {
+    // Handle relative paths - encode spaces and ensure proper format
+    if (!imgPath) return 'Pic/Car 3.svg';
+    if (imgPath.startsWith('http://') || imgPath.startsWith('https://')) return imgPath;
+    // For local paths, encode spaces and ensure forward slashes
+    return encodeURI(imgPath).replace(/\%20/g, '%20');
+  }
+
   function createListingsCard(c){
     const div = document.createElement('div');
     div.className = 'car-card';
+    const imgSrc = normalizeImagePath(c.img);
+    const carLink = c.link || (c.id ? `car-detail.html?id=${c.id}` : 'car-detail.html');
+    
     div.innerHTML = `
-      <div class="card-img-wrap"><img src="${c.img || 'https://images.unsplash.com/photo-1555215695-3004980ad54e?w=600&q=80'}" alt="${c.name || 'Car'}"/>
-        ${c.badge ? '<span class="verified-pill">Verified</span>' : ''}</div>
+      <div class="card-img-wrap">
+        <img src="${imgSrc}" 
+             alt="${c.name || 'Car'}"
+             onerror="this.src='Pic/Car 3.svg'" 
+             style="width:100%; height:100%; object-fit:cover;"/>
+        ${c.badge ? '<span class="verified-pill">Verified</span>' : ''}
+      </div>
       <div class="card-body">
         <div class="card-name">${c.name || 'Unnamed Car'}</div>
         <div class="card-meta">
@@ -65,7 +87,7 @@
         </div>
         <div class="card-footer">
           <div class="card-price"><small>USD</small> ${c.price || '—'}</div>
-          <a href="${c.link || 'car-detail.html'}" class="btn btn-gold btn-sm">More Details</a>
+          <a href="${carLink}" class="btn btn-gold btn-sm">More Details</a>
         </div>
       </div>`;
     return div;
