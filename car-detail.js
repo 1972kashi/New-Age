@@ -10,6 +10,73 @@
 
 /* Observer handled by reveal-common.js — use window.reveal.observe(el) */
 
+const DETAIL_IMAGE_API_BASE = 'http://localhost:8000';
+
+function normalizeDetailImageSrc(value) {
+  if (!value) return '';
+  if (typeof value !== 'string') return '';
+  if (value.startsWith('http://') || value.startsWith('https://') || value.startsWith('data:')) {
+    return value;
+  }
+  if (value.startsWith('/')) {
+    return `${DETAIL_IMAGE_API_BASE}${value}`;
+  }
+  return `${DETAIL_IMAGE_API_BASE}/${value.replace(/^\.\//, '').replace(/^\//, '')}`;
+}
+
+function collectDetailImageSources(car) {
+  const sources = [];
+  if (Array.isArray(car?.images)) {
+    car.images.filter(Boolean).forEach((item) => sources.push(item));
+  }
+  if (Array.isArray(car?.photos)) {
+    car.photos.filter(Boolean).forEach((item) => sources.push(item));
+  }
+  if (typeof car?.images === 'string' && car.images.trim()) {
+    car.images.split(',').map((item) => item.trim()).filter(Boolean).forEach((item) => sources.push(item));
+  }
+  if (car?.img) {
+    sources.push(car.img);
+  }
+
+  const uniqueSources = sources.filter((value, index, arr) => value && arr.indexOf(value) === index);
+  return uniqueSources.length ? uniqueSources : ['Pic/Car 3.svg'];
+}
+
+window.renderDetailGallery = function(car) {
+  const galleryGrid = document.querySelector('.gallery-grid');
+  if (!galleryGrid) return;
+
+  const photoCells = galleryGrid.querySelectorAll('.photo');
+  if (!photoCells.length) return;
+
+  const imageSources = collectDetailImageSources(car);
+  const totalImages = imageSources.length;
+
+  photoCells.forEach((photoEl, index) => {
+    photoEl.innerHTML = '';
+
+    if (index < totalImages) {
+      const img = document.createElement('img');
+      img.src = normalizeDetailImageSrc(imageSources[index]);
+      img.alt = `Car photo ${index + 1}`;
+      photoEl.appendChild(img);
+    } else {
+      const placeholder = document.createElement('div');
+      placeholder.className = 'placeholder';
+      photoEl.appendChild(placeholder);
+    }
+
+    const extraCount = totalImages - photoCells.length;
+    if (index === photoCells.length - 1 && extraCount > 0) {
+      const overlayText = document.createElement('div');
+      overlayText.className = 'overlay-text';
+      overlayText.textContent = `+${extraCount} PHOTOS`;
+      photoEl.appendChild(overlayText);
+    }
+  });
+};
+
 /* ── Assign directions by class name, then register with observer ──
    Mirrors how new_age.js maps element classes → directions:
      .hero-left        → reveal-left
@@ -140,7 +207,7 @@ async function sendEnquiryEmail() {
 function openWhatsApp() {
   const { name, email, phone, message } = collectEnquiryDetails();
   const text = encodeURIComponent(`Hello New Age Automotive, I am ${name}. Email: ${email}. Phone: ${phone}. Message: ${message}`);
-  window.open(`https://wa.me/254757822470?text=${text}`, '_blank', 'noopener,noreferrer');
+  window.open(`https://wa.me/+254724105521?text=${text}`, '_blank', 'noopener,noreferrer');
 }
 
 /* ── Init on DOM ready — same pattern as new_age.js ── */

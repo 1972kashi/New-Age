@@ -108,9 +108,13 @@
       }
     }
 
-    // Handle images - check if car.images is an array or if car.img exists
-    const imageArray = Array.isArray(car.images) ? car.images : (car.img ? [car.img] : []);
-    setImageSources(car.img, imageArray);
+    // Handle images - prefer the shared gallery renderer used by car-detail.js
+    if (window.renderDetailGallery) {
+      window.renderDetailGallery(car);
+    } else {
+      const imageArray = Array.isArray(car.images) ? car.images : (car.img ? [car.img] : []);
+      setImageSources(car.img, imageArray);
+    }
   }
 
   function extractMakeFromName(name) {

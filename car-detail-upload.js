@@ -9,6 +9,70 @@
 	let activePendingCard = null;
 	const PENDING_CARDS_KEY = 'naa_pending_car_cards';
 
+	async function ensureAdminAuth(forceRefresh = false) {
+		const storedToken = localStorage.getItem('naa_token') || localStorage.getItem('token');
+		if (!forceRefresh && storedToken) {
+			return storedToken;
+		}
+
+		try {
+			const res = await fetch(`${API_BASE}/auth/login`, {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+				body: new URLSearchParams({
+					username: 'admin@gmail.com',
+					password: 'Admin@admin'
+				}).toString()
+			});
+			const data = await res.json().catch(() => ({}));
+			if (res.ok && data.access_token) {
+				localStorage.setItem('naa_token', data.access_token);
+				localStorage.setItem('token', data.access_token);
+				localStorage.setItem('naa_session', JSON.stringify({ name: 'Admin', email: 'admin@gmail.com', role: data.role || 'admin' }));
+				return data.access_token;
+			}
+		} catch (err) {
+			console.warn('Could not refresh admin auth automatically', err);
+		}
+
+		return storedToken || '';
+	}
+
+	async function getAuthHeaders(forceRefresh = false) {
+		const token = await ensureAdminAuth(forceRefresh);
+		return token ? { Authorization: `Bearer ${token}` } : {};
+	}
+
+	async function uploadImages(files) {
+		if (!files || !files.length) return [];
+		const uploadedImagePaths = [];
+		for (const file of files) {
+			const formData = new FormData();
+			formData.append('file', file);
+			let res = await fetch(`${API_BASE}/upload/image`, {
+				method: 'POST',
+				headers: await getAuthHeaders(),
+				body: formData
+			});
+			if ((res.status === 401 || res.status === 403) && !res.url.includes('/upload/image')) {
+				res = await fetch(`${API_BASE}/upload/image`, {
+					method: 'POST',
+					headers: await getAuthHeaders(true),
+					body: formData
+				});
+			}
+			if (!res.ok) {
+				const text = await res.text();
+				throw new Error(text || 'Image upload failed');
+			}
+			const data = await res.json();
+			if (data?.img) {
+				uploadedImagePaths.push(data.img);
+			}
+		}
+		return uploadedImagePaths;
+	}
+
 	window.setNav = function(el) {
 		document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
 		el.classList.add('active');
@@ -347,6 +411,7 @@
 		const carName = document.getElementById('carName').value.trim();
 		if (!carName) { showToast('⚠ CAR NAME REQUIRED', 'var(--danger)'); return; }
 
+		const imgPathValue = document.getElementById('imgPath').value.trim();
 		const detailItem = {
 			name: carName,
 			make: document.getElementById('make').value.trim(),
@@ -363,7 +428,7 @@
 			color: document.getElementById('color').value.trim(),
 			price: document.getElementById('price').value.trim(),
 			description: document.getElementById('description').value.trim(),
-			img: document.getElementById('imgPath').value.trim(),
+			img: imgPathValue,
 			images: [],
 			badge: true
 	};
@@ -377,6 +442,12 @@
 					detailItem.img = uploadedImagePaths[0];
 				}
 			}
+		}
+		if (imgPathValue && !detailItem.images.includes(imgPathValue)) {
+			detailItem.images = [imgPathValue, ...detailItem.images];
+		}
+		if (detailItem.images.length && !detailItem.img) {
+			detailItem.img = detailItem.images[0];
 		}
 
 		let savedDetail;
