@@ -53,9 +53,51 @@
 
   function uuid(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,8); }
 
-  async function queuePost(path, body){
+  function normalizeCarForCache(car){
+    if (!car || typeof car !== 'object') return null;
+    const normalized = { ...car };
+    if (!normalized.name && normalized.title) normalized.name = normalized.title;
+    if (!normalized.link && normalized.id) normalized.link = `car-detail.html?id=${normalized.id}`;
+    normalized.cachedAt = new Date().toISOString();
+    return normalized;
+  }
+
+  function isSameCar(left, right){
+    if (!left || !right) return false;
+    if (left.id && right.id && left.id === right.id) return true;
+    if (left.link && right.link && left.link === right.link) return true;
+    return Boolean(left.name && right.name && left.name === right.name && left.price === right.price);
+  }
+
+  async function saveCarToCache(car){
+    const normalized = normalizeCarForCache(car);
+    if (!normalized) return [];
+
+    const existing = await getCachedCars();
+    const list = Array.isArray(existing) ? existing : [];
+    const deduped = [normalized, ...list.filter(item => !isSameCar(item, normalized))];
+    const payload = deduped.slice(0, 200);
+    await put(STORE_CACHE, { key: 'cars', payload, updatedAt: new Date().toISOString() });
+    return payload;
+  }
+
+  async function queuePost(path, body, options = {}){
     const id = uuid();
-    await put(STORE_QUEUE, { id, path, body, createdAt: new Date().toISOString() });
+    const record = {
+      id,
+      path,
+      body,
+      createdAt: new Date().toISOString(),
+      method: options.method || 'POST',
+      headers: options.headers || { 'Content-Type': 'application/json' },
+      cachePayload: options.cachePayload || null
+    };
+
+    if (record.cachePayload) {
+      await saveCarToCache(record.cachePayload);
+    }
+
+    await put(STORE_QUEUE, record);
     return id;
   }
 
@@ -64,14 +106,13 @@
     for (const it of items){
       try{
         const res = await fetch(apiBase + it.path, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(it.body)
+          method: it.method || 'POST',
+          headers: it.headers || { 'Content-Type': 'application/json' },
+          body: it.body ? (typeof it.body === 'string' ? it.body : JSON.stringify(it.body)) : undefined
         });
         if (res.ok){
           await deleteKey(STORE_QUEUE, it.id);
         } else {
-          // stop on first failure to avoid spinning
           console.warn('flushQueue: failed item', it, await res.text());
           return false;
         }
@@ -84,19 +125,22 @@
   }
 
   async function cacheCars(data){
-    await put(STORE_CACHE, { key: 'cars', payload: data, updatedAt: new Date().toISOString() });
+    const payload = Array.isArray(data) ? data : (Array.isArray(data?.items) ? data.items : []);
+    const normalized = payload.map(normalizeCarForCache).filter(Boolean);
+    await put(STORE_CACHE, { key: 'cars', payload: normalized, updatedAt: new Date().toISOString() });
+    return normalized;
   }
 
   async function getCachedCars(){
     const all = await getAll(STORE_CACHE);
     const rec = all.find(r => r.key === 'cars');
-    return rec ? rec.payload : null;
+    const payload = rec ? rec.payload : [];
+    return Array.isArray(payload) ? payload : [];
   }
 
   function initAutoSync(apiBase){
     window.addEventListener('online', () => {
-      console.log('online: attempting flushQueue');
-      flushQueue(apiBase).then(ok => { if (ok) console.log('outbox flushed') });
+      flushQueue(apiBase).then(ok => { if (ok) console.log('outbox flushed'); });
     });
   }
 
@@ -105,6 +149,7 @@
     flushQueue,
     cacheCars,
     getCachedCars,
+    saveCarToCache,
     initAutoSync
   };
 })();

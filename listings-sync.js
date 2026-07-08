@@ -8,10 +8,23 @@
       const res = await fetch(API_BASE + '/api/cars?limit=100');
       if (res.ok) {
         const data = await res.json();
-        return data.items || [];
+        const items = Array.isArray(data) ? data : (Array.isArray(data?.items) ? data.items : []);
+        if (window.offlineSync?.cacheCars && items.length) {
+          await window.offlineSync.cacheCars(items);
+        }
+        return items;
       }
     } catch (e) {
-      // API is unavailable; fall back to reading the local db.json file.
+      // API is unavailable; fall back to cached uploads.
+    }
+
+    try {
+      if (window.offlineSync?.getCachedCars) {
+        const cached = await window.offlineSync.getCachedCars();
+        if (Array.isArray(cached) && cached.length) return cached;
+      }
+    } catch (e) {
+      // Cached cars unavailable.
     }
 
     try {

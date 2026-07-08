@@ -402,6 +402,18 @@
 			badge: true
 		};
 
+		let carItem = {
+			name: carName,
+			miles: document.getElementById('miles').value.trim(),
+			fuel: document.getElementById('fuel').value,
+			trans: document.getElementById('trans').value,
+			year: document.getElementById('year').value.trim(),
+			price: document.getElementById('price').value.trim(),
+			img: primaryImagePath,
+			badge: true,
+			link: `car-detail.html`
+		};
+
 		try {
 			let savedDetail;
 			if (selectedDetailId) {
@@ -440,7 +452,7 @@
 				detailLinkText.textContent = `car-detail.html?id=${savedDetail.id}`;
 			}
 
-			const carItem = {
+			carItem = {
 				name: savedDetail.name,
 				miles: savedDetail.miles,
 				fuel: savedDetail.fuel,
@@ -489,6 +501,22 @@
 			await extractExistingCars();
 			await extractExistingCarDetails();
 		} catch (err) {
+			if (window.offlineSync?.queuePost && window.offlineSync?.saveCarToCache) {
+				try {
+					const offlineCar = {
+						...carItem,
+						id: `offline-${Date.now()}`,
+						link: `car-detail.html?id=offline-${Date.now()}`
+					};
+					await window.offlineSync.saveCarToCache(offlineCar);
+					await window.offlineSync.queuePost('/api/car-details', detailItem, { cachePayload: offlineCar });
+					await window.offlineSync.queuePost('/api/cars', offlineCar, { cachePayload: offlineCar });
+					showToast('Saved offline. It will appear when the server is back.', 'var(--accent2)');
+					return;
+				} catch (cacheErr) {
+					console.error('offline cache error', cacheErr);
+				}
+			}
 			console.error('uploadListing error', err);
 			showToast(`Upload failed: ${err.message || 'Server unreachable'}`, 'var(--danger)');
 		}
