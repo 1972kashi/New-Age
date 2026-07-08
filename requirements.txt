@@ -6,3 +6,4 @@ passlib[bcrypt]>=1.7.4
 aiofiles>=23.2.1
 pydantic[email]>=2.6.0
 pyotp>=2.8.0
+Pillow>=10.0.0

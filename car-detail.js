@@ -12,6 +12,12 @@
 
 const DETAIL_IMAGE_API_BASE = 'http://localhost:8000';
 
+let detailGalleryState = {
+  images: [],
+  activeIndex: 0,
+  modalEl: null
+};
+
 function normalizeDetailImageSrc(value) {
   if (!value) return '';
   if (typeof value !== 'string') return '';
@@ -26,21 +32,107 @@ function normalizeDetailImageSrc(value) {
 
 function collectDetailImageSources(car) {
   const sources = [];
-  if (Array.isArray(car?.images)) {
-    car.images.filter(Boolean).forEach((item) => sources.push(item));
-  }
-  if (Array.isArray(car?.photos)) {
-    car.photos.filter(Boolean).forEach((item) => sources.push(item));
-  }
-  if (typeof car?.images === 'string' && car.images.trim()) {
-    car.images.split(',').map((item) => item.trim()).filter(Boolean).forEach((item) => sources.push(item));
-  }
+
   if (car?.img) {
     sources.push(car.img);
   }
+  const parseImageList = (value) => {
+    if (Array.isArray(value)) {
+      return value.filter(Boolean);
+    }
+    if (typeof value === 'string' && value.trim()) {
+      return value.split(',').map((item) => item.trim()).filter(Boolean);
+    }
+    return [];
+  };
+
+  parseImageList(car?.images).forEach((item) => sources.push(item));
+  parseImageList(car?.photos).forEach((item) => sources.push(item));
 
   const uniqueSources = sources.filter((value, index, arr) => value && arr.indexOf(value) === index);
   return uniqueSources.length ? uniqueSources : ['Pic/Car 3.svg'];
+}
+
+function ensureGalleryLightbox() {
+  if (detailGalleryState.modalEl) return detailGalleryState.modalEl;
+
+  const modal = document.createElement('div');
+  modal.className = 'gallery-lightbox';
+  modal.innerHTML = `
+    <div class="gallery-lightbox__backdrop"></div>
+    <div class="gallery-lightbox__panel">
+      <button class="gallery-lightbox__close" type="button" aria-label="Close gallery">×</button>
+      <button class="gallery-lightbox__nav gallery-lightbox__nav--prev" type="button" aria-label="Previous image">‹</button>
+      <div class="gallery-lightbox__image-wrap">
+        <img class="gallery-lightbox__image" alt="Car gallery">
+      </div>
+      <button class="gallery-lightbox__nav gallery-lightbox__nav--next" type="button" aria-label="Next image">›</button>
+      <div class="gallery-lightbox__meta">
+        <div class="gallery-lightbox__counter"></div>
+        <div class="gallery-lightbox__caption">Vehicle gallery</div>
+      </div>
+    </div>`;
+
+  modal.querySelector('.gallery-lightbox__backdrop').addEventListener('click', closeDetailGallery);
+  modal.querySelector('.gallery-lightbox__close').addEventListener('click', closeDetailGallery);
+  modal.querySelector('.gallery-lightbox__nav--prev').addEventListener('click', () => changeDetailGallery(-1));
+  modal.querySelector('.gallery-lightbox__nav--next').addEventListener('click', () => changeDetailGallery(1));
+  document.addEventListener('keydown', (event) => {
+    if (!modal.classList.contains('is-open')) return;
+    if (event.key === 'Escape') closeDetailGallery();
+    if (event.key === 'ArrowRight') changeDetailGallery(1);
+    if (event.key === 'ArrowLeft') changeDetailGallery(-1);
+  });
+
+  document.body.appendChild(modal);
+  detailGalleryState.modalEl = modal;
+  return modal;
+}
+
+function updateDetailGalleryModal() {
+  const modal = detailGalleryState.modalEl;
+  if (!modal) return;
+  const image = modal.querySelector('.gallery-lightbox__image');
+  const counter = modal.querySelector('.gallery-lightbox__counter');
+  const caption = modal.querySelector('.gallery-lightbox__caption');
+  if (!image || !counter || !caption) return;
+
+  const total = detailGalleryState.images.length;
+  if (!total) {
+    image.removeAttribute('src');
+    counter.textContent = '0 / 0';
+    caption.textContent = 'No photos available';
+    return;
+  }
+
+  const safeIndex = Math.max(0, Math.min(detailGalleryState.activeIndex, total - 1));
+  detailGalleryState.activeIndex = safeIndex;
+  image.src = normalizeDetailImageSrc(detailGalleryState.images[safeIndex]);
+  image.alt = `Car photo ${safeIndex + 1}`;
+  counter.textContent = `${safeIndex + 1} / ${total}`;
+  caption.textContent = 'Vehicle gallery';
+}
+
+function openDetailGallery(startIndex = 0) {
+  if (!detailGalleryState.images.length) return;
+  const modal = ensureGalleryLightbox();
+  detailGalleryState.activeIndex = Math.max(0, Math.min(startIndex, detailGalleryState.images.length - 1));
+  updateDetailGalleryModal();
+  modal.classList.add('is-open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeDetailGallery() {
+  const modal = detailGalleryState.modalEl;
+  if (!modal) return;
+  modal.classList.remove('is-open');
+  document.body.style.overflow = '';
+}
+
+function changeDetailGallery(step) {
+  if (!detailGalleryState.images.length) return;
+  detailGalleryState.activeIndex = (detailGalleryState.activeIndex + step + detailGalleryState.images.length) % detailGalleryState.images.length;
+  updateDetailGalleryModal();
 }
 
 window.renderDetailGallery = function(car) {
@@ -52,19 +144,33 @@ window.renderDetailGallery = function(car) {
 
   const imageSources = collectDetailImageSources(car);
   const totalImages = imageSources.length;
+  detailGalleryState.images = imageSources;
 
   photoCells.forEach((photoEl, index) => {
     photoEl.innerHTML = '';
+    photoEl.style.overflow = 'hidden';
+    photoEl.style.position = 'relative';
+    photoEl.style.cursor = totalImages ? 'zoom-in' : 'default';
+    photoEl.classList.toggle('has-image', index < totalImages);
 
     if (index < totalImages) {
       const img = document.createElement('img');
       img.src = normalizeDetailImageSrc(imageSources[index]);
       img.alt = `Car photo ${index + 1}`;
+      img.style.width = '100%';
+      img.style.height = '100%';
+      img.style.objectFit = 'cover';
+      img.style.display = 'block';
+      img.onerror = () => { img.onerror = null; img.src = 'Pic/Car 3.svg'; };
       photoEl.appendChild(img);
+      photoEl.onclick = () => openDetailGallery(index);
     } else {
       const placeholder = document.createElement('div');
       placeholder.className = 'placeholder';
       photoEl.appendChild(placeholder);
+      photoEl.onclick = () => {
+        if (totalImages) openDetailGallery(0);
+      };
     }
 
     const extraCount = totalImages - photoCells.length;

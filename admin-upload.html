@@ -129,15 +129,8 @@
     </div>
 
     <div class="field">
-      <label>Image Upload</label>
-      <div id="adminDropZone" class="admin-drop-zone">
-        <input type="file" id="adminFileInput" accept="image/*" class="admin-file-input" title="Upload car image">
-        <div class="drop-icon-emoji">📸</div>
-        <div class="drop-label-main">Drag & drop images here</div>
-        <div class="drop-label-sub">or click to browse</div>
-      </div>
-      <div id="adminImagePreview" class="admin-image-preview"></div>
-      <input id="f-img" type="text" placeholder="Image path will appear here" oninput="liveUpdate()" class="admin-img-field"/>
+      <label>Image Path</label>
+      <input id="f-img" type="text" placeholder="Pic/Car1.svg" oninput="liveUpdate()"/>
     </div>
 
     <div class="field">
@@ -160,7 +153,9 @@
   <div class="right-panel">
     <div>
       <div class="panel-title">Card Detail <span>Preview</span></div>
-      
+      <div class="search-row">
+        <input id="card-search" type="search" placeholder="Search cars..." oninput="setSearch(this.value)" />
+      </div>
       <div class="grid-3" id="cards-grid"></div>
       <div class="upload-row">
         <button class="btn-upload-final" onclick="uploadCards()">Queue for Editing</button>
@@ -179,7 +174,6 @@
 
 <div class="toast" id="toast"></div>
 
-<script src="image-editor.js"></script>
 <script src="Admin.js"></script>
 <script src="reveal-common.js"></script>
 </body>

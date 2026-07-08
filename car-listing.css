@@ -100,7 +100,9 @@
       display: flex; 
       gap: 4px; 
       list-style: none;
-      margin-left:300px;
+      margin-left:auto;
+      justify-content:center;
+      flex-wrap:wrap;
     }
     
     .nav-links a {

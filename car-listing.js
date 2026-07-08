@@ -90,8 +90,9 @@ function buildListingPagination() {
   });
 
   for (let i = 1; i <= listingTotalPages; i++) {
-    const btn = document.createElement('div');
+    const btn = document.createElement('button');
     btn.className = 'pg-btn';
+    btn.type = 'button';
     btn.textContent = i;
     pagination.insertBefore(btn, nextListingBtn || null);
   }
@@ -118,7 +119,7 @@ function initListingPagination() {
   }
 
   // Search button
-  const searchBtn = document.querySelector('.hero-banner .btn-gold');
+  const searchBtn = document.querySelector('.hero-banner #listingSearchBtn');
   if (searchBtn) searchBtn.onclick = () => {
     if (listingSearchInput) {
       listingSearchQuery = (listingSearchInput.value || '').trim().toLowerCase();
@@ -146,9 +147,10 @@ function initListingPagination() {
   const adv = document.querySelector('.advanced-filters');
   if (filterBtn && adv) {
     filterBtn.onclick = () => {
-      const shown = adv.style.display !== 'none';
-      adv.style.display = shown ? 'none' : 'block';
-      filterBtn.textContent = shown ? 'Show More Filters ▽' : 'Hide Filters △';
+      const isHidden = adv.hidden;
+      adv.hidden = !isHidden;
+      filterBtn.setAttribute('aria-expanded', String(!isHidden));
+      filterBtn.textContent = isHidden ? 'Hide Filters △' : 'Show More Filters ▽';
     };
   }
 

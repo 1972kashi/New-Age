@@ -1,3 +1,14 @@
+ function normalizeAdminImageSrc(value) {
+    if (!value || typeof value !== 'string') return '';
+    if (value.startsWith('http://') || value.startsWith('https://') || value.startsWith('data:') || value.startsWith('blob:')) {
+      return value;
+    }
+    if (value.startsWith('/')) {
+      return `${API_BASE}${value}`;
+    }
+    return `${API_BASE}/${value.replace(/^\.\//, '').replace(/^\//, '')}`;
+  }
+
  const TOTAL = 6;
   const PENDING_CARDS_KEY = 'naa_pending_car_cards';
   let showBadge = true;
@@ -371,7 +382,7 @@
     if (index < 0 || index >= savedCars.length) return;
     const car = savedCars[index];
     if (car && car.id) {
-      await fetch(API_BASE + '/api/cars/' + encodeURIComponent(car.id), { method: 'DELETE' });
+      await fetch(API_BASE + '/api/cars/' + encodeURIComponent(car.id), { method: 'DELETE', headers: getAuthHeaders() });
     }
     savedCars.splice(index, 1);
     if (editingSavedIndex === index) {
@@ -437,12 +448,12 @@
     grid.innerHTML = visible.map(({ c, i }) => {
       const isActive = i === activeCard;
       const imgHtml = c.img
-        ? `<img src="${c.img}" alt="${c.name || 'Car'}">`
+        ? `<img src="${normalizeAdminImageSrc(c.img)}" alt="${c.name || 'Car'}" style="width:100%; height:100%; object-fit:cover; display:block;" onerror="this.onerror=null; this.src='Pic/Car 3.svg';">`
         : `<div class="car-img-placeholder"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 17H3a2 2 0 01-2-2v-4l2.5-6h13l2.5 6V15a2 2 0 01-2 2h-2m-9 0a2 2 0 104 0m5 0a2 2 0 104 0"/></svg><span>No image</span></div>`;
       const badge = c.badge ? '<span class="verified-badge">Verified</span>' : '';
       return `
         <div class="car-card${isActive ? ' editing' : ''}" onclick="selectCard(${i})">
-          <div class="car-img-wrap">
+          <div class="car-img-wrap" style="position:relative; overflow:hidden; height:180px; width:100%;">
             ${imgHtml}
             <span class="card-number">Card ${i+1}</span>
             ${badge}
@@ -515,42 +526,42 @@
 
     let selectedFile = null;
 
-    // Click to browse
-    dropZone.onclick = () => fileInput.click();
-
-    // Drag and drop
-    dropZone.addEventListener('dragover', (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      dropZone.style.borderColor = 'var(--gold)';
-      dropZone.style.background = 'rgba(212,160,23,0.1)';
-    });
-
-    dropZone.addEventListener('dragleave', (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      dropZone.style.borderColor = 'rgba(255,255,255,0.2)';
-      dropZone.style.background = 'rgba(212,160,23,0.02)';
-    });
-
-    dropZone.addEventListener('drop', (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      dropZone.style.borderColor = 'rgba(255,255,255,0.2)';
-      dropZone.style.background = 'rgba(212,160,23,0.02)';
-      
-      const files = e.dataTransfer.files;
-      if (files && files.length > 0) {
-        processImageFile(files[0]);
+    // Disable drag-and-drop and direct file uploads.
+    // Use the `f-img` text input as the source of truth for image paths
+    // (local blob/data URLs or server paths). Hide the file input UI.
+    try {
+      if (dropZone) {
+        dropZone.style.opacity = '0.6';
+        dropZone.style.pointerEvents = 'none';
       }
-    });
-
-    // File input change
-    fileInput.addEventListener('change', (e) => {
-      if (e.target.files && e.target.files.length > 0) {
-        processImageFile(e.target.files[0]);
+      if (fileInput) {
+        fileInput.style.display = 'none';
+        fileInput.disabled = true;
       }
-    });
+    } catch (e) {}
+
+    // Listen to manual image-path input changes and update preview accordingly
+    if (imgField) {
+      imgField.addEventListener('input', () => {
+        const val = (imgField.value || '').trim();
+        const targetCardIndex = activeCard;
+        cards[targetCardIndex].img = val;
+        if (targetCardIndex === activeCard) {
+          if (!val) {
+            preview.innerHTML = '';
+          } else {
+            preview.innerHTML = `
+              <div style="position:relative; display:inline-block;">
+                <img src="${normalizeAdminImageSrc(val)}" alt="preview" style="height:60px; width:60px; object-fit:cover; border-radius:4px; cursor:pointer;" onclick="window.editAdminImage(this)" title="Click to edit image">
+                <button type="button" style="position:absolute; top:-8px; right:-8px; width:24px; height:24px; border-radius:50%; background:#dc2626; color:white; border:none; cursor:pointer; font-weight:bold; padding:0; font-size:14px;" onclick="clearAdminImage()">✕</button>
+              </div>
+            `;
+          }
+        }
+        renderGrid();
+        renderDashboard();
+      });
+    }
 
     async function processImageFile(file) {
       if (!file.type.startsWith('image/')) {
@@ -564,62 +575,35 @@
       const url = URL.createObjectURL(file);
       preview.innerHTML = `
         <div style="position:relative; display:inline-block;">
-          <img src="${url}" alt="preview" style="height:60px; width:60px; object-fit:cover; border-radius:4px; cursor:pointer; onerror='this.src=\\'Pic/Car 3.svg\\'';" onclick="window.editAdminImage(this)" title="Click to edit image">
+          <img src="${url}" alt="preview" style="height:60px; width:60px; object-fit:cover; border-radius:4px; cursor:pointer;" onclick="window.editAdminImage(this)" title="Click to edit image">
           <button type="button" style="position:absolute; top:-8px; right:-8px; width:24px; height:24px; border-radius:50%; background:#dc2626; color:white; border:none; cursor:pointer; font-weight:bold; padding:0; font-size:14px;" onclick="clearAdminImage()">✕</button>
         </div>
       `;
 
-      // Upload and set image path
+      // Use local blob URL as the image path (no server upload)
       try {
-        const token = localStorage.getItem('naa_token') || localStorage.getItem('token');
-        const formData = new FormData();
-        formData.append('file', file);
+        const targetCardIndex = activeCard;
+        // Remember the blob URL as the card image so grid previews work
+        cards[targetCardIndex].img = url;
 
-        let res = await fetch(API_BASE + '/upload/image', {
-          method: 'POST',
-          headers: token ? { Authorization: `Bearer ${token}` } : {},
-          body: formData
-        });
-
-        if ((res.status === 401 || res.status === 403)) {
-          // Try refreshing token
-          const loginRes = await fetch(API_BASE + '/auth/login', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: new URLSearchParams({
-              username: 'admin@gmail.com',
-              password: 'Admin@admin'
-            }).toString()
-          });
-          const loginData = await loginRes.json();
-          if (loginData.access_token) {
-            localStorage.setItem('naa_token', loginData.access_token);
-            localStorage.setItem('token', loginData.access_token);
-            res = await fetch(API_BASE + '/upload/image', {
-              method: 'POST',
-              headers: { Authorization: `Bearer ${loginData.access_token}` },
-              body: formData
-            });
-          }
+        if (targetCardIndex === activeCard) {
+          imgField.value = url;
+          preview.innerHTML = `
+            <div style="position:relative; display:inline-block;">
+              <img src="${url}" alt="preview" style="height:60px; width:60px; object-fit:cover; border-radius:4px; cursor:pointer;" onclick="window.editAdminImage(this)" title="Click to edit image">
+              <button type="button" style="position:absolute; top:-8px; right:-8px; width:24px; height:24px; border-radius:50%; background:#dc2626; color:white; border:none; cursor:pointer; font-weight:bold; padding:0; font-size:14px;" onclick="clearAdminImage()">✕</button>
+            </div>
+          `;
         }
 
-        if (!res.ok) {
-          throw new Error('Upload failed: ' + res.status);
-        }
-
-        const data = await res.json();
-        if (data?.img) {
-          imgField.value = data.img;  // Store SERVER PATH, not blob URL
-          liveUpdate();
-          showToast('✓ Image uploaded successfully', 'var(--accent2)');
-        }
-        
-        // Revoke the temporary blob URL to free memory
-        URL.revokeObjectURL(url);
+        renderGrid();
+        renderDashboard();
+        showToast('✓ Image selected (local path)', 'var(--accent2)');
+        // Do not revoke the blob URL while it's in use by the UI
       } catch (err) {
-        console.error('Image upload error:', err);
-        showToast('Error uploading image: ' + err.message, 'var(--danger)');
-        URL.revokeObjectURL(url);  // Clean up on error too
+        console.error('Image handling error:', err);
+        showToast('Error processing image: ' + (err.message || ''), 'var(--danger)');
+        URL.revokeObjectURL(url);
       }
     }
   }
@@ -642,57 +626,21 @@
         targetHeight: 319
       });
 
-      // Upload edited image
+      // Use edited dataUrl as local image path (no server upload)
       try {
-        const token = localStorage.getItem('naa_token') || localStorage.getItem('token');
-        const formData = new FormData();
-        
-        // Convert blob to file
-        const editedFile = new File([result.blob], 'edited-image.jpg', { type: 'image/jpeg' });
-        formData.append('file', editedFile);
-
-        let res = await fetch(API_BASE + '/upload/image', {
-          method: 'POST',
-          headers: token ? { Authorization: `Bearer ${token}` } : {},
-          body: formData
-        });
-
-        if (res.status === 401 || res.status === 403) {
-          const loginRes = await fetch(API_BASE + '/auth/login', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: new URLSearchParams({
-              username: 'admin@gmail.com',
-              password: 'Admin@admin'
-            }).toString()
-          });
-          const loginData = await loginRes.json();
-          if (loginData.access_token) {
-            localStorage.setItem('naa_token', loginData.access_token);
-            localStorage.setItem('token', loginData.access_token);
-            res = await fetch(API_BASE + '/upload/image', {
-              method: 'POST',
-              headers: { Authorization: `Bearer ${loginData.access_token}` },
-              body: formData
-            });
-          }
-        }
-
-        if (!res.ok) throw new Error('Upload failed');
-
-        const data = await res.json();
-        if (data?.img) {
-          // Store SERVER PATH in the form field (NOT data URL or blob URL)
-          document.getElementById('f-img').value = data.img;
-          // Update preview image with data URL for display
+        const targetCardIndex = activeCard;
+        cards[targetCardIndex].img = result.dataUrl;
+        if (targetCardIndex === activeCard) {
+          document.getElementById('f-img').value = result.dataUrl;
           imgElement.src = result.dataUrl;
           imgElement.onerror = () => { imgElement.src = 'Pic/Car 3.svg'; };
-          liveUpdate();
-          showToast('✓ Image edited & uploaded (529×319px)', 'var(--accent2)');
         }
+        renderGrid();
+        renderDashboard();
+        showToast('✓ Image edited (local path)', 'var(--accent2)');
       } catch (err) {
-        console.error('Upload error:', err);
-        showToast('Error uploading edited image: ' + err.message, 'var(--danger)');
+        console.error('Processing edited image error:', err);
+        showToast('Error processing edited image: ' + (err.message || ''), 'var(--danger)');
       }
     } catch (err) {
       if (err.message !== 'User cancelled') {

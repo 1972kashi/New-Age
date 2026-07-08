@@ -998,6 +998,118 @@ def delete_user(user_id: str, admin=Depends(require_admin)):
 
 ALLOWED_TYPES = {"image/jpeg", "image/png", "image/webp", "image/svg+xml"}
 MAX_SIZE_MB   = 5
+REFERENCE_WIDTH = 529
+REFERENCE_HEIGHT = 319
+
+
+def _resize_image_bytes(contents: bytes, ext: str) -> bytes:
+    """Resize uploaded images to the shared 529x319 reference format when possible."""
+    if ext.lower() == ".svg":
+        return contents
+
+    try:
+        from PIL import Image, ImageOps
+    except ImportError:
+        return contents
+
+    try:
+        with Image.open(io.BytesIO(contents)) as img:
+            img = ImageOps.exif_transpose(img)
+            if img.mode in ("RGBA", "LA", "P"):
+                img = img.convert("RGBA")
+            elif img.mode not in ("RGB", "L"):
+                img = img.convert("RGB")
+
+            target_ratio = REFERENCE_WIDTH / REFERENCE_HEIGHT
+            src_ratio = img.width / img.height
+            if src_ratio > target_ratio:
+                new_height = REFERENCE_HEIGHT
+                new_width = int(new_height * src_ratio)
+            else:
+                new_width = REFERENCE_WIDTH
+                new_height = int(new_width / src_ratio)
+
+            resample_filter = getattr(getattr(Image, "Resampling", None), "LANCZOS", 1)
+            resized = img.resize((new_width, new_height), resample_filter)
+            left = (new_width - REFERENCE_WIDTH) // 2
+            top = (new_height - REFERENCE_HEIGHT) // 2
+            cropped = resized.crop((left, top, left + REFERENCE_WIDTH, top + REFERENCE_HEIGHT))
+
+            if ext.lower() in {".jpg", ".jpeg", ".webp"}:
+                cropped = cropped.convert("RGB")
+
+            out = io.BytesIO()
+            if ext.lower() in {".jpg", ".jpeg"}:
+                cropped.save(out, format="JPEG", quality=90)
+            elif ext.lower() == ".webp":
+                cropped.save(out, format="WEBP", quality=90)
+            else:
+                cropped.save(out, format="PNG")
+            return out.getvalue()
+    except Exception as exc:
+        print(f"[WARN] Image resize failed, using original file: {exc}")
+        return contents
+
+
+def _detect_image_kind(contents: bytes, provided_type: Optional[str], filename: str) -> tuple[Optional[str], Optional[str]]:
+    """Infer a normalized image MIME type and extension from content, filename or request headers."""
+    normalized_type = (provided_type or "").strip().lower()
+    normalized_type = {
+        "image/jpg": "image/jpeg",
+        "image/jpe": "image/jpeg",
+        "image/pjpeg": "image/jpeg",
+        "image/x-jpg": "image/jpeg",
+        "image/x-png": "image/png",
+    }.get(normalized_type, normalized_type)
+
+    if normalized_type in {"image/svg+xml", "image/svg"}:
+        return "image/svg+xml", ".svg"
+
+    if contents.startswith(b"\xff\xd8\xff"):
+        return "image/jpeg", ".jpg"
+    if contents.startswith(b"\x89PNG\r\n\x1a\n"):
+        return "image/png", ".png"
+    if len(contents) >= 12 and contents[0:4] == b"RIFF" and contents[8:12] == b"WEBP":
+        return "image/webp", ".webp"
+
+    if b"<svg" in contents[:256].lower() or contents[:4].lower() == b"<?xm":
+        return "image/svg+xml", ".svg"
+
+    try:
+        from PIL import Image
+        with Image.open(io.BytesIO(contents)) as img:
+            img_format = (img.format or "").lower()
+            if img_format in {"jpeg", "jpg"}:
+                return "image/jpeg", ".jpg"
+            if img_format == "png":
+                return "image/png", ".png"
+            if img_format == "webp":
+                return "image/webp", ".webp"
+    except Exception:
+        pass
+
+    if normalized_type in ALLOWED_TYPES:
+        ext_map = {
+            "image/jpeg": ".jpg",
+            "image/png": ".png",
+            "image/webp": ".webp",
+            "image/svg+xml": ".svg",
+        }
+        return normalized_type, ext_map.get(normalized_type)
+
+    suffix = Path(filename or "").suffix.lower()
+    ext_map = {
+        ".jpg": "image/jpeg",
+        ".jpeg": "image/jpeg",
+        ".png": "image/png",
+        ".webp": "image/webp",
+        ".svg": "image/svg+xml",
+    }
+    if suffix in ext_map:
+        return ext_map[suffix], suffix
+
+    return None, None
+
 
 @app.post("/upload/image", summary="Upload a car image (admin only)")
 async def upload_image(
@@ -1009,9 +1121,6 @@ async def upload_image(
     Returns the relative path to store in car.img, e.g. "Pic/abc123.jpg".
     Max size: 5 MB. Allowed types: JPEG, PNG, WebP, SVG.
     """
-    # Quick content-type check (from client) — we'll verify using file contents below
-    if file.content_type not in ALLOWED_TYPES:
-        raise HTTPException(400, f"File type '{file.content_type}' not allowed")
 
     # Read the upload in chunks to enforce size limits without unbounded memory growth
     size = 0
@@ -1026,30 +1135,13 @@ async def upload_image(
         chunks.append(chunk)
     contents = b"".join(chunks)
 
-    # Validate raster image types using content-signature checks
-    if file.content_type != "image/svg+xml":
-        def _detect_raster(b: bytes):
-            # JPEG
-            if b.startswith(b"\xff\xd8\xff"):
-                return "jpeg"
-            # PNG
-            if b.startswith(b"\x89PNG\r\n\x1a\n"):
-                return "png"
-            # WebP (RIFF....WEBP)
-            if len(b) >= 12 and b[0:4] == b"RIFF" and b[8:12] == b"WEBP":
-                return "webp"
-            return None
+    # Validate the uploaded content using signatures and filename hints rather than
+    # relying only on the browser-provided MIME type, which can vary across clients.
+    mime_type, ext = _detect_image_kind(contents, file.content_type, file.filename or "")
+    if not mime_type or not ext:
+        raise HTTPException(400, "Uploaded file is not a recognized image")
 
-        kind = _detect_raster(contents)
-        if kind is None:
-            raise HTTPException(400, "Uploaded file is not a recognized image")
-        # Map detected kinds to extensions
-        ext_map = {"jpeg": ".jpg", "png": ".png", "webp": ".webp"}
-        ext = ext_map.get(kind)
-        if not ext:
-            raise HTTPException(400, f"Unsupported image format: {kind}")
-
-    else:
+    if mime_type == "image/svg+xml":
         # Basic SVG safety checks — disallow scripts and inline event handlers
         try:
             txt = contents.decode("utf-8", errors="ignore").lower()
@@ -1057,8 +1149,12 @@ async def upload_image(
             raise HTTPException(400, "Invalid SVG file encoding")
         if "<script" in txt or re.search(r"on\w+\s*=", txt):
             raise HTTPException(400, "SVG contains disallowed script or event handlers")
-        # Prefer .svg extension for SVG files
-        ext = ".svg"
+    else:
+        if mime_type not in ALLOWED_TYPES:
+            raise HTTPException(400, f"Unsupported image format: {mime_type}")
+
+    # Resize uploaded images to the standard 529x319 reference format before saving.
+    contents = _resize_image_bytes(contents, ext)
 
     # Create a server-generated filename and write to disk
     filename = f"{new_id()}{ext}"
@@ -1102,7 +1198,7 @@ def create_record(db: dict, table: str, item: dict) -> dict:
 
 
 @app.post('/api/cars')
-def api_create_cars(body: object = Body(...)):
+def api_create_cars(body: object = Body(...), _admin=Depends(require_admin)):
     if not body:
         raise HTTPException(400, "Missing body")
     db = read_db()
@@ -1179,7 +1275,7 @@ def api_get_car(car_id: str):
 
 
 @app.put('/api/cars/{car_id}')
-def api_update_car(car_id: str, body: dict = Body(...)):
+def api_update_car(car_id: str, body: dict = Body(...), _admin=Depends(require_admin)):
     db = read_db()
     idx = next((i for i, c in enumerate(db.get('cars', [])) if c['id'] == car_id), None)
     if idx is None:
@@ -1192,7 +1288,7 @@ def api_update_car(car_id: str, body: dict = Body(...)):
 
 
 @app.delete('/api/cars/{car_id}')
-def api_delete_car(car_id: str):
+def api_delete_car(car_id: str, _admin=Depends(require_admin)):
     db = read_db()
     before = len(db.get('cars', []))
     db['cars'] = [c for c in db.get('cars', []) if c['id'] != car_id]
@@ -1260,7 +1356,7 @@ def car_detail_ssr(car_id: str, request: "Request"):
 
 
 @app.post('/api/car-details')
-def api_create_car_detail(body: dict = Body(...)):
+def api_create_car_detail(body: dict = Body(...), _admin=Depends(require_admin)):
     if not body:
         raise HTTPException(400, "Missing body")
     if not isinstance(body, dict):
@@ -1290,7 +1386,7 @@ def api_create_car_detail(body: dict = Body(...)):
 
 
 @app.put('/api/car-details/{detail_id}')
-def api_update_car_detail(detail_id: str, body: dict = Body(...)):
+def api_update_car_detail(detail_id: str, body: dict = Body(...), _admin=Depends(require_admin)):
     db = read_db()
     idx = next((i for i, d in enumerate(db.get('carDetails', [])) if d['id'] == detail_id), None)
     if idx is None:
@@ -1305,7 +1401,7 @@ def api_update_car_detail(detail_id: str, body: dict = Body(...)):
 
 
 @app.delete('/api/car-details/{detail_id}')
-def api_delete_car_detail(detail_id: str):
+def api_delete_car_detail(detail_id: str, _admin=Depends(require_admin)):
     db = read_db()
     before = len(db.get('carDetails', []))
     db['carDetails'] = [d for d in db.get('carDetails', []) if d['id'] != detail_id]
