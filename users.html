@@ -77,9 +77,9 @@
     </table>
   </div>
 
-   <div class="table-card" style="margin-top: 24px;">
-    <div class="page-title" style="font-size: 22px; margin-bottom: 12px;">FAQ <span>Manager</span></div>
-    <div class="row2" style="margin-bottom: 12px;">
+   <div class="table-card faq-manager-card">
+    <div class="page-title faq-manager-title">FAQ <span>Manager</span></div>
+    <div class="row2 faq-form-row">
       <div class="field">
         <label>Question</label>
         <input type="text" id="faq-question" placeholder="Enter a frequently asked question" />
@@ -99,10 +99,10 @@
       <label>Answer</label>
       <textarea id="faq-answer" rows="4" placeholder="Enter the answer that should appear on the FAQ page"></textarea>
     </div>
-    <div style="display:flex; justify-content:flex-end; margin-top: 12px;">
+    <div class="faq-actions">
       <button class="btn-save" onclick="saveFaqForm()">Save FAQ</button>
     </div>
-    <div style="margin-top: 18px;">
+    <div class="faq-list-section">
       <div class="guest-note" id="faq-count">0 entries</div>
       <div id="faq-list"></div>
     </div>

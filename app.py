@@ -25,6 +25,7 @@ from pathlib import Path
 from typing import Optional
 from email.message import EmailMessage
 
+import psycopg
 from fastapi import (
     FastAPI, HTTPException, Depends, status,
     UploadFile, File, Query, Body, Request
@@ -40,8 +41,14 @@ from passlib.context import CryptContext
 from pydantic import BaseModel, EmailStr
 
 # ── Constants ──────────────────────────────────
-DB_PATH      = Path("db.json")          # path to your db.json file
+DB_PATH      = Path("db.json")          # legacy JSON backup used for migration
 UPLOAD_DIR   = Path("Pic")              # folder where car images are saved
+DATABASE_URL = os.getenv("DATABASE_URL")
+DB_HOST      = os.getenv("DB_HOST", "localhost")
+DB_PORT      = int(os.getenv("DB_PORT", "5432"))
+DB_NAME      = os.getenv("DB_NAME", "newage")
+DB_USER      = os.getenv("DB_USER", "postgres")
+DB_PASSWORD  = os.getenv("DB_PASSWORD", "postgres")
 # Read secrets from environment when possible. Keeps the existing default
 # value for development to avoid breaking local setups, but logs a warning
 # so deployers know to set a real secret in production.
@@ -298,15 +305,106 @@ def ensure_default_admin():
 # 2. DATABASE HELPERS
 # ─────────────────────────────────────────────
 
+def _connection_kwargs(database_name: Optional[str] = None) -> dict:
+    kwargs = {"host": DB_HOST, "port": DB_PORT, "user": DB_USER, "password": DB_PASSWORD}
+    if database_name:
+        kwargs["dbname"] = database_name
+    elif DATABASE_URL:
+        kwargs = {"conninfo": DATABASE_URL}
+    return kwargs
+
+
+def initialize_database() -> bool:
+    """Create the PostgreSQL database and required table if needed."""
+    try:
+        admin_db = "postgres"
+        with psycopg.connect(**_connection_kwargs(admin_db), autocommit=True) as conn:
+            with conn.cursor() as cur:
+                cur.execute("SELECT 1 FROM pg_database WHERE datname = %s", (DB_NAME,))
+                exists = cur.fetchone()
+                if not exists:
+                    cur.execute(f'CREATE DATABASE "{DB_NAME}"')
+
+        with psycopg.connect(**_connection_kwargs(DB_NAME), autocommit=True) as conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    """
+                    CREATE TABLE IF NOT EXISTS app_data (
+                        collection TEXT NOT NULL,
+                        item_id TEXT NOT NULL,
+                        payload JSONB NOT NULL,
+                        created_at TIMESTAMPTZ DEFAULT NOW(),
+                        PRIMARY KEY (collection, item_id)
+                    )
+                    """
+                )
+                cur.execute("CREATE INDEX IF NOT EXISTS idx_app_data_collection ON app_data (collection)")
+        return True
+    except Exception as exc:
+        print(f"[DB] PostgreSQL initialization failed: {exc}")
+        return False
+
+
+def _load_legacy_db() -> dict:
+    if not DB_PATH.exists():
+        return {}
+    try:
+        with DB_PATH.open("r", encoding="utf-8") as f:
+            return json.load(f)
+    except Exception:
+        return {}
+
+
 def read_db() -> dict:
-    """Load the entire db.json into memory."""
-    with open(DB_PATH, "r") as f:
-        return json.load(f)
+    """Load the current database state from PostgreSQL, migrating legacy JSON data if needed."""
+    if initialize_database():
+        try:
+            with psycopg.connect(**_connection_kwargs(DB_NAME)) as conn:
+                with conn.cursor() as cur:
+                    data = {"users": [], "cars": [], "carDetails": [], "faqItems": []}
+                    for collection in data:
+                        cur.execute("SELECT payload FROM app_data WHERE collection = %s ORDER BY item_id", (collection,))
+                        rows = cur.fetchall()
+                        data[collection] = [row[0] for row in rows]
+
+            if any(data[col] for col in ("users", "cars", "carDetails", "faqItems")):
+                return data
+        except Exception as exc:
+            print(f"[DB] PostgreSQL read failed: {exc}")
+
+    legacy = _load_legacy_db()
+    if legacy:
+        return legacy
+    return {"users": [], "cars": [], "carDetails": [], "faqItems": []}
+
 
 def write_db(data: dict) -> None:
-    """Persist changes back to db.json (pretty-printed)."""
-    with open(DB_PATH, "w") as f:
-        json.dump(data, f, indent=2)
+    """Persist changes back to PostgreSQL while keeping the legacy JSON file as a backup."""
+    payload = data or {}
+    if initialize_database():
+        try:
+            with psycopg.connect(**_connection_kwargs(DB_NAME), autocommit=True) as conn:
+                with conn.cursor() as cur:
+                    for collection in ("users", "cars", "carDetails", "faqItems"):
+                        cur.execute("DELETE FROM app_data WHERE collection = %s", (collection,))
+                        for item in payload.get(collection, []):
+                            if not isinstance(item, dict):
+                                continue
+                            item_id = item.get("id") or item.get("email") or item.get("carId") or uuid.uuid4().hex[:15]
+                            cur.execute(
+                                "INSERT INTO app_data (collection, item_id, payload) VALUES (%s, %s, %s)",
+                                (collection, item_id, json.dumps(item)),
+                            )
+        except Exception as exc:
+            print(f"[DB] PostgreSQL write failed: {exc}")
+
+    if DB_PATH.exists() or payload:
+        try:
+            with DB_PATH.open("w", encoding="utf-8") as f:
+                json.dump(payload, f, indent=2)
+        except Exception:
+            pass
+
 
 def new_id() -> str:
     """Generate a short unique ID similar to the existing ones."""

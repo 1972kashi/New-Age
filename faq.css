@@ -409,11 +409,12 @@ ul{list-style:none;}
   .nav-auth{gap:6px;}
   .nav-auth .btn,.nav-auth button{padding:7px 12px;font-size:12px;border-radius:12px;}
   .footer{padding:36px 0 20px;}
-  .footer-grid{grid-template-columns:1fr;gap:28px;margin-bottom:24px;}
-  .footer-links-grid{grid-template-columns:repeat(2,1fr);gap:20px;}
+  .footer-grid{grid-template-columns:1fr;gap:24px;margin-bottom:24px;align-items:start;}
+  .footer-brand,.footer-links-grid,.footer-newsletter{width:100%;}
+  .footer-links-grid{grid-template-columns:1fr;gap:16px;}
   .footer-newsletter{grid-column:1 / -1;}
-  .footer-bottom{grid-template-columns:1fr;gap:12px;text-align:center;}
-  .footer-nav{justify-content:center;}
+  .footer-bottom{display:flex;flex-direction:column;align-items:center;gap:12px;text-align:center;}
+  .footer-nav{justify-content:center;flex-wrap:wrap;gap:10px 16px;}
   .hero{padding:28px 14px 24px;}
   .hero h1{font-size:18px;line-height:1.3;}
   .hero h1 .sub{font-size:15px;}
