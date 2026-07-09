@@ -76,6 +76,37 @@
       <tbody id="users-tbody"></tbody>
     </table>
   </div>
+
+   <div class="table-card" style="margin-top: 24px;">
+    <div class="page-title" style="font-size: 22px; margin-bottom: 12px;">FAQ <span>Manager</span></div>
+    <div class="row2" style="margin-bottom: 12px;">
+      <div class="field">
+        <label>Question</label>
+        <input type="text" id="faq-question" placeholder="Enter a frequently asked question" />
+      </div>
+      <div class="field">
+        <label>Category</label>
+        <select id="faq-category" title="FAQ category">
+          <option value="general">General</option>
+          <option value="payment">Payment</option>
+          <option value="financing">Financing</option>
+          <option value="buying">Buying a Car</option>
+          <option value="selling">Selling a Car</option>
+        </select>
+      </div>
+    </div>
+    <div class="field">
+      <label>Answer</label>
+      <textarea id="faq-answer" rows="4" placeholder="Enter the answer that should appear on the FAQ page"></textarea>
+    </div>
+    <div style="display:flex; justify-content:flex-end; margin-top: 12px;">
+      <button class="btn-save" onclick="saveFaqForm()">Save FAQ</button>
+    </div>
+    <div style="margin-top: 18px;">
+      <div class="guest-note" id="faq-count">0 entries</div>
+      <div id="faq-list"></div>
+    </div>
+  </div>
 </div>
 
 <!-- ADD/EDIT MODAL -->

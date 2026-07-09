@@ -2,9 +2,11 @@ let editIndex = -1;
 let deleteIndex = -1;
 let users = [];
 let editingUserId = null;
+let faqItems = [];
 
 const API_PORT = 8000;
 const API_BASE = `http://localhost:${API_PORT}`;  // API now served by FastAPI (port 8000)
+const FAQ_STORAGE_KEY = 'naa_faq_items';
 
 function initSession(){
   const session = JSON.parse(localStorage.getItem('naa_session')||'null');
@@ -14,6 +16,84 @@ function initSession(){
   }
   document.getElementById('nav-name').textContent = session.name;
 }
+
+function escapeHtml(value){
+  return String(value || '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function getFaqItems(){
+  try {
+    const stored = localStorage.getItem(FAQ_STORAGE_KEY);
+    if (!stored) return [];
+    const parsed = JSON.parse(stored);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch (err) {
+    console.warn('Could not load FAQ items', err);
+    return [];
+  }
+}
+
+function saveFaqItems(items){
+  faqItems = Array.isArray(items) ? items : [];
+  localStorage.setItem(FAQ_STORAGE_KEY, JSON.stringify(faqItems));
+  window.dispatchEvent(new CustomEvent('faq-data-updated', { detail: faqItems }));
+}
+
+function renderFaqManager(){
+  const list = document.getElementById('faq-list');
+  const count = document.getElementById('faq-count');
+  if (!list || !count) return;
+
+  faqItems = getFaqItems();
+  count.textContent = faqItems.length;
+
+  if (!faqItems.length) {
+    list.innerHTML = '<div class="empty">No FAQ entries yet. Add one above.</div>';
+    return;
+  }
+
+  list.innerHTML = faqItems.map(item => `
+    <div class="faq-manager-item">
+      <div class="faq-manager-question">${escapeHtml(item.question)}</div>
+      <div class="faq-manager-answer">${escapeHtml(item.answer)}</div>
+      <div class="faq-manager-meta">${escapeHtml(item.category || 'general')}</div>
+    </div>
+  `).join('');
+}
+
+function saveFaqForm(){
+  const question = document.getElementById('faq-question').value.trim();
+  const answer = document.getElementById('faq-answer').value.trim();
+  const category = document.getElementById('faq-category').value.trim();
+
+  if (!question || !answer) {
+    showToast('Please add both a question and an answer.', 'err');
+    return;
+  }
+
+  const newItem = {
+    id: `faq-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+    question,
+    answer,
+    category: category || 'general',
+    createdAt: new Date().toISOString()
+  };
+
+  const nextItems = [newItem, ...faqItems];
+  saveFaqItems(nextItems);
+  document.getElementById('faq-question').value = '';
+  document.getElementById('faq-answer').value = '';
+  document.getElementById('faq-category').value = 'general';
+  renderFaqManager();
+  showToast('FAQ entry added successfully.');
+}
+
+window.saveFaqForm = saveFaqForm;
 
 async function loadUsers(){
   try {
@@ -241,3 +321,4 @@ document.querySelectorAll('.overlay').forEach(o => {
 
 initSession();
 loadUsers();
+renderFaqManager();

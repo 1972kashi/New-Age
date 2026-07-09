@@ -18,85 +18,175 @@ window.addEventListener('error', (event) => {
   }
 });
 
-/* ════════════════════════════════════════
-   ACCORDION TOGGLE LOGIC
-════════════════════════════════════════ */
-document.querySelectorAll('.faq-question').forEach(btn => {
-  btn.addEventListener('click', () => {
-    const item  = btn.closest('.faq-item');
-    const panel = item.querySelector('.faq-panel');
-    const isOpen = item.classList.contains('active');
-
-    // Close all other open items (single-open accordion behaviour)
-    document.querySelectorAll('.faq-item.active').forEach(openItem => {
-      if (openItem !== item) {
-        openItem.classList.remove('active');
-        openItem.querySelector('.faq-question').setAttribute('aria-expanded', 'false');
-        const openPanel = openItem.querySelector('.faq-panel');
-        // collapse animation
-        openPanel.style.maxHeight = null;
-        // hide after transition to avoid layout jump
-        setTimeout(() => { try { openPanel.style.display = 'none'; } catch(e) {} }, 360);
-      }
-    });
-
-    // Toggle current item
-    if (isOpen) {
-      item.classList.remove('active');
-      btn.setAttribute('aria-expanded', 'false');
-      // collapse
-      panel.style.maxHeight = null;
-      setTimeout(() => { try { panel.style.display = 'none'; } catch(e) {} }, 360);
-    } else {
-      item.classList.add('active');
-      btn.setAttribute('aria-expanded', 'true');
-      // ensure panel is visible before measuring
-      try { panel.style.display = 'block'; } catch(e) {}
-      // force a reflow then set maxHeight for transition
-      const h = panel.scrollHeight;
-      panel.style.maxHeight = h + 'px';
-    }
-  });
-});
-
-/* ════════════════════════════════════════
-   CATEGORY FILTER
-════════════════════════════════════════ */
+const FAQ_STORAGE_KEY = 'naa_faq_items';
 const categoryBtns = document.querySelectorAll('.category-btn');
-const faqItems     = document.querySelectorAll('.faq-item');
-const faqSearchInput  = document.getElementById('faqSearch');
-const noResults    = document.getElementById('noResults');
+const faqSearchInput = document.getElementById('faqSearch');
+const noResults = document.getElementById('noResults');
+const accordionList = document.getElementById('accordionList');
 
 let activeCategory = 'all';
+let faqItems = [];
+let carouselTimer = null;
 
-categoryBtns.forEach(btn => {
-  btn.addEventListener('click', () => {
-    categoryBtns.forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    activeCategory = btn.dataset.category;
-    applyFilters();
+function escapeHtml(value) {
+  return String(value || '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function getFaqItems() {
+  try {
+    const stored = localStorage.getItem(FAQ_STORAGE_KEY);
+    if (!stored) return [];
+    const parsed = JSON.parse(stored);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch (err) {
+    console.warn('Could not load FAQ items', err);
+    return [];
+  }
+}
+
+function injectFaqStyles() {
+  if (document.getElementById('faq-advanced-styles')) return;
+  const style = document.createElement('style');
+  style.id = 'faq-advanced-styles';
+  style.textContent = `
+    .faq-carousel-shell {
+      position: relative;
+      max-height: 560px;
+      overflow-y: auto;
+      padding-right: 8px;
+      scroll-behavior: smooth;
+      scroll-snap-type: y proximity;
+    }
+    .faq-carousel-shell::-webkit-scrollbar { width: 7px; }
+    .faq-carousel-shell::-webkit-scrollbar-thumb {
+      background: rgba(255,255,255,.18);
+      border-radius: 999px;
+    }
+    .faq-item {
+      scroll-snap-align: start;
+      transition: transform .25s ease, opacity .25s ease;
+    }
+    .faq-item.hidden { display: none; }
+    .faq-item.active { transform: translateY(0); }
+    .category-btn .count { display: none; }
+  `;
+  document.head.appendChild(style);
+}
+
+function ensureCarouselShell() {
+  if (!accordionList) return;
+  if (accordionList.parentElement?.classList.contains('faq-carousel-shell')) return;
+
+  const shell = document.createElement('div');
+  shell.className = 'faq-carousel-shell';
+  accordionList.parentNode.insertBefore(shell, accordionList);
+  shell.appendChild(accordionList);
+}
+
+function bindFaqEvents() {
+  document.querySelectorAll('.faq-question').forEach((btn) => {
+    btn.onclick = () => {
+      const item = btn.closest('.faq-item');
+      const panel = item.querySelector('.faq-panel');
+      const isOpen = item.classList.contains('active');
+
+      document.querySelectorAll('.faq-item.active').forEach((openItem) => {
+        if (openItem !== item) {
+          openItem.classList.remove('active');
+          openItem.querySelector('.faq-question').setAttribute('aria-expanded', 'false');
+          const openPanel = openItem.querySelector('.faq-panel');
+          openPanel.style.maxHeight = null;
+          setTimeout(() => { try { openPanel.style.display = 'none'; } catch (e) {} }, 360);
+        }
+      });
+
+      if (isOpen) {
+        item.classList.remove('active');
+        btn.setAttribute('aria-expanded', 'false');
+        panel.style.maxHeight = null;
+        setTimeout(() => { try { panel.style.display = 'none'; } catch (e) {} }, 360);
+      } else {
+        item.classList.add('active');
+        btn.setAttribute('aria-expanded', 'true');
+        try { panel.style.display = 'block'; } catch (e) {}
+        const h = panel.scrollHeight;
+        panel.style.maxHeight = h + 'px';
+      }
+    };
   });
-});
+}
 
-/* ════════════════════════════════════════
-   LIVE SEARCH FILTER
-════════════════════════════════════════ */
-faqSearchInput && faqSearchInput.addEventListener('input', applyFilters);
+function startFaqCarousel() {
+  if (!accordionList) return;
+  const shell = accordionList.closest('.faq-carousel-shell');
+  if (!shell) return;
+
+  if (carouselTimer) clearInterval(carouselTimer);
+
+  const visibleItems = Array.from(accordionList.querySelectorAll('.faq-item:not(.hidden)'));
+  if (!visibleItems.length) return;
+
+  carouselTimer = setInterval(() => {
+    const currentTop = shell.scrollTop;
+    const nextItem = visibleItems.find((item) => item.offsetTop > currentTop + 80) || visibleItems[0];
+    shell.scrollTo({ top: Math.max(0, nextItem.offsetTop - 12), behavior: 'smooth' });
+  }, 4200);
+
+  shell.addEventListener('mouseenter', () => {
+    if (carouselTimer) clearInterval(carouselTimer);
+  }, { once: true });
+
+  shell.addEventListener('mouseleave', () => {
+    startFaqCarousel();
+  }, { once: true });
+}
+
+function renderFaqItems(items) {
+  faqItems = Array.isArray(items) ? items : [];
+  if (!accordionList) return;
+
+  if (!faqItems.length) {
+    accordionList.innerHTML = '<li class="faq-item"><div class="faq-panel"><div class="faq-panel-inner">No FAQ entries have been added yet.</div></div></li>';
+    if (noResults) noResults.classList.add('show');
+    return;
+  }
+
+  accordionList.innerHTML = faqItems.map((item) => `
+    <li class="faq-item" data-category="${escapeHtml(item.category || 'general')}">
+      <button class="faq-question" aria-expanded="false">
+        <span class="faq-question-text"><span class="cat-tag">${escapeHtml((item.category || 'General').charAt(0).toUpperCase() + (item.category || 'General').slice(1))}</span>${escapeHtml(item.question)}</span>
+        <span class="faq-icon"><svg viewBox="0 0 12 8" fill="none"><path d="M1 1l5 5 5-5" stroke="#fff" stroke-width="2"/></svg></span>
+      </button>
+      <div class="faq-panel">
+        <div class="faq-panel-inner">${escapeHtml(item.answer)}</div>
+      </div>
+    </li>
+  `).join('');
+
+  bindFaqEvents();
+  applyFilters();
+  startFaqCarousel();
+}
 
 function applyFilters() {
   const query = (faqSearchInput && faqSearchInput.value || '').trim().toLowerCase();
+  const items = document.querySelectorAll('.faq-item');
   let visibleCount = 0;
 
-  faqItems.forEach(item => {
+  items.forEach((item) => {
     const text = item.textContent.toLowerCase();
     const matchesCategory = activeCategory === 'all' || item.dataset.category === activeCategory;
-    const matchesSearch   = query === '' || text.includes(query);
+    const matchesSearch = query === '' || text.includes(query);
     const show = matchesCategory && matchesSearch;
 
     item.classList.toggle('hidden', !show);
     if (show) visibleCount++;
 
-    // Collapse hidden items so they don't stay "open" invisibly
     if (!show && item.classList.contains('active')) {
       item.classList.remove('active');
       item.querySelector('.faq-question').setAttribute('aria-expanded', 'false');
@@ -104,5 +194,35 @@ function applyFilters() {
     }
   });
 
-  noResults.classList.toggle('show', visibleCount === 0);
+  if (noResults) noResults.classList.toggle('show', visibleCount === 0);
+  startFaqCarousel();
 }
+
+function initFaqPage() {
+  injectFaqStyles();
+  ensureCarouselShell();
+  document.querySelectorAll('.category-btn .count').forEach((el) => el.remove());
+
+  categoryBtns.forEach((btn) => {
+    btn.addEventListener('click', () => {
+      categoryBtns.forEach((b) => b.classList.remove('active'));
+      btn.classList.add('active');
+      activeCategory = btn.dataset.category;
+      applyFilters();
+    });
+  });
+
+  faqSearchInput && faqSearchInput.addEventListener('input', applyFilters);
+  window.addEventListener('faq-data-updated', (event) => {
+    renderFaqItems(event.detail || getFaqItems());
+  });
+  window.addEventListener('storage', (event) => {
+    if (event.key === FAQ_STORAGE_KEY) {
+      renderFaqItems(getFaqItems());
+    }
+  });
+
+  renderFaqItems(getFaqItems());
+}
+
+initFaqPage();

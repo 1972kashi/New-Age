@@ -299,6 +299,13 @@
       text-transform: uppercase;
     }
 
+    .desc{
+      font-size: 18px; 
+      font-weight: 600;
+      color: whitesmoke; 
+      line-height: 1.8;
+    }
+
     .hero-desc {
       font-size: 15px; 
       color: whitesmoke;
