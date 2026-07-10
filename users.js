@@ -26,6 +26,8 @@ function escapeHtml(value){
     .replace(/'/g, '&#39;');
 }
 
+let faqEditingId = null;
+
 function getFaqItems(){
   try {
     const stored = localStorage.getItem(FAQ_STORAGE_KEY);
@@ -44,12 +46,23 @@ function saveFaqItems(items){
   window.dispatchEvent(new CustomEvent('faq-data-updated', { detail: faqItems }));
 }
 
+async function loadFaqItems(){
+  try {
+    const res = await fetch(`${API_BASE}/api/faq`);
+    if (!res.ok) throw new Error('Failed to load FAQ items');
+    faqItems = await res.json();
+  } catch (err) {
+    console.warn('Could not load FAQ items from server, using local fallback:', err);
+    faqItems = getFaqItems();
+  }
+  renderFaqManager();
+}
+
 function renderFaqManager(){
   const list = document.getElementById('faq-list');
   const count = document.getElementById('faq-count');
   if (!list || !count) return;
 
-  faqItems = getFaqItems();
   count.textContent = faqItems.length;
 
   if (!faqItems.length) {
@@ -62,11 +75,22 @@ function renderFaqManager(){
       <div class="faq-manager-question">${escapeHtml(item.question)}</div>
       <div class="faq-manager-answer">${escapeHtml(item.answer)}</div>
       <div class="faq-manager-meta">${escapeHtml(item.category || 'general')}</div>
+      <div class="faq-manager-actions">
+        <button class="btn-edit" type="button" onclick="editFaqItem('${item.id}')">Edit</button>
+        <button class="btn-delete" type="button" onclick="deleteFaqItem('${item.id}')">Delete</button>
+      </div>
     </div>
   `).join('');
 }
 
-function saveFaqForm(){
+function setFaqFormState(editing = false){
+  const saveBtn = document.querySelector('.faq-actions .btn-save');
+  const cancelBtn = document.getElementById('cancel-faq-edit-btn');
+  if (saveBtn) saveBtn.textContent = editing ? 'Update FAQ' : 'Save FAQ';
+  if (cancelBtn) cancelBtn.style.display = editing ? 'inline-flex' : 'none';
+}
+
+async function saveFaqForm(){
   const question = document.getElementById('faq-question').value.trim();
   const answer = document.getElementById('faq-answer').value.trim();
   const category = document.getElementById('faq-category').value.trim();
@@ -76,24 +100,83 @@ function saveFaqForm(){
     return;
   }
 
-  const newItem = {
-    id: `faq-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+  const payload = {
     question,
     answer,
-    category: category || 'general',
-    createdAt: new Date().toISOString()
+    category: category || 'general'
   };
 
-  const nextItems = [newItem, ...faqItems];
-  saveFaqItems(nextItems);
-  document.getElementById('faq-question').value = '';
-  document.getElementById('faq-answer').value = '';
-  document.getElementById('faq-category').value = 'general';
-  renderFaqManager();
-  showToast('FAQ entry added successfully.');
+  try {
+    const method = faqEditingId ? 'PUT' : 'POST';
+    const url = faqEditingId ? `${API_BASE}/api/faq/${faqEditingId}` : `${API_BASE}/api/faq`;
+    const res = await fetch(url, {
+      method,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    if (!res.ok) {
+      const errorBody = await res.json().catch(() => ({}));
+      throw new Error(errorBody.detail || errorBody.message || 'Failed to save FAQ');
+    }
+
+    const savedItem = await res.json();
+    if (faqEditingId) {
+      faqItems = faqItems.map(item => item.id === savedItem.id ? savedItem : item);
+      showToast('FAQ entry updated successfully.');
+    } else {
+      faqItems = [savedItem, ...faqItems];
+      showToast('FAQ entry added successfully.');
+    }
+
+    faqEditingId = null;
+    document.getElementById('faq-question').value = '';
+    document.getElementById('faq-answer').value = '';
+    document.getElementById('faq-category').value = 'general';
+    setFaqFormState(false);
+    renderFaqManager();
+  } catch (err) {
+    showToast(err.message || 'Error saving FAQ entry.', 'err');
+  }
 }
 
 window.saveFaqForm = saveFaqForm;
+
+function editFaqItem(id){
+  const item = faqItems.find((entry) => entry.id === id);
+  if (!item) return;
+  faqEditingId = id;
+  document.getElementById('faq-question').value = item.question;
+  document.getElementById('faq-answer').value = item.answer;
+  document.getElementById('faq-category').value = item.category || 'general';
+  setFaqFormState(true);
+}
+
+async function deleteFaqItem(id){
+  const item = faqItems.find((entry) => entry.id === id);
+  if (!item) return;
+  if (!confirm(`Delete FAQ question:\n"${item.question}"?`)) return;
+
+  try {
+    const res = await fetch(`${API_BASE}/api/faq/${id}`, { method: 'DELETE' });
+    if (!res.ok) {
+      const errorBody = await res.json().catch(() => ({}));
+      throw new Error(errorBody.detail || errorBody.message || 'Failed to delete FAQ');
+    }
+    faqItems = faqItems.filter((entry) => entry.id !== id);
+    renderFaqManager();
+    showToast('FAQ entry deleted.');
+  } catch (err) {
+    showToast(err.message || 'Error deleting FAQ entry.', 'err');
+  }
+}
+
+function cancelFaqEdit(){
+  faqEditingId = null;
+  document.getElementById('faq-question').value = '';
+  document.getElementById('faq-answer').value = '';
+  document.getElementById('faq-category').value = 'general';
+  setFaqFormState(false);
+}
 
 async function loadUsers(){
   try {
@@ -321,4 +404,4 @@ document.querySelectorAll('.overlay').forEach(o => {
 
 initSession();
 loadUsers();
-renderFaqManager();
+loadFaqItems();

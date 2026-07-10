@@ -1582,6 +1582,69 @@ def api_delete_user(user_id: str):
     return {"deleted": True}
 
 
+@app.get('/api/faq')
+def api_list_faq():
+    db = read_db()
+    items = list(db.get('faqItems', []))
+    items.reverse()
+    return items
+
+
+@app.post('/api/faq')
+def api_create_faq(body: dict = Body(...)):
+    if not body or not isinstance(body, dict):
+        raise HTTPException(400, "Missing or invalid body")
+    body = sanitize_dict(body)
+    question = body.get('question', '').strip()
+    answer = body.get('answer', '').strip()
+    category = body.get('category', 'general').strip() or 'general'
+    if not question or not answer:
+        raise HTTPException(400, "Question and answer are required")
+    db = read_db()
+    item = {
+        'question': question,
+        'answer': answer,
+        'category': category,
+    }
+    rec = create_record(db, 'faqItems', item)
+    write_db(db)
+    return rec
+
+
+@app.put('/api/faq/{faq_id}')
+def api_update_faq(faq_id: str, body: dict = Body(...)):
+    if not body or not isinstance(body, dict):
+        raise HTTPException(400, "Missing or invalid body")
+    body = sanitize_dict(body)
+    question = body.get('question', '').strip()
+    answer = body.get('answer', '').strip()
+    category = body.get('category', 'general').strip() or 'general'
+    if not question or not answer:
+        raise HTTPException(400, "Question and answer are required")
+    db = read_db()
+    idx = next((i for i, item in enumerate(db.get('faqItems', [])) if item['id'] == faq_id), None)
+    if idx is None:
+        raise HTTPException(404, "Not found")
+    db['faqItems'][idx].update({
+        'question': question,
+        'answer': answer,
+        'category': category,
+    })
+    write_db(db)
+    return db['faqItems'][idx]
+
+
+@app.delete('/api/faq/{faq_id}')
+def api_delete_faq(faq_id: str):
+    db = read_db()
+    before = len(db.get('faqItems', []))
+    db['faqItems'] = [item for item in db.get('faqItems', []) if item['id'] != faq_id]
+    if len(db['faqItems']) == before:
+        raise HTTPException(404, "Not found")
+    write_db(db)
+    return {"deleted": True}
+
+
 # Serve frontend files for non-API requests (kept after API routes so they don't get shadowed)
 @app.get("/", include_in_schema=False)
 def serve_root():

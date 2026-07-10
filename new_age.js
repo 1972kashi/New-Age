@@ -124,43 +124,6 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 });
 
-/* Scroll reveal uses shared reveal-common.js: window.reveal.observe(el) */
-
-function triggerScrollReveal() {
-  // Select elements that should have scroll reveal
-  const revealSelectors = [
-    ".featured-car-card",
-    ".search-bar-section",
-    ".section",
-    ".car-card",
-    ".source-banner",
-    ".calculator-section",
-    ".why-card",
-    ".hero-left",
-    ".hero-badges"
-  ];
-
-  document.querySelectorAll(revealSelectors.join(", ")).forEach((el) => {
-    // Set reveal type based on element position or class
-    if (!el.dataset.reveal) {
-      if (el.classList.contains("hero-left")) {
-        el.dataset.reveal = "reveal-left";
-      } else if (el.classList.contains("featured-car-card")) {
-        el.dataset.reveal = "reveal-right";
-      } else if (el.classList.contains("car-card")) {
-        el.dataset.reveal = "reveal-bottom";
-      } else if (el.classList.contains("why-card")) {
-        el.dataset.reveal = "reveal-bottom";
-      } else if (el.classList.contains("source-banner")) {
-        el.dataset.reveal = "reveal-scale";
-      } else {
-        el.dataset.reveal = "reveal-bottom";
-      }
-    }
-    
-    window.reveal && window.reveal.observe(el);
-  });
-}
 
 const CARDS_PER_PAGE = 6; // how many cards per page
 let cards = [];
@@ -341,15 +304,7 @@ function initHomePagination() {
 window.refreshHomePagination = initHomePagination;
 
 // Initialize scroll reveal on page load
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', function() {
-    initHomePagination();
-    triggerScrollReveal();
-  });
-} else {
-  initHomePagination();
-  triggerScrollReveal();
-}
+
 // Register service worker for offline caching and enable lazy-loading for images
 try {
   // Only register the service worker in non-local environments to avoid
