@@ -1331,16 +1331,22 @@ if __name__ == "__main__":
     reload_enabled = os.getenv("RELOAD", "0").lower() in {"1", "true", "yes", "on"}
 
     if requested_port <= 0:
-        port = 0
-    else:
+        requested_port = 8000
+
+    port = requested_port
+    if requested_port != 0:
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as probe:
             try:
                 probe.bind((host, requested_port))
-                port = requested_port
             except OSError:
                 port = 0
 
-    print(f"[INFO] Starting backend on host={host} port={port if port else 'auto'}")
+    if port == 0:
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as probe:
+            probe.bind((host, 0))
+            port = probe.getsockname()[1]
+
+    print(f"[INFO] Starting backend on host={host} port={port}")
 
     # Run with:  python app.py
     # Or:        uvicorn app:app --host 127.0.0.1 --port 8000 --reload

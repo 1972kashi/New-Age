@@ -304,6 +304,7 @@
       font-weight: 600;
       color: whitesmoke; 
       line-height: 1.8;
+      margin-bottom: 8px;
     }
 
     .hero-desc {
@@ -383,19 +384,44 @@
       color: var(--white); margin-bottom: 12px;
     }
     .featured-car-price span { font-size: 13px; color: var(--text-muted); font-weight: 400; }
-    .car-listings-btn {
-      display: block; text-align: center;
-      background: var(--dark-3);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 12px;
-      font-size: 12px; font-weight: 700;
-      letter-spacing: 2px; text-transform: uppercase;
-      transition: background 0.2s;
-      margin-top: 10px;
+    @keyframes carListingsBtnShift {
+      0%, 100% {
+        background: var(--gold);
+        color: #fff;
+        border-color: var(--gold);
+        box-shadow: 0 0 0 rgba(245, 166, 35, 0);
+      }
+      50% {
+        background: #fff;
+        color: #111;
+        border-color: #fff;
+        box-shadow: 0 8px 20px rgba(255, 255, 255, 0.16);
+      }
     }
 
-    
+    .car-listings-btn {
+      display: inline-block;
+      text-align: center;
+      background: var(--gold);
+      color: #fff;
+      border: 1px solid var(--gold);
+      border-radius: 999px;
+      padding: 8px 14px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1.8px;
+      text-transform: uppercase;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      margin-top: 0;
+      width: fit-content;
+      text-decoration: none;
+    }
+
+    .car-listings-btn:hover {
+      animation: carListingsBtnShift 5s ease-in-out infinite;
+      transform: translateY(-2px);
+    }
+
     .stats-panel {
       width: min(1120px, 100%);
       margin: 32px auto 0;
@@ -447,8 +473,6 @@
       font-size: 14px;
       padding-top: 4px;
     }
-    .car-listings-btn:hover { background: #2a2f42; }
-
     /* ─────────────── SEARCH ─────────────── */
     .search-bar-section {
       background: #253745;
@@ -1133,6 +1157,9 @@
       .footer-links-grid {
         grid-template-columns: 1fr;
         gap: 16px;
+      }
+      .footer-col {
+        width: 100%;
       }
       .footer-bottom {
         display: flex;
