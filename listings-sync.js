@@ -1,8 +1,7 @@
 // listings-sync.js
 // Load uploaded cards from localStorage and append them to the index and listings pages
 (function(){
-  const API_PORT = 8000;
-  const API_BASE = `http://localhost:${API_PORT}`;  // API now served by FastAPI (port 8000)
+  const API_BASE = window.API_BASE || window.getApiBase?.() || (window.location.protocol === 'file:' ? 'http://localhost:8000' : window.location.origin);
   async function fetchUploadedCars(){
     try {
       const res = await fetch(API_BASE + '/api/cars?limit=100');

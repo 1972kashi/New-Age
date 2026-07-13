@@ -12,8 +12,7 @@
  const TOTAL = 6;
   const PENDING_CARDS_KEY = 'naa_pending_car_cards';
   let showBadge = true;
-  const API_PORT = 8000;
-  const API_BASE = `http://localhost:${API_PORT}`;  // API now served by FastAPI (port 8000)
+  const API_BASE = window.API_BASE || window.getApiBase?.() || (window.location.protocol === 'file:' ? 'http://localhost:8000' : window.location.origin);
   let activeCard = 0;
   let searchQuery = '';
   let savedSearchQuery = '';

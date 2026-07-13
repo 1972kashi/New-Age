@@ -9,7 +9,7 @@
  *   const cars = await API.cars.list({ fuel: "Diesel" });
  */
 
-const API_BASE = "http://localhost:8000";   // ← change to your server URL when deployed
+const API_BASE = window.API_BASE || window.getApiBase?.() || (window.location.protocol === 'file:' ? 'http://localhost:8000' : window.location.origin);
 
 // ── Token helpers ──────────────────────────────────────────────────────────
 const Auth = {

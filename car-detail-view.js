@@ -1,9 +1,14 @@
 (function(){
-  const API_PORT = 8000;
-  const API_BASE = `http://localhost:${API_PORT}`;  // API now served by FastAPI (port 8000)
+  const API_BASE = window.API_BASE || window.getApiBase?.() || (window.location.protocol === 'file:' ? 'http://localhost:8000' : window.location.origin);
 
   const params = new URLSearchParams(window.location.search);
-  const carId = params.get('id');
+  let carId = params.get('id');
+  if (!carId) {
+    const match = window.location.pathname.match(/\/car-detail\/(?<id>[^\/\?#]+)/);
+    if (match && match.groups && match.groups.id) {
+      carId = decodeURIComponent(match.groups.id);
+    }
+  }
 
   function setText(id, value) {
     const element = document.getElementById(id);

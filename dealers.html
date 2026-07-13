@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>New Age Automotive — Dealers Analytics</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@300;400;600;700&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="users.css"/>
+<link rel="stylesheet" href="reveal.css"/>
+<link rel="stylesheet" href="media-overrides.css"/>
+</head>
+<body>
+<nav class="nav">
+  <div class="nav-brand">NEW AGE <span>AUTOMOTIVE</span></div>
+  <div class="nav-links">
+    <a class="nav-btn" href="admin-upload.html">Upload</a>
+    <a class="nav-btn" href="users.html">Users</a>
+    <a class="nav-btn active" href="dealers.html">Dealers</a>
+    <a class="nav-btn" href="car-detail-upload.html">Car Details</a>
+  </div>
+  <div class="nav-user">
+    Logged in as <strong id="nav-name">Admin</strong>
+    <button class="btn-logout" onclick="logout()">Sign Out</button>
+  </div>
+</nav>
+<div class="page">
+  <div class="page-header">
+    <div>
+      <div class="page-title">Dealers <span>Analytics</span></div>
+      <div class="guest-note">Review personal and technical analytics for site engagement.</div>
+    </div>
+  </div>
+
+  <div class="table-card analytics-card">
+    <div class="page-title faq-manager-title">Analytics <span>Dashboard</span></div>
+    <div class="analytics-summary-row">
+      <div class="analytics-stat">
+        <div class="analytics-label">Total Events</div>
+        <div class="analytics-value" id="analytics-total">0</div>
+      </div>
+      <div class="analytics-stat">
+        <div class="analytics-label">Personal Data Events</div>
+        <div class="analytics-value" id="analytics-personal">0</div>
+      </div>
+      <div class="analytics-stat">
+        <div class="analytics-label">Technical Data Events</div>
+        <div class="analytics-value" id="analytics-technical">0</div>
+      </div>
+      <div class="analytics-stat">
+        <div class="analytics-label">Policy Views</div>
+        <div class="analytics-value" id="analytics-policy-views">0</div>
+      </div>
+    </div>
+    <div class="analytics-table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Type</th>
+            <th>Page</th>
+            <th>Policy</th>
+            <th>Personal</th>
+            <th>Technical</th>
+          </tr>
+        </thead>
+        <tbody id="analytics-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="api-config.js"></script>
+<script src="analytics.js"></script>
+<script src="auth-nav.js"></script>
+<script src="dealers.js"></script>
+<script src="reveal-common.js"></script>
+</body>
+</html>

@@ -4,8 +4,7 @@ function switchTab(t){
   document.getElementById('panel-'+t).classList.add('active');
 }
 
-const API_PORT = 8000;
-const API_BASE = `http://localhost:${API_PORT}`;  // API now served by FastAPI (port 8000)
+const API_BASE = window.API_BASE || window.getApiBase?.() || (window.location.protocol === 'file:' ? 'http://localhost:8000' : window.location.origin);
 
 function togglePwd(id,btn){
   const el=document.getElementById(id);
@@ -158,6 +157,8 @@ function doLogin(){
     if(body.access_token){
       const role = body.role || 'user';
       localStorage.setItem('naa_token', body.access_token);
+      localStorage.setItem('token', body.access_token);
+      localStorage.setItem('role', role);
       const sessionData = {name: body.name || id, email: id, role};
       localStorage.setItem('naa_session', JSON.stringify(sessionData));
       showMsg('login-ok', 'Welcome back! Redirecting…');
@@ -252,6 +253,8 @@ function confirmMfaSetup(){
     if(body.access_token){
       const role = body.role || 'admin';
       localStorage.setItem('naa_token', body.access_token);
+      localStorage.setItem('token', body.access_token);
+      localStorage.setItem('role', role);
       localStorage.setItem('naa_session', JSON.stringify({email:document.getElementById('login-id').value.trim(), role}));
       showMsg('mfa-ok','MFA setup complete. Redirecting…');
       setTimeout(() => {
@@ -282,6 +285,8 @@ function verifyMfaChallenge(){
     if(body.access_token){
       const role = body.role || 'admin';
       localStorage.setItem('naa_token', body.access_token);
+      localStorage.setItem('token', body.access_token);
+      localStorage.setItem('role', role);
       localStorage.setItem('naa_session', JSON.stringify({email:document.getElementById('login-id').value.trim(), role}));
       showMsg('mfa-ok','Login successful. Redirecting…');
       setTimeout(()=>{

@@ -1,6 +1,5 @@
 (function(){
-	const API_PORT = 8000;
-	const API_BASE = `http://localhost:${API_PORT}`;  // API now served by FastAPI (port 8000)
+	const API_BASE = window.API_BASE || window.getApiBase?.() || (window.location.protocol === 'file:' ? 'http://localhost:8000' : window.location.origin);
 
 	let existingCars = [];
 	let existingCarDetails = [];
@@ -73,6 +72,11 @@
 		if (!name) return '';
 		const match = name.match(/\b(19|20)\d{2}\b/);
 		return match ? match[0] : '';
+	}
+
+	function getAuthHeaders() {
+		const token = localStorage.getItem('naa_token') || localStorage.getItem('token');
+		return token ? { Authorization: `Bearer ${token}` } : {};
 	}
 
 	function getPendingQueue() {
@@ -157,9 +161,7 @@
 	async function extractExistingCars() {
 		try {
 			const res = await fetch(`${API_BASE}/api/cars?limit=200`, {
-				headers: {
-					Authorization: `Bearer ${localStorage.getItem('naa_token') || localStorage.getItem('token') || ''}`
-				}
+				headers: getAuthHeaders()
 			});
 			if (!res.ok) return;
 			const data = await res.json();
@@ -173,9 +175,7 @@
 	async function extractExistingCarDetails() {
 		try {
 			const res = await fetch(`${API_BASE}/api/car-details?limit=200`, {
-				headers: {
-					Authorization: `Bearer ${localStorage.getItem('naa_token') || localStorage.getItem('token') || ''}`
-				}
+				headers: getAuthHeaders()
 			});
 			if (!res.ok) return;
 			const data = await res.json();
@@ -341,17 +341,22 @@
 
 	async function uploadImageToServer(file) {
 		if (!file || !file.type?.startsWith('image/')) return '';
+		const headers = getAuthHeaders();
+		if (!headers.Authorization) {
+			throw new Error('Authentication required. Please sign in and try again.');
+		}
 		const formData = new FormData();
 		formData.append('file', file);
 		const response = await fetch(`${API_BASE}/upload/image`, {
 			method: 'POST',
-			headers: {
-				Authorization: `Bearer ${localStorage.getItem('naa_token') || localStorage.getItem('token') || ''}`
-			},
+			headers,
 			body: formData
 		});
 		const data = await response.json().catch(() => ({}));
-		if (!response.ok) throw new Error(data.detail || 'Image upload failed');
+		if (!response.ok) {
+			const message = data.detail || data.message || response.statusText || 'Image upload failed';
+			throw new Error(message);
+		}
 		return data.img || data.url || data.path || '';
 	}
 
@@ -421,7 +426,7 @@
 					method: 'PUT',
 					headers: {
 						'Content-Type': 'application/json',
-						Authorization: `Bearer ${localStorage.getItem('naa_token') || localStorage.getItem('token') || ''}`
+						...getAuthHeaders()
 					},
 					body: JSON.stringify(detailItem)
 				});
@@ -435,7 +440,7 @@
 					method: 'POST',
 					headers: {
 						'Content-Type': 'application/json',
-						Authorization: `Bearer ${localStorage.getItem('naa_token') || localStorage.getItem('token') || ''}`
+						...getAuthHeaders()
 					},
 					body: JSON.stringify(detailItem)
 				});
@@ -471,7 +476,7 @@
 					method: 'PUT',
 					headers: {
 						'Content-Type': 'application/json',
-						Authorization: `Bearer ${localStorage.getItem('naa_token') || localStorage.getItem('token') || ''}`
+						...getAuthHeaders()
 					},
 					body: JSON.stringify(carItem)
 				});
@@ -480,7 +485,7 @@
 					method: 'POST',
 					headers: {
 						'Content-Type': 'application/json',
-						Authorization: `Bearer ${localStorage.getItem('naa_token') || localStorage.getItem('token') || ''}`
+						...getAuthHeaders()
 					},
 					body: JSON.stringify(carItem)
 				});

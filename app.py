@@ -18,14 +18,16 @@ Sections:
 # ─────────────────────────────────────────────
 # 1. IMPORTS & SETUP
 # ─────────────────────────────────────────────
-import json, os, uuid, base64, shutil, smtplib, time, io, re
+import json, os, uuid, base64, shutil, smtplib, time, io, re, socket
 from collections import defaultdict
+from contextlib import asynccontextmanager
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
-from typing import Optional
+from typing import Any, Optional
 from email.message import EmailMessage
 
 import psycopg
+from psycopg import sql
 from fastapi import (
     FastAPI, HTTPException, Depends, status,
     UploadFile, File, Query, Body, Request
@@ -39,6 +41,27 @@ from jose import JWTError, jwt
 import pyotp
 from passlib.context import CryptContext
 from pydantic import BaseModel, EmailStr
+
+
+def _load_env_file(path: Path) -> None:
+    """Load simple KEY=VALUE pairs from a local env file when they are not already set."""
+    if not path.exists():
+        return
+    try:
+        for raw_line in path.read_text(encoding="utf-8").splitlines():
+            line = raw_line.strip()
+            if not line or line.startswith("#") or "=" not in line:
+                continue
+            key, value = line.split("=", 1)
+            key = key.strip()
+            value = value.strip().strip('"').strip("'")
+            if key and key not in os.environ:
+                os.environ[key] = value
+    except Exception as exc:
+        print(f"[ENV] Failed to load {path}: {exc}")
+
+
+_load_env_file(Path("db.env"))
 
 # ── Constants ──────────────────────────────────
 DB_PATH      = Path("db.json")          # legacy JSON backup used for migration
@@ -65,7 +88,25 @@ if SECRET_KEY == "change-me-in-production-use-env-var":
 
 UPLOAD_DIR.mkdir(exist_ok=True)
 
-app = FastAPI(title="Car Dealership API", version="1.0.0")
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    global DB_INIT_ATTEMPTED, DB_INIT_OK
+    if not DB_INIT_ATTEMPTED:
+        DB_INIT_ATTEMPTED = True
+        DB_INIT_OK = initialize_database()
+        if DB_INIT_OK:
+            print("[DB] Database initialization complete.")
+        else:
+            print("[DB] Database initialization unavailable; falling back to db.json.")
+    yield
+    print("[INFO] Backend shutdown complete.")
+
+app = FastAPI(title="Car Dealership API", version="1.0.0", lifespan=lifespan)
+
+# Initialize the database once at startup so the terminal shows a clear status
+# and requests do not repeatedly test the same connection path.
+DB_INIT_ATTEMPTED = False
+DB_INIT_OK = False
 
 # Configure CORS from environment (comma-separated) to avoid wide-open origins in
 # production. Default keeps previous permissive behavior for local development.
@@ -124,27 +165,16 @@ async def global_rate_limiter(request, call_next):
     return await call_next(request)
 
 
-# Temporary debugging middleware: log raw request body and headers for API create endpoints
+# Lightweight request logging so the terminal shows live activity for auth, API and upload requests.
 @app.middleware("http")
 async def log_api_requests(request, call_next):
-    try:
-        path = request.url.path
-        if path.startswith('/api/cars') or path.startswith('/api/car-details'):
-            body = await request.body()
-            try:
-                bstr = body.decode('utf-8')
-            except Exception:
-                bstr = str(body)
-            print('---[API REQUEST]---')
-            print(f'METHOD: {request.method} PATH: {path}')
-            # Print a subset of headers relevant for debugging
-            hdrs = {k: v for k, v in request.headers.items() if k.lower() in ('content-type', 'content-length', 'origin', 'host')}
-            print('HEADERS:', hdrs)
-            print('BODY:', bstr)
-            print('---[END REQUEST]---')
-    except Exception as e:
-        print('Error in log_api_requests middleware:', e)
-    return await call_next(request)
+    start = time.perf_counter()
+    response = await call_next(request)
+    elapsed_ms = int((time.perf_counter() - start) * 1000)
+    path = request.url.path
+    if path.startswith('/auth') or path.startswith('/api') or path.startswith('/upload'):
+        print(f"[HTTP] {request.method} {path} -> {response.status_code} ({elapsed_ms}ms)")
+    return response
 
 # Serve uploaded images as static files at /Pic/<filename>
 app.mount("/Pic", StaticFiles(directory=str(UPLOAD_DIR)), name="pics")
@@ -316,6 +346,12 @@ def _connection_kwargs(database_name: Optional[str] = None) -> dict:
 
 def initialize_database() -> bool:
     """Create the PostgreSQL database and required table if needed."""
+    global DB_INIT_ATTEMPTED, DB_INIT_OK
+
+    if DB_INIT_ATTEMPTED:
+        return DB_INIT_OK
+
+    DB_INIT_ATTEMPTED = True
     try:
         admin_db = "postgres"
         with psycopg.connect(**_connection_kwargs(admin_db), autocommit=True) as conn:
@@ -323,7 +359,7 @@ def initialize_database() -> bool:
                 cur.execute("SELECT 1 FROM pg_database WHERE datname = %s", (DB_NAME,))
                 exists = cur.fetchone()
                 if not exists:
-                    cur.execute(f'CREATE DATABASE "{DB_NAME}"')
+                    cur.execute(sql.SQL("CREATE DATABASE {}").format(sql.Identifier(DB_NAME)))
 
         with psycopg.connect(**_connection_kwargs(DB_NAME), autocommit=True) as conn:
             with conn.cursor() as cur:
@@ -339,8 +375,10 @@ def initialize_database() -> bool:
                     """
                 )
                 cur.execute("CREATE INDEX IF NOT EXISTS idx_app_data_collection ON app_data (collection)")
+        DB_INIT_OK = True
         return True
     except Exception as exc:
+        DB_INIT_OK = False
         print(f"[DB] PostgreSQL initialization failed: {exc}")
         return False
 
@@ -357,20 +395,25 @@ def _load_legacy_db() -> dict:
 
 def read_db() -> dict:
     """Load the current database state from PostgreSQL, migrating legacy JSON data if needed."""
-    if initialize_database():
-        try:
-            with psycopg.connect(**_connection_kwargs(DB_NAME)) as conn:
-                with conn.cursor() as cur:
-                    data = {"users": [], "cars": [], "carDetails": [], "faqItems": []}
-                    for collection in data:
-                        cur.execute("SELECT payload FROM app_data WHERE collection = %s ORDER BY item_id", (collection,))
-                        rows = cur.fetchall()
-                        data[collection] = [row[0] for row in rows]
+    if not DB_INIT_OK and not initialize_database():
+        legacy = _load_legacy_db()
+        if legacy:
+            return legacy
+        return {"users": [], "cars": [], "carDetails": [], "faqItems": []}
 
-            if any(data[col] for col in ("users", "cars", "carDetails", "faqItems")):
-                return data
-        except Exception as exc:
-            print(f"[DB] PostgreSQL read failed: {exc}")
+    try:
+        with psycopg.connect(**_connection_kwargs(DB_NAME)) as conn:
+            with conn.cursor() as cur:
+                data = {"users": [], "cars": [], "carDetails": [], "faqItems": [], "analytics": []}
+                for collection in data:
+                    cur.execute("SELECT payload FROM app_data WHERE collection = %s ORDER BY item_id", (collection,))
+                    rows = cur.fetchall()
+                    data[collection] = [row[0] for row in rows]
+
+        if any(data[col] for col in ("users", "cars", "carDetails", "faqItems", "analytics")):
+            return data
+    except Exception as exc:
+        print(f"[DB] PostgreSQL read failed: {exc}")
 
     legacy = _load_legacy_db()
     if legacy:
@@ -381,11 +424,11 @@ def read_db() -> dict:
 def write_db(data: dict) -> None:
     """Persist changes back to PostgreSQL while keeping the legacy JSON file as a backup."""
     payload = data or {}
-    if initialize_database():
+    if DB_INIT_OK or initialize_database():
         try:
             with psycopg.connect(**_connection_kwargs(DB_NAME), autocommit=True) as conn:
                 with conn.cursor() as cur:
-                    for collection in ("users", "cars", "carDetails", "faqItems"):
+                    for collection in ("users", "cars", "carDetails", "faqItems", "analytics"):
                         cur.execute("DELETE FROM app_data WHERE collection = %s", (collection,))
                         for item in payload.get(collection, []):
                             if not isinstance(item, dict):
@@ -555,7 +598,7 @@ def _sanitize_str(s: str) -> str:
     return s
 
 
-def sanitize_dict(obj):
+def sanitize_dict(obj: object) -> object:
     if isinstance(obj, dict):
         return {k: sanitize_dict(v) for k, v in obj.items()}
     if isinstance(obj, list):
@@ -653,6 +696,11 @@ def login(form: OAuth2PasswordRequestForm = Depends()):
         "role": user["role"],
         "message": "Login successful." if not first_login else "Login successful. A confirmation email was sent if delivery is configured."
     }
+
+
+@app.post("/api/auth/login")
+def api_login_compat(form: OAuth2PasswordRequestForm = Depends()):
+    return login(form)
 
 
 class PasswordResetRequest(BaseModel):
@@ -1268,14 +1316,35 @@ async def upload_image(
     return {"img": f"Pic/{filename}", "url": f"/Pic/{filename}"}
 
 
+@app.post("/api/upload/image")
+async def upload_image_compat(file: UploadFile = File(...), _admin=Depends(require_admin)):
+    return await upload_image(file=file, _admin=_admin)
+
+
 # ─────────────────────────────────────────────
 # ENTRY POINT
 # ─────────────────────────────────────────────
 if __name__ == "__main__":
     import uvicorn
+    host = os.getenv("HOST", "127.0.0.1")
+    requested_port = int(os.getenv("PORT", "8000"))
+    reload_enabled = os.getenv("RELOAD", "0").lower() in {"1", "true", "yes", "on"}
+
+    if requested_port <= 0:
+        port = 0
+    else:
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as probe:
+            try:
+                probe.bind((host, requested_port))
+                port = requested_port
+            except OSError:
+                port = 0
+
+    print(f"[INFO] Starting backend on host={host} port={port if port else 'auto'}")
+
     # Run with:  python app.py
-    # Or:        uvicorn app:app --reload
-    uvicorn.run("app:app", host="0.0.0.0", port=8000, reload=True)
+    # Or:        uvicorn app:app --host 127.0.0.1 --port 8000 --reload
+    uvicorn.run("app:app", host=host, port=port, reload=reload_enabled)
 
 
 # -------------------------------------------------
@@ -1594,10 +1663,12 @@ def api_list_faq():
 def api_create_faq(body: dict = Body(...)):
     if not body or not isinstance(body, dict):
         raise HTTPException(400, "Missing or invalid body")
-    body = sanitize_dict(body)
-    question = body.get('question', '').strip()
-    answer = body.get('answer', '').strip()
-    category = body.get('category', 'general').strip() or 'general'
+    body_data = sanitize_dict(body)
+    if not isinstance(body_data, dict):
+        raise HTTPException(400, "Missing or invalid body")
+    question = str(body_data.get('question', '')).strip()
+    answer = str(body_data.get('answer', '')).strip()
+    category = str(body_data.get('category', 'general')).strip() or 'general'
     if not question or not answer:
         raise HTTPException(400, "Question and answer are required")
     db = read_db()
@@ -1615,10 +1686,12 @@ def api_create_faq(body: dict = Body(...)):
 def api_update_faq(faq_id: str, body: dict = Body(...)):
     if not body or not isinstance(body, dict):
         raise HTTPException(400, "Missing or invalid body")
-    body = sanitize_dict(body)
-    question = body.get('question', '').strip()
-    answer = body.get('answer', '').strip()
-    category = body.get('category', 'general').strip() or 'general'
+    body_data = sanitize_dict(body)
+    if not isinstance(body_data, dict):
+        raise HTTPException(400, "Missing or invalid body")
+    question = str(body_data.get('question', '')).strip()
+    answer = str(body_data.get('answer', '')).strip()
+    category = str(body_data.get('category', 'general')).strip() or 'general'
     if not question or not answer:
         raise HTTPException(400, "Question and answer are required")
     db = read_db()
@@ -1643,6 +1716,86 @@ def api_delete_faq(faq_id: str):
         raise HTTPException(404, "Not found")
     write_db(db)
     return {"deleted": True}
+
+
+@app.get('/api/analytics')
+def api_list_analytics(page: int = 1, limit: int = 50):
+    db = read_db()
+    items = list(db.get('analytics', []))
+    items.reverse()
+    total = len(items)
+    start = (max(1, page) - 1) * max(1, limit)
+    paged = items[start:start + max(1, limit)]
+    return {"total": total, "page": page, "limit": limit, "items": paged}
+
+
+@app.get('/api/analytics/summary')
+def api_analytics_summary():
+    db = read_db()
+    events = list(db.get('analytics', []))
+    summary = {
+        "total": len(events),
+        "byType": {},
+        "pageViews": {},
+        "policyViews": {},
+        "personalEvents": 0,
+        "technicalEvents": 0,
+        "uniqueVisitors": 0,
+        "cookieAccepted": 0,
+        "cookieDeclined": 0,
+    }
+    visitor_ids = set()
+    for event in events:
+        typ = event.get('type', 'unknown')
+        summary['byType'][typ] = summary['byType'].get(typ, 0) + 1
+        page = event.get('page')
+        if page:
+            summary['pageViews'][page] = summary['pageViews'].get(page, 0) + 1
+        policy = event.get('policy')
+        if policy:
+            summary['policyViews'][policy] = summary['policyViews'].get(policy, 0) + 1
+        if event.get('personalData'):
+            summary['personalEvents'] += 1
+        if event.get('technicalData'):
+            summary['technicalEvents'] += 1
+
+        details = event.get('details') or {}
+        visitor = details.get('visitorId') or event.get('visitorIp')
+        if visitor:
+            visitor_ids.add(visitor)
+
+        cookie_consent = details.get('cookieConsent')
+        if cookie_consent is True:
+            summary['cookieAccepted'] += 1
+        elif cookie_consent is False:
+            summary['cookieDeclined'] += 1
+
+    summary['uniqueVisitors'] = len(visitor_ids)
+    return summary
+
+
+@app.post('/api/analytics')
+def api_create_analytics(request: Request, body: dict = Body(...)):
+    if not body or not isinstance(body, dict):
+        raise HTTPException(400, "Missing or invalid body")
+    data = sanitize_dict(body)
+    if not isinstance(data, dict):
+        raise HTTPException(400, "Missing or invalid body")
+    db = read_db()
+    analytics_record = {
+        'type': data.get('type', 'event'),
+        'page': data.get('page', ''),
+        'url': data.get('url', ''),
+        'referrer': data.get('referrer', ''),
+        'policy': data.get('policy', ''),
+        'personalData': bool(data.get('personalData')),
+        'technicalData': bool(data.get('technicalData')),
+        'details': data.get('details', {}),
+        'visitorIp': request.client.host if request and request.client else 'unknown',
+    }
+    rec = create_record(db, 'analytics', analytics_record)
+    write_db(db)
+    return rec
 
 
 # Serve frontend files for non-API requests (kept after API routes so they don't get shadowed)

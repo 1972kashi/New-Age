@@ -10,7 +10,7 @@
 
 /* Observer handled by reveal-common.js — use window.reveal.observe(el) */
 
-const DETAIL_IMAGE_API_BASE = 'http://localhost:8000';
+const DETAIL_IMAGE_API_BASE = window.API_BASE || window.getApiBase?.() || (window.location.protocol === 'file:' ? 'http://localhost:8000' : window.location.origin);
 
 let detailGalleryState = {
   images: [],

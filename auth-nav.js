@@ -47,6 +47,9 @@ function toggleAuthPopup(){
 
 function logout(){
   localStorage.removeItem('naa_session');
+  localStorage.removeItem('naa_token');
+  localStorage.removeItem('token');
+  localStorage.removeItem('role');
   hideAuthPopup();
   loadAuthNav();
 }
@@ -65,8 +68,13 @@ function checkAdminAccess(){
   
   if(adminPages.includes(currentPage)){
     const session = JSON.parse(localStorage.getItem('naa_session')||'null');
-    if (!session || session.role !== 'admin') {
+    const token = localStorage.getItem('naa_token') || localStorage.getItem('token') || '';
+    if (!session || session.role !== 'admin' || !token) {
       localStorage.setItem('post_login_redirect', currentPage);
+      localStorage.removeItem('naa_session');
+      localStorage.removeItem('naa_token');
+      localStorage.removeItem('token');
+      localStorage.removeItem('role');
       window.location.href = 'login.html';
       return false;
     }

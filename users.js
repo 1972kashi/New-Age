@@ -4,8 +4,7 @@ let users = [];
 let editingUserId = null;
 let faqItems = [];
 
-const API_PORT = 8000;
-const API_BASE = `http://localhost:${API_PORT}`;  // API now served by FastAPI (port 8000)
+const API_BASE = window.API_BASE || window.getApiBase?.() || (window.location.protocol === 'file:' ? 'http://localhost:8000' : window.location.origin);
 const FAQ_STORAGE_KEY = 'naa_faq_items';
 
 function initSession(){
