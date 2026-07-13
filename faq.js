@@ -19,6 +19,7 @@ window.addEventListener('error', (event) => {
 });
 
 const FAQ_STORAGE_KEY = 'naa_faq_items';
+const API_BASE = window.API_BASE || window.getApiBase?.() || (window.location.protocol === 'file:' ? 'http://localhost:8000' : window.location.origin);
 const categoryBtns = document.querySelectorAll('.category-btn');
 const faqSearchInput = document.getElementById('faqSearch');
 const noResults = document.getElementById('noResults');
@@ -46,6 +47,32 @@ function getFaqItems() {
   } catch (err) {
     console.warn('Could not load FAQ items', err);
     return [];
+  }
+}
+
+function persistFaqItems(items) {
+  const normalized = Array.isArray(items) ? items : [];
+  try {
+    localStorage.setItem(FAQ_STORAGE_KEY, JSON.stringify(normalized));
+  } catch (err) {
+    console.warn('Could not save FAQ items', err);
+  }
+  return normalized;
+}
+
+async function loadFaqItemsFromServer() {
+  try {
+    const res = await fetch(`${API_BASE}/api/faq`);
+    if (!res.ok) throw new Error('Failed to load FAQ items');
+    const items = await res.json();
+    const normalized = persistFaqItems(items);
+    renderFaqItems(normalized);
+    return normalized;
+  } catch (err) {
+    console.warn('Could not load FAQ items from server, using local fallback:', err);
+    const fallback = getFaqItems();
+    renderFaqItems(fallback);
+    return fallback;
   }
 }
 
@@ -150,14 +177,24 @@ function renderFaqItems(items) {
   faqItems = Array.isArray(items) ? items : [];
   if (!accordionList) return;
 
-  if (!faqItems.length) {
+  const dynamicItems = faqItems.filter((item) => item && item.question && item.answer);
+  accordionList.querySelectorAll('.faq-item[data-source="dynamic"]').forEach((el) => el.remove());
+
+  if (!dynamicItems.length) {
+    if (accordionList.querySelector('.faq-item')) {
+      bindFaqEvents();
+      applyFilters();
+      startFaqCarousel();
+      return;
+    }
+
     accordionList.innerHTML = '<li class="faq-item"><div class="faq-panel"><div class="faq-panel-inner">No FAQ entries have been added yet.</div></div></li>';
     if (noResults) noResults.classList.add('show');
     return;
   }
 
-  accordionList.innerHTML = faqItems.map((item) => `
-    <li class="faq-item" data-category="${escapeHtml(item.category || 'general')}">
+  accordionList.insertAdjacentHTML('beforeend', dynamicItems.map((item) => `
+    <li class="faq-item" data-source="dynamic" data-category="${escapeHtml(item.category || 'general')}">
       <button class="faq-question" aria-expanded="false">
         <span class="faq-question-text"><span class="cat-tag">${escapeHtml((item.category || 'General').charAt(0).toUpperCase() + (item.category || 'General').slice(1))}</span>${escapeHtml(item.question)}</span>
         <span class="faq-icon"><svg viewBox="0 0 12 8" fill="none"><path d="M1 1l5 5 5-5" stroke="#fff" stroke-width="2"/></svg></span>
@@ -166,7 +203,7 @@ function renderFaqItems(items) {
         <div class="faq-panel-inner">${escapeHtml(item.answer)}</div>
       </div>
     </li>
-  `).join('');
+  `).join(''));
 
   bindFaqEvents();
   applyFilters();

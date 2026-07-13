@@ -41,7 +41,11 @@ function getFaqItems(){
 
 function saveFaqItems(items){
   faqItems = Array.isArray(items) ? items : [];
-  localStorage.setItem(FAQ_STORAGE_KEY, JSON.stringify(faqItems));
+  try {
+    localStorage.setItem(FAQ_STORAGE_KEY, JSON.stringify(faqItems));
+  } catch (err) {
+    console.warn('Could not save FAQ items', err);
+  }
   window.dispatchEvent(new CustomEvent('faq-data-updated', { detail: faqItems }));
 }
 
@@ -54,6 +58,7 @@ async function loadFaqItems(){
     console.warn('Could not load FAQ items from server, using local fallback:', err);
     faqItems = getFaqItems();
   }
+  saveFaqItems(faqItems);
   renderFaqManager();
 }
 
@@ -132,6 +137,7 @@ async function saveFaqForm(){
     document.getElementById('faq-answer').value = '';
     document.getElementById('faq-category').value = 'general';
     setFaqFormState(false);
+    saveFaqItems(faqItems);
     renderFaqManager();
   } catch (err) {
     showToast(err.message || 'Error saving FAQ entry.', 'err');
@@ -162,6 +168,7 @@ async function deleteFaqItem(id){
       throw new Error(errorBody.detail || errorBody.message || 'Failed to delete FAQ');
     }
     faqItems = faqItems.filter((entry) => entry.id !== id);
+    saveFaqItems(faqItems);
     renderFaqManager();
     showToast('FAQ entry deleted.');
   } catch (err) {
