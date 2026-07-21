@@ -24,7 +24,7 @@
       } catch (e) {
         // API is unavailable; fall back to cached uploads.
       }
-    }
+    
 
     try {
       if (window.offlineSync?.getCachedCars) {
