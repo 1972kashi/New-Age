@@ -7,22 +7,23 @@
   async function fetchUploadedCars(){
     try {
       const res = await fetch(API_BASE + '/api/cars?limit=100');
-      if (res.ok) {
-        const data = await res.json();
-        const items = Array.isArray(data) ? data : (Array.isArray(data?.items) ? data.items : []);
-        if (window.offlineSync?.cacheCars && items.length) {
-          await window.offlineSync.cacheCars(items);
-          // Preload images in background only if enough time has passed (throttle to once per minute)
-          if (window.offlineSync?.preloadImages && Date.now() - lastPreloadTime > 60000) {
-            lastPreloadTime = Date.now();
-            // Schedule preload after a short delay to avoid competing with render
-            setTimeout(() => window.offlineSync.preloadImages(items).catch(() => {}), 2000);
+        if (res.ok) {
+          const data = await res.json();
+          const items = Array.isArray(data) ? data : (Array.isArray(data?.items) ? data.items : []);
+          if (window.offlineSync?.cacheCars && items.length) {
+            await window.offlineSync.cacheCars(items);
+            // Preload images in background only if enough time has passed (throttle to once per minute)
+            if (window.offlineSync?.preloadImages && Date.now() - lastPreloadTime > 60000) {
+              lastPreloadTime = Date.now();
+              // Schedule preload after a short delay to avoid competing with render
+              setTimeout(() => window.offlineSync.preloadImages(items).catch(() => {}), 2000);
+            }
           }
+          return items;
         }
-        return items;
+      } catch (e) {
+        // API is unavailable; fall back to cached uploads.
       }
-    } catch (e) {
-      // API is unavailable; fall back to cached uploads.
     }
 
     try {
@@ -37,14 +38,28 @@
       // Cached cars unavailable.
     }
 
-    try {
-      const res = await fetch('db.json');
-      if (!res.ok) return [];
-      const data = await res.json();
-      return Array.isArray(data.cars) ? data.cars.slice().reverse().slice(0, 100) : [];
-    } catch (e) {
-      return [];
+    // Try to load static data fallbacks (db.json then db.sample.json)
+    const dbFiles = ['db.json', 'db.sample.json'];
+    for (const dbFile of dbFiles) {
+      try {
+        const res = await fetch(dbFile);
+        if (res.ok) {
+          const data = await res.json();
+          if (Array.isArray(data.cars) && data.cars.length) {
+            const cars = data.cars.slice().reverse().slice(0, 100);
+            if (dbFile === 'db.sample.json') {
+              console.info('[Listings] Using sample data (server/cache unavailable)');
+            }
+            return cars;
+          }
+        }
+      } catch (e) {
+        // Continue to next fallback
+      }
     }
+
+    // No data available
+    return [];
   }
 
   function getCarKey(c){

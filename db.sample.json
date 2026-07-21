@@ -1,0 +1,43 @@
+{
+  "cars": [
+    {
+      "id": "sample-001",
+      "img": "Pic/GLC1.jpg",
+      "fuel": "Petrol",
+      "link": "car-detail.html?id=sample-001",
+      "name": "Mercedes Benz GLC 43 AMG",
+      "year": "2020",
+      "badge": true,
+      "miles": "65000",
+      "price": "9,000,000",
+      "trans": "Automatic",
+      "createdAt": "2026-07-17T17:07:54.452256+00:00"
+    },
+    {
+      "id": "sample-002",
+      "img": "Pic/Main2.png",
+      "fuel": "Diesel",
+      "link": "car-detail.html?id=sample-002",
+      "name": "Toyota Land Cruiser",
+      "year": "2019",
+      "badge": false,
+      "miles": "45000",
+      "price": "8,500,000",
+      "trans": "Automatic",
+      "createdAt": "2026-07-15T10:22:30.123456+00:00"
+    },
+    {
+      "id": "sample-003",
+      "img": "Pic/Main2.png",
+      "fuel": "Petrol",
+      "link": "car-detail.html?id=sample-003",
+      "name": "BMW X5",
+      "year": "2021",
+      "badge": true,
+      "miles": "32000",
+      "price": "12,000,000",
+      "trans": "Automatic",
+      "createdAt": "2026-07-14T14:45:12.654321+00:00"
+    }
+  ]
+}

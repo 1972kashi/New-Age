@@ -12,30 +12,6 @@ const PRECACHE_URLS = [
 const API_CACHE_NAME = 'new-age-api-v1';
 const IMG_CACHE_NAME = 'new-age-images-v1';
 
-self.addEventListener('install', event => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then(cache => {
-      console.log('[SW] Precaching core assets');
-      return cache.addAll(PRECACHE_URLS);
-    })
-  );
-  self.skipWaiting();
-});
-
-self.addEventListener('activate', event => {
-  event.waitUntil(
-    caches.keys().then(keys => {
-      console.log('[SW] Cleaning old caches');
-      return Promise.all(
-        keys
-          .filter(k => ![CACHE_NAME, API_CACHE_NAME, IMG_CACHE_NAME].includes(k))
-          .map(k => caches.delete(k))
-      );
-    })
-  );
-  self.clients.claim();
-});
-
 // Request deduplication to prevent duplicate simultaneous requests
 const PENDING_REQUESTS = new Map();
 
@@ -110,8 +86,6 @@ self.addEventListener('fetch', event => {
           });
         })
     );
-    return;
-  }
 
   // Images: cache-first with network fallback
   if (event.request.destination === 'image' || url.pathname.startsWith('/Pic/')) {
