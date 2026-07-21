@@ -36,10 +36,27 @@
     }
   }
 
+  function getCarKey(c){
+    if (!c) return '';
+    if (typeof c === 'string') {
+      try {
+        return getCarKey(JSON.parse(c));
+      } catch (e) {
+        return c;
+      }
+    }
+    if (typeof c === 'object') {
+      const source = c.dataset?.car ? JSON.parse(c.dataset.car) : c;
+      return source?.id || source?.link || source?.name || `${source?.price || ''}-${source?.year || ''}-${source?.img || ''}`;
+    }
+    return String(c);
+  }
+
   function createIndexCard(c, pageNum){
     const div = document.createElement('div');
     div.className = 'car-card';
     if(pageNum) div.setAttribute('data-page', pageNum);
+    div.dataset.car = JSON.stringify({ id: c.id, link: c.link, name: c.name, price: c.price, year: c.year, img: c.img });
     const imgSrc = normalizeImagePath(c.img);
     const carLink = c.link || (c.id ? `car-detail.html?id=${c.id}` : 'car-detail.html');
     
@@ -78,6 +95,7 @@
   function createListingsCard(c){
     const div = document.createElement('div');
     div.className = 'car-card';
+    div.dataset.car = JSON.stringify({ id: c.id, link: c.link, name: c.name, price: c.price, year: c.year, img: c.img });
     const imgSrc = normalizeImagePath(c.img);
     const carLink = c.link || (c.id ? `car-detail.html?id=${c.id}` : 'car-detail.html');
     
@@ -114,10 +132,16 @@
     const pageEls = Array.from(document.querySelectorAll('.car-card[data-page]'));
     const maxPage = pageEls.length ? Math.max(...pageEls.map(el=>parseInt(el.getAttribute('data-page')||0))) : 0;
     const pagination = document.querySelector('.pagination');
+    const existingCards = Array.from(grid.querySelectorAll('.car-card'));
+    let addedCount = 0;
     cars.forEach((c,i)=>{
+      const key = getCarKey(c);
+      const alreadyExists = existingCards.some(card => getCarKey(card) === key);
+      if (alreadyExists) return;
       const pageNum = maxPage + i + 1;
       const card = createIndexCard(c, pageNum);
       grid.appendChild(card);
+      addedCount += 1;
       // add page button if pagination exists
       if(pagination){
         const btn = document.createElement('div');
@@ -127,7 +151,7 @@
         pagination.insertBefore(btn, pagination.querySelector('[data-prev]') || null);
       }
     });
-    if(window.refreshHomePagination) {
+    if(addedCount && window.refreshHomePagination) {
       window.refreshHomePagination();
     }
   }
@@ -137,39 +161,54 @@
     if(!cars.length) return;
     const container = document.querySelector('.listings-section .container');
     if(!container) return;
-    // append to last .g-3 row or create a new one
+    const existingCards = Array.from(container.querySelectorAll('.car-card'));
+    const existingKeys = new Set(existingCards.map(card => getCarKey(card)));
     let row = container.querySelector('.g-3.row-gap:last-of-type');
     if(!row) row = container.querySelector('.g-3') || null;
     if(!row){
       row = document.createElement('div');
       row.className = 'g-3 row-gap';
-      // insert before pagination
       const pagination = container.querySelector('.pagination');
       container.insertBefore(row, pagination);
     }
+    let addedCount = 0;
     cars.forEach(c=>{
+      const key = getCarKey(c);
+      if (existingKeys.has(key)) return;
       const card = createListingsCard(c);
       row.appendChild(card);
+      existingKeys.add(key);
+      addedCount += 1;
     });
-    // update count in title if exists
     const titleSpan = container.querySelector('.listings-title span');
     if(titleSpan){
       const n = parseInt(titleSpan.textContent.replace(/\D/g,'')) || 0;
-      titleSpan.textContent = `(${n + cars.length})`;
+      titleSpan.textContent = `(${n + addedCount})`;
     }
-    if(window.refreshListingPagination) {
+    if(addedCount && window.refreshListingPagination) {
       window.refreshListingPagination();
     }
   }
 
+  async function bootstrapListings(){
+    try {
+      await loadUploadedCardsForIndex();
+      await loadUploadedCardsForListings();
+    } catch (err) {
+      console.warn('Could not bootstrap listings', err);
+    }
+  }
+
+  window.addEventListener('na-cars-cache-updated', () => {
+    bootstrapListings();
+  });
+
   // auto-run on pages
   if(document.readyState === 'loading'){
     document.addEventListener('DOMContentLoaded', ()=>{
-      loadUploadedCardsForIndex();
-      loadUploadedCardsForListings();
+      bootstrapListings();
     });
   } else {
-    loadUploadedCardsForIndex();
-    loadUploadedCardsForListings();
+    bootstrapListings();
   }
 })();

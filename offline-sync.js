@@ -62,6 +62,14 @@
     return normalized;
   }
 
+  function notifyCarsCacheUpdated(payload){
+    try {
+      window.dispatchEvent(new CustomEvent('na-cars-cache-updated', { detail: payload }));
+    } catch (e) {
+      console.warn('offline sync event dispatch failed', e);
+    }
+  }
+
   function isSameCar(left, right){
     if (!left || !right) return false;
     if (left.id && right.id && left.id === right.id) return true;
@@ -78,6 +86,7 @@
     const deduped = [normalized, ...list.filter(item => !isSameCar(item, normalized))];
     const payload = deduped.slice(0, 200);
     await put(STORE_CACHE, { key: 'cars', payload, updatedAt: new Date().toISOString() });
+    notifyCarsCacheUpdated(payload);
     return payload;
   }
 
@@ -128,6 +137,7 @@
     const payload = Array.isArray(data) ? data : (Array.isArray(data?.items) ? data.items : []);
     const normalized = payload.map(normalizeCarForCache).filter(Boolean);
     await put(STORE_CACHE, { key: 'cars', payload: normalized, updatedAt: new Date().toISOString() });
+    notifyCarsCacheUpdated(normalized);
     return normalized;
   }
 
