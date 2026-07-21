@@ -2,6 +2,8 @@
 // Load uploaded cards from localStorage and append them to the index and listings pages
 (function(){
   const API_BASE = window.API_BASE || window.getApiBase?.() || (window.location.protocol === 'file:' ? 'http://localhost:8000' : window.location.origin);
+  let lastPreloadTime = 0;
+  
   async function fetchUploadedCars(){
     try {
       const res = await fetch(API_BASE + '/api/cars?limit=100');
@@ -10,9 +12,11 @@
         const items = Array.isArray(data) ? data : (Array.isArray(data?.items) ? data.items : []);
         if (window.offlineSync?.cacheCars && items.length) {
           await window.offlineSync.cacheCars(items);
-          // Preload images in background so they're cached for offline use
-          if (window.offlineSync?.preloadImages) {
-            window.offlineSync.preloadImages(items).catch(() => {});
+          // Preload images in background only if enough time has passed (throttle to once per minute)
+          if (window.offlineSync?.preloadImages && Date.now() - lastPreloadTime > 60000) {
+            lastPreloadTime = Date.now();
+            // Schedule preload after a short delay to avoid competing with render
+            setTimeout(() => window.offlineSync.preloadImages(items).catch(() => {}), 2000);
           }
         }
         return items;
@@ -25,10 +29,7 @@
       if (window.offlineSync?.getCachedCars) {
         const cached = await window.offlineSync.getCachedCars();
         if (Array.isArray(cached) && cached.length) {
-          // Preload images from cache in background
-          if (window.offlineSync?.preloadImages) {
-            window.offlineSync.preloadImages(cached).catch(() => {});
-          }
+          // Don't preload from cache (already cached)
           return cached;
         }
       }

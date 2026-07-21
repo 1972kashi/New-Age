@@ -154,6 +154,10 @@ GLOBAL_RATE_LIMIT = int(os.getenv("GLOBAL_RATE_LIMIT", "120"))
 async def global_rate_limiter(request, call_next):
     try:
         ip = request.client.host if request.client else "unknown"
+        # Exempt localhost/development from rate limiting
+        if ip in ("127.0.0.1", "localhost", "::1"):
+            return await call_next(request)
+        
         now = time.time()
         entries = [t for t in GLOBAL_RATE[ip] if now - t < GLOBAL_RATE_WINDOW]
         if len(entries) >= GLOBAL_RATE_LIMIT:

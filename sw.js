@@ -36,6 +36,31 @@ self.addEventListener('activate', event => {
   self.clients.claim();
 });
 
+// Request deduplication to prevent duplicate simultaneous requests
+const PENDING_REQUESTS = new Map();
+
+function createRequestKey(request) {
+  return `${request.method}:${request.url}`;
+}
+
+async function deduplicatedFetch(request) {
+  const key = createRequestKey(request);
+  if (PENDING_REQUESTS.has(key)) {
+    console.log('[SW] Deduplicating request:', key);
+    return PENDING_REQUESTS.get(key);
+  }
+  
+  const fetchPromise = fetch(request, { cache: 'no-store' });
+  PENDING_REQUESTS.set(key, fetchPromise);
+  
+  try {
+    const res = await fetchPromise;
+    return res;
+  } finally {
+    PENDING_REQUESTS.delete(key);
+  }
+}
+
 // Check if server is reachable
 async function isServerAvailable() {
   try {
@@ -51,15 +76,22 @@ self.addEventListener('fetch', event => {
   const url = new URL(event.request.url);
   const isLocalRequest = url.origin === self.location.origin;
 
-  // API requests: network-first with cache fallback
+  // API requests: network-first with cache fallback, add request deduplication
   if (url.pathname.startsWith('/api/')) {
     event.respondWith(
-      fetch(event.request, { cache: 'no-store' })
+      deduplicatedFetch(event.request)
         .then(res => {
-          // Cache successful responses
+          // Cache successful responses and add cache headers
           if (res && res.status === 200) {
             const copy = res.clone();
-            caches.open(API_CACHE_NAME).then(cache => cache.put(event.request, copy));
+            const headers = new Headers(copy.headers);
+            headers.set('Cache-Control', 'public, max-age=300'); // Cache for 5 minutes
+            const cachedRes = new Response(copy.body, {
+              status: copy.status,
+              statusText: copy.statusText,
+              headers: headers
+            });
+            caches.open(API_CACHE_NAME).then(cache => cache.put(event.request, cachedRes));
           }
           return res;
         })
@@ -70,11 +102,11 @@ self.addEventListener('fetch', event => {
               console.log('[SW] Using cached API response for:', url.pathname);
               return cached;
             }
-            // No cache either; return error response
-            return new Response(
-              JSON.stringify({ error: 'Server unavailable and no cached response available' }),
+            // No cache either; return cached fallback or error response
+            return caches.match('/index.html').then(fallback => fallback || new Response(
+              JSON.stringify({ error: 'Server unavailable', items: [] }),
               { status: 503, headers: { 'Content-Type': 'application/json' } }
-            );
+            ));
           });
         })
     );

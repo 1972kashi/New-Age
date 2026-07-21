@@ -152,26 +152,38 @@
     /**
      * Preload images from car listings into the browser's cache.
      * This runs in the background and helps images load faster offline.
+     * Throttled to avoid rate limit issues.
      */
     if (!Array.isArray(cars) || !('caches' in window)) return;
 
     const imageSources = [];
-    cars.forEach(car => {
+    cars.slice(0, 20).forEach(car => {  // Limit to first 20 cars to reduce requests
       if (car.img) imageSources.push(car.img);
       if (car.image) imageSources.push(car.image);
-      if (Array.isArray(car.images)) imageSources.push(...car.images);
+      // Skip array of images to reduce request volume
     });
 
     const cache = await caches.open('new-age-images-v1').catch(() => null);
     if (!cache) return;
 
-    for (const src of imageSources) {
+    // Preload sequentially with delay to avoid rate limiting
+    for (let i = 0; i < imageSources.length; i++) {
+      const src = imageSources[i];
       if (!src) continue;
+      
+      // Check cache first before attempting fetch
+      const cachedRes = await cache.match(src).catch(() => null);
+      if (cachedRes) continue; // Already cached, skip
+      
       try {
         const url = src.startsWith('http') ? src : window.location.origin + '/' + src;
         const res = await fetch(url, { mode: 'no-cors', cache: 'force-cache' }).catch(() => null);
         if (res) {
           await cache.put(url, res).catch(() => {});
+        }
+        // Small delay between fetches to spread out requests
+        if (i < imageSources.length - 1) {
+          await new Promise(r => setTimeout(r, 100));
         }
       } catch (e) {
         // Silently ignore image preload failures
