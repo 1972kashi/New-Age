@@ -148,6 +148,37 @@
     return Array.isArray(payload) ? payload : [];
   }
 
+  async function preloadImages(cars) {
+    /**
+     * Preload images from car listings into the browser's cache.
+     * This runs in the background and helps images load faster offline.
+     */
+    if (!Array.isArray(cars) || !('caches' in window)) return;
+
+    const imageSources = [];
+    cars.forEach(car => {
+      if (car.img) imageSources.push(car.img);
+      if (car.image) imageSources.push(car.image);
+      if (Array.isArray(car.images)) imageSources.push(...car.images);
+    });
+
+    const cache = await caches.open('new-age-images-v1').catch(() => null);
+    if (!cache) return;
+
+    for (const src of imageSources) {
+      if (!src) continue;
+      try {
+        const url = src.startsWith('http') ? src : window.location.origin + '/' + src;
+        const res = await fetch(url, { mode: 'no-cors', cache: 'force-cache' }).catch(() => null);
+        if (res) {
+          await cache.put(url, res).catch(() => {});
+        }
+      } catch (e) {
+        // Silently ignore image preload failures
+      }
+    }
+  }
+
   function initAutoSync(apiBase){
     window.addEventListener('online', () => {
       flushQueue(apiBase).then(ok => { if (ok) console.log('outbox flushed'); });
@@ -160,6 +191,7 @@
     cacheCars,
     getCachedCars,
     saveCarToCache,
-    initAutoSync
+    initAutoSync,
+    preloadImages
   };
 })();

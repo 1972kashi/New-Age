@@ -309,8 +309,17 @@ window.refreshHomePagination = initHomePagination;
 try {
   // Only register the service worker in non-local environments to avoid
   // SW caching interfering with development and MFA flows on localhost.
-  if ('serviceWorker' in navigator && location.hostname !== 'localhost' && location.hostname !== '127.0.0.1') {
-    navigator.serviceWorker.register('/sw.js').catch(() => {});
+  // Register Service Worker everywhere to enable offline caching and PWA features
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/sw.js').catch(err => {
+      console.warn('[PWA] Service Worker registration failed:', err);
+    });
+  }
+
+  // Initialize auto-sync for offline queue
+  if (window.offlineSync?.initAutoSync && window.getApiBase) {
+    const apiBase = window.getApiBase?.() || window.API_BASE || (window.location.protocol === 'file:' ? 'http://localhost:8000' : window.location.origin);
+    window.offlineSync.initAutoSync(apiBase);
   }
 } catch (e) {}
 

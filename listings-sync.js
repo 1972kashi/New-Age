@@ -10,6 +10,10 @@
         const items = Array.isArray(data) ? data : (Array.isArray(data?.items) ? data.items : []);
         if (window.offlineSync?.cacheCars && items.length) {
           await window.offlineSync.cacheCars(items);
+          // Preload images in background so they're cached for offline use
+          if (window.offlineSync?.preloadImages) {
+            window.offlineSync.preloadImages(items).catch(() => {});
+          }
         }
         return items;
       }
@@ -20,7 +24,13 @@
     try {
       if (window.offlineSync?.getCachedCars) {
         const cached = await window.offlineSync.getCachedCars();
-        if (Array.isArray(cached) && cached.length) return cached;
+        if (Array.isArray(cached) && cached.length) {
+          // Preload images from cache in background
+          if (window.offlineSync?.preloadImages) {
+            window.offlineSync.preloadImages(cached).catch(() => {});
+          }
+          return cached;
+        }
       }
     } catch (e) {
       // Cached cars unavailable.
