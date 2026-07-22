@@ -85,8 +85,11 @@
     const list = Array.isArray(existing) ? existing : [];
     const deduped = [normalized, ...list.filter(item => !isSameCar(item, normalized))];
     const payload = deduped.slice(0, 200);
+    const prevPayload = Array.isArray(existing) ? existing : [];
     await put(STORE_CACHE, { key: 'cars', payload, updatedAt: new Date().toISOString() });
-    notifyCarsCacheUpdated(payload);
+    if (JSON.stringify(prevPayload) !== JSON.stringify(payload)) {
+      notifyCarsCacheUpdated(payload);
+    }
     return payload;
   }
 
@@ -136,8 +139,11 @@
   async function cacheCars(data){
     const payload = Array.isArray(data) ? data : (Array.isArray(data?.items) ? data.items : []);
     const normalized = payload.map(normalizeCarForCache).filter(Boolean);
+    const existing = await getCachedCars();
     await put(STORE_CACHE, { key: 'cars', payload: normalized, updatedAt: new Date().toISOString() });
-    notifyCarsCacheUpdated(normalized);
+    if (JSON.stringify(existing) !== JSON.stringify(normalized)) {
+      notifyCarsCacheUpdated(normalized);
+    }
     return normalized;
   }
 
