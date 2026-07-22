@@ -22,6 +22,13 @@
   let liveDashboardData = { cars: [], stats: {}, users: [], updatedAt: null };
   let liveRefreshTimer = null;
 
+  function stopLiveRefresh() {
+    if (liveRefreshTimer) {
+      clearInterval(liveRefreshTimer);
+      liveRefreshTimer = null;
+    }
+  }
+
   function formatCurrency(value) {
     return new Intl.NumberFormat('en-KE', {
       style: 'currency',
@@ -216,17 +223,112 @@
   }
 
   function getFormVals() {
+    const name = document.getElementById('f-name').value.trim();
+    const nameParts = name.split(/\s+/).filter(Boolean);
     return {
-      name:  document.getElementById('f-name').value,
+      name,
       miles: document.getElementById('f-miles').value,
-      fuel:  document.getElementById('f-fuel').value,
+      fuel: document.getElementById('f-fuel').value,
       trans: document.getElementById('f-trans').value,
-      year:  document.getElementById('f-year').value,
+      year: document.getElementById('f-year').value,
       price: document.getElementById('f-price').value,
-      link:  document.getElementById('f-link').value || '#',
-      img:   document.getElementById('f-img').value,
+      link: document.getElementById('f-link').value || '#',
+      img: document.getElementById('f-img').value,
       badge: showBadge,
+      make: nameParts[0] || '',
+      model: nameParts.slice(1).join(' ') || '',
     };
+  }
+
+  function getEditingCarId() {
+    if (editingSavedId) return editingSavedId;
+    if (editingSavedIndex !== null && editingSavedIndex >= 0 && editingSavedIndex < savedCars.length) {
+      return savedCars[editingSavedIndex]?.id || null;
+    }
+    return null;
+  }
+
+  function getDetailIdFromLink(linkValue) {
+    if (!linkValue || typeof linkValue !== 'string') return null;
+    const directMatch = linkValue.match(/(?:id=|\/)([A-Za-z0-9._:-]+)$/);
+    return directMatch ? directMatch[1] : null;
+  }
+
+  function getQueueContextForCurrentCar(carData) {
+    const carId = getEditingCarId();
+    const detailId = getDetailIdFromLink(carData.link || '') || getDetailIdFromLink(savedCars.find((car) => car?.id === carId)?.link || '');
+    return { carId, detailId };
+  }
+
+  function mergeCarIntoState(updatedCar, carId) {
+    const payload = { ...(updatedCar || {}) };
+    if (carId) payload.id = carId;
+
+    const savedIndex = savedCars.findIndex((car) => car?.id && carId && car.id === carId);
+    if (savedIndex >= 0) {
+      savedCars[savedIndex] = { ...savedCars[savedIndex], ...payload };
+    } else if (editingSavedIndex !== null && editingSavedIndex >= 0 && editingSavedIndex < savedCars.length) {
+      savedCars[editingSavedIndex] = { ...savedCars[editingSavedIndex], ...payload };
+    }
+
+    const dashboardIndex = liveDashboardData.cars.findIndex((car) => car?.id && carId && car.id === carId);
+    if (dashboardIndex >= 0) {
+      liveDashboardData.cars[dashboardIndex] = { ...liveDashboardData.cars[dashboardIndex], ...payload };
+    }
+
+    renderSavedCars();
+    renderDashboard();
+  }
+
+  async function persistEditedCar(carData) {
+    const carId = getEditingCarId();
+    if (!carId) return null;
+
+    try {
+      const carRes = await fetch(`${API_BASE}/api/cars/${encodeURIComponent(carId)}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          ...getAuthHeaders()
+        },
+        body: JSON.stringify(carData)
+      });
+
+      const detailLink = carData.link || (savedCars.find((car) => car?.id === carId)?.link) || '';
+      const detailId = getDetailIdFromLink(detailLink);
+      let detailUpdated = null;
+
+      if (detailId) {
+        const detailRes = await fetch(`${API_BASE}/api/car-details/${encodeURIComponent(detailId)}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            ...getAuthHeaders()
+          },
+          body: JSON.stringify({
+            ...carData,
+            name: carData.name || '',
+            miles: carData.miles || '',
+            trans: carData.trans || '',
+            fuel: carData.fuel || '',
+            year: carData.year || '',
+            price: carData.price || '',
+            img: carData.img || '',
+            badge: carData.badge !== undefined ? carData.badge : true,
+          })
+        });
+        if (detailRes.ok) {
+          detailUpdated = await detailRes.json().catch(() => null);
+        }
+      }
+
+      if (!carRes.ok) return null;
+      const updatedCar = await carRes.json();
+      mergeCarIntoState({ ...updatedCar, ...(detailUpdated || {}) }, carId);
+      return updatedCar;
+    } catch (e) {
+      return null;
+    }
   }
   
   function liveUpdate() {
@@ -250,10 +352,16 @@
     renderGrid();
   }
 
-  function saveCard() {
-    Object.assign(cards[activeCard], getFormVals());
+  async function saveCard() {
+    const payload = getFormVals();
+    Object.assign(cards[activeCard], payload);
+    const persisted = await persistEditedCar(payload);
     renderGrid();
-    showToast('Card ' + (activeCard + 1) + ' saved!');
+    if (persisted) {
+      showToast('Card ' + (activeCard + 1) + ' saved and listing updated!');
+    } else {
+      showToast('Card ' + (activeCard + 1) + ' saved!');
+    }
   }
 
   function deleteCard() {
@@ -399,10 +507,14 @@
       return showToast('Fill in a car name, image, or price before sending it for editing.');
     }
 
-    queueCardsForDetails([{ ...car, source: 'admin-upload' }]);
+    Object.assign(cards[activeCard], car);
+    renderGrid();
+    await persistEditedCar(car);
+    const queueContext = getQueueContextForCurrentCar(car);
+    queueCardsForDetails([{ ...car, id: queueContext.carId || getEditingCarId() || undefined, carId: queueContext.carId || getEditingCarId() || undefined, detailId: queueContext.detailId || undefined, source: 'admin-upload' }]);
     editingSavedIndex = null;
     editingSavedId = null;
-    showToast('Card sent to the details upload queue');
+    showToast('Card saved and sent to the details upload queue');
     renderDashboard();
   }
 
@@ -498,16 +610,17 @@
   }
 
   if (ensureAdminSession()) {
+    stopLiveRefresh();
     loadSavedCars();
     renderGrid();
     initAdminImageDrop();
-    if (liveRefreshTimer) clearInterval(liveRefreshTimer);
-    liveRefreshTimer = setInterval(() => {
-      loadSavedCars();
-    }, 15000);
   }
 
+  window.addEventListener('pagehide', stopLiveRefresh);
+  window.addEventListener('beforeunload', stopLiveRefresh);
+
   function logout(){
+  stopLiveRefresh();
   localStorage.removeItem('naa_session');
   window.location.href='login.html';
 }
