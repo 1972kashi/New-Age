@@ -133,6 +133,10 @@
 		const card = pendingQueue[index];
 		if (!card) return;
 		activePendingCard = card;
+		selectedDetailId = card.detailId || null;
+		if (card.detailId) {
+			document.getElementById('carName').value = card.name || '';
+		}
 		document.getElementById('carName').value = card.name || '';
 		document.getElementById('price').value = card.price || '';
 		document.getElementById('imgPath').value = card.img || '';
@@ -469,7 +473,7 @@
 				link: `car-detail.html?id=${savedDetail.id}`
 			};
 
-			const existingCar = existingCars.find(c => c.link === `car-detail.html?id=${savedDetail.id}`);
+			const existingCar = existingCars.find(c => c.id === activePendingCard?.carId || c.link === `car-detail.html?id=${savedDetail.id}`);
 			let carRes;
 			if (existingCar) {
 				carRes = await fetch(`${API_BASE}/api/cars/${encodeURIComponent(existingCar.id)}`, {
