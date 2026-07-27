@@ -143,6 +143,7 @@ function doLogin(){
       // Show MFA setup UI
       window._mfa_token = body.mfa_token;
       showMfaPanel('setup');
+      if(body.message){ showMsg('mfa-ok', body.message); }
       startMfaSetup(body.mfa_token);
       return;
     }
@@ -150,6 +151,7 @@ function doLogin(){
     if(body.mfa_required){
       window._mfa_token = body.mfa_token;
       showMfaPanel('challenge');
+      if(body.message){ showMsg('mfa-ok', body.message); }
       return;
     }
 
@@ -333,7 +335,8 @@ function doSignUp(){
       lname: lname,
       email: email,
       phone: phone,
-      password: pass
+      password: pass,
+      role: document.getElementById('su-role')?.value || 'user'
     })
   })
     .then(res => {

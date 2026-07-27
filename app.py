@@ -86,6 +86,9 @@ except Exception:
 if SECRET_KEY == "change-me-in-production-use-env-var":
     print("[WARN] Using default SECRET_KEY. Set SECRET_KEY env var in production.")
 
+if not os.getenv("SMTP_HOST"):
+    print("[WARN] SMTP is not configured. MFA and password-reset emails will be skipped unless SMTP_HOST/SMTP_USERNAME/SMTP_PASSWORD are set.")
+
 UPLOAD_DIR.mkdir(exist_ok=True)
 
 @asynccontextmanager
@@ -220,6 +223,74 @@ def audit_log(user_identifier: str, action: str, details: Optional[dict] = None)
         pass
 
 
+def normalize_login_id(value: Optional[str]) -> str:
+    return (value or "").strip().lower()
+
+
+def find_user_by_login_id(users: list[dict], login_id: str) -> Optional[dict]:
+    normalized = normalize_login_id(login_id)
+    if not normalized:
+        return None
+
+    for user in users:
+        if normalize_login_id(user.get("email")) == normalized:
+            return user
+        if normalize_login_id(user.get("phone")) == normalized:
+            return user
+    return None
+
+
+def deliver_mfa_code(user: dict, code: str) -> dict:
+    methods = []
+    delivered = False
+    phone = (user.get("phone") or "").strip()
+    email = (user.get("email") or "").strip()
+
+    target = email or phone or "unknown"
+    print(f"[MFA] Preparing code for {target}: {code}")
+
+    if email:
+        try:
+            sent = send_email(
+                email,
+                "New Age MFA verification code",
+                f"Your New Age MFA verification code is: {code}\n\nIf you did not attempt to sign in, please ignore this message.",
+            )
+        except Exception:
+            sent = False
+        if sent:
+            delivered = True
+            methods.append("email")
+        else:
+            methods.append("email_failed")
+            print(f"[MFA] Email delivery failed for {email}; code was {code}")
+
+    if phone and not delivered:
+        try:
+            sent = send_sms(phone, f"Your New Age MFA code is: {code}")
+        except Exception:
+            sent = False
+        if sent:
+            delivered = True
+            methods.append("sms")
+        else:
+            methods.append("sms_failed")
+
+    if not delivered:
+        methods.append("none")
+        print(f"[MFA] No delivery method succeeded. Code for {email or phone}: {code}")
+
+    if delivered:
+        if methods[0] == "email":
+            message = "Your MFA verification code was sent to your email."
+        else:
+            message = "Your MFA verification code was sent to your phone."
+    else:
+        message = "MFA delivery is not configured for this account. Please contact support or use a backup code if available."
+
+    return {"delivered": delivered, "methods": methods, "message": message}
+
+
 def send_sms(phone: str, message: str) -> bool:
     """Placeholder SMS sender — replace with Twilio or other provider in production.
 
@@ -238,6 +309,7 @@ def send_email(to: str, subject: str, body: str) -> bool:
     smtp_host = os.getenv("SMTP_HOST")
     if not smtp_host:
         print(f"[EMAIL] SMTP not configured. To={to} Subject={subject}")
+        print(f"[MFA] Email fallback body: {body}")
         return False
 
     smtp_port = int(os.getenv("SMTP_PORT", "587"))
@@ -546,6 +618,7 @@ class RegisterBody(BaseModel):
     email: EmailStr
     phone: Optional[str] = ""
     password: str
+    role: Optional[str] = "user"
 
 class UserOut(BaseModel):
     id: str
@@ -574,6 +647,10 @@ def register(body: RegisterBody):
     if any(u["email"] == body.email for u in db["users"]):
         raise HTTPException(400, "Email already registered")
 
+    requested_role = (body.role or "user").strip().lower()
+    if requested_role not in {"user", "admin"}:
+        raise HTTPException(400, "Invalid role")
+
     user = {
         "id":        new_id(),
         "createdAt": now_iso(),
@@ -581,7 +658,7 @@ def register(body: RegisterBody):
         "lname":     body.lname,
         "email":     body.email,
         "phone":     body.phone,
-        "role":      "user",
+        "role":      requested_role,
         "password":  hash_password(body.password),   # ← bcrypt hash
         "welcome_email_sent": False,
     }
@@ -631,7 +708,7 @@ def login(form: OAuth2PasswordRequestForm = Depends()):
         raise HTTPException(429, "Too many login attempts, try again later")
 
     db   = read_db()
-    user = next((u for u in db["users"] if u["email"] == form.username), None)
+    user = find_user_by_login_id(db["users"], form.username)
 
     if not user:
         raise HTTPException(401, "Invalid email or password")
@@ -667,17 +744,13 @@ def login(form: OAuth2PasswordRequestForm = Depends()):
         # If admin already has an MFA secret, issue a short-lived MFA challenge token
         if user.get("mfa_secret"):
             mfa_token = create_token({"sub": user["id"], "role": user["role"]}, expires_minutes=5, purpose="mfa_challenge")
-            # If a phone number is present, send the current TOTP code via SMS.
             try:
                 totp = pyotp.TOTP(user["mfa_secret"])
                 code = totp.now()
-                phone = user.get("phone")
-                if phone:
-                    send_sms(phone, f"Your New Age MFA code is: {code}")
-            except Exception:
-                # Don't block login flow if SMS sending fails; verification can still proceed.
-                pass
-            return {"mfa_required": True, "mfa_token": mfa_token}
+                delivery = deliver_mfa_code(user, code)
+            except Exception as exc:
+                delivery = {"delivered": False, "methods": ["none"], "message": f"Unable to generate MFA code: {exc}"}
+            return {"mfa_required": True, "mfa_token": mfa_token, "message": delivery["message"], "delivery": delivery}
         # No MFA configured yet — return a short-lived setup token so the admin can provision MFA
         setup_token = create_token({"sub": user["id"], "role": user["role"]}, expires_minutes=10, purpose="mfa_setup")
         return {"mfa_setup_required": True, "mfa_token": setup_token, "message": "MFA setup required for admin accounts"}
