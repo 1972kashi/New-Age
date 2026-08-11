@@ -46,6 +46,11 @@
         const img = document.createElement('img');
         img.src = normalizeImageSrc(imgArray[index]);
         img.alt = `Car photo ${index + 1}`;
+        img.onerror = (event) => {
+          console.warn('Car detail view image failed to load:', img.src, event);
+          img.onerror = null;
+          img.src = 'Pic/Car 3.svg';
+        };
         photoEl.appendChild(img);
       } else {
         const placeholder = document.createElement('div');

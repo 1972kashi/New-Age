@@ -167,6 +167,11 @@ window.renderDetailGallery = function(car) {
       img.style.objectFit = 'cover';
       img.style.display = 'block';
       img.onerror = () => { img.onerror = null; img.src = 'Pic/Car 3.svg'; };
+      img.onerror = (event) => {
+        console.warn('Car detail gallery image failed to load:', img.src, event);
+        img.onerror = null;
+        img.src = 'Pic/Car 3.svg';
+      };
       photoEl.appendChild(img);
       photoEl.onclick = () => openDetailGallery(index);
     } else {
