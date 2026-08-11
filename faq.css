@@ -32,6 +32,7 @@ ul{list-style:none;}
 .btn-gold{background:var(--gold);color:#000;} .btn-gold:hover{background:var(--gold-light);}
 .btn-outline{background:transparent;border:1.5px solid var(--border);color:var(--text);} .btn-outline:hover{border-color:var(--gold);color:var(--gold);}
 .btn-dark{background:var(--dark-3);color:var(--text);border:1px solid var(--border);}
+.btn-full-width{width:100%;letter-spacing:1px;}
 
 /* ═══ NAVBAR ═══ */
 

@@ -33,8 +33,9 @@ def sanitize_car(raw: Dict[str, Any]) -> Dict[str, Any]:
     # Normalize images: accept `images`, `photos`, `img`, or `image`
     imgs = []
     for key in ('images', 'photos'):
-        if isinstance(raw.get(key), list):
-            imgs.extend([p for p in raw.get(key) if isinstance(p, str)])
+        values = raw.get(key)
+        if isinstance(values, list):
+            imgs.extend([p for p in values if isinstance(p, str)])
     for key in ('img', 'image', 'img_main'):
         v = raw.get(key)
         if isinstance(v, str) and v:

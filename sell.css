@@ -20,6 +20,7 @@ img{
 
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:10px 22px;border-radius:var(--radius);font-family:'Barlow',sans-serif;font-size:13px;font-weight:600;cursor:pointer;border:none;transition:all var(--tr);}
 .btn-gold{background:var(--gold);color:#000;} .btn-gold:hover{background:var(--gold-light);}
+.btn-full-width{width:100%;letter-spacing:1px;}
 
 /* ═══ NAVBAR ═══ */
 .navbar {
