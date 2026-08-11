@@ -54,3 +54,15 @@ if __name__ == '__main__':
     if parts:
         css_out.write_text(minify_css('\n'.join(parts)), encoding='utf-8')
         print('Wrote', css_out)
+
+    # Generate sanitized public feed for GitHub Pages (if db.json exists)
+    try:
+        from tools import export_public_cars
+        try:
+            export_public_cars.main()
+        except SystemExit:
+            # argparse in export_public_cars may call sys.exit(); ignore that when invoked programmatically
+            pass
+    except Exception:
+        # Non-fatal: exporter is optional in environments without db.json
+        pass
