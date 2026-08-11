@@ -26,9 +26,18 @@
 
     const normalizeImageSrc = (value) => {
       if (!value) return '';
-      if (value.startsWith('http://') || value.startsWith('https://')) return value;
-      if (value.startsWith('/')) return `${API_BASE}${value}`;
-      return `${API_BASE}/${value}`;
+      const trimmed = value.trim();
+      if (!trimmed) return '';
+      if (trimmed.startsWith('http://') || trimmed.startsWith('https://') || trimmed.startsWith('data:')) {
+        return trimmed;
+      }
+      const cleaned = trimmed.replace(/^\.\//, '');
+      try {
+        const baseUrl = API_BASE.endsWith('/') ? API_BASE : `${API_BASE}/`;
+        return new URL(cleaned, baseUrl).href;
+      } catch (err) {
+        return encodeURI(`${API_BASE}/${cleaned.replace(/^\//, '')}`);
+      }
     };
 
     photoElements.forEach((photoEl, index) => {

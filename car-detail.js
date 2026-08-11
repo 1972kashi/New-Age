@@ -21,13 +21,18 @@ let detailGalleryState = {
 function normalizeDetailImageSrc(value) {
   if (!value) return '';
   if (typeof value !== 'string') return '';
-  if (value.startsWith('http://') || value.startsWith('https://') || value.startsWith('data:')) {
-    return value;
+  const trimmed = value.trim();
+  if (!trimmed) return '';
+  if (trimmed.startsWith('http://') || trimmed.startsWith('https://') || trimmed.startsWith('data:')) {
+    return trimmed;
   }
-  if (value.startsWith('/')) {
-    return `${DETAIL_IMAGE_API_BASE}${value}`;
+  const cleaned = trimmed.replace(/^\.\//, '');
+  try {
+    const baseUrl = DETAIL_IMAGE_API_BASE.endsWith('/') ? DETAIL_IMAGE_API_BASE : `${DETAIL_IMAGE_API_BASE}/`;
+    return new URL(cleaned, baseUrl).href;
+  } catch (err) {
+    return encodeURI(`${DETAIL_IMAGE_API_BASE}/${cleaned.replace(/^\//, '')}`);
   }
-  return `${DETAIL_IMAGE_API_BASE}/${value.replace(/^\.\//, '').replace(/^\//, '')}`;
 }
 
 function collectDetailImageSources(car) {
