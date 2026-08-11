@@ -53,7 +53,22 @@
           if (res.ok) {
             const data = await res.json();
             if (Array.isArray(data.cars) && data.cars.length) {
-              const cars = data.cars.slice().reverse().slice(0, 100);
+              // Normalize car objects to frontend-expected fields
+              const normalize = (c) => {
+                if (!c || typeof c !== 'object') return c;
+                const out = Object.assign({}, c);
+                out.name = out.name || out.title || [out.make, out.model, out.year].filter(Boolean).join(' ') || out.title || null;
+                out.images = out.images || out.photos || (out.img ? [out.img] : (out.image ? [out.image] : []));
+                out.img = out.img || (Array.isArray(out.images) && out.images[0]) || null;
+                out.miles = out.miles || out.mileage || null;
+                out.trans = out.trans || out.transmission || null;
+                out.badge = out.badge !== undefined ? out.badge : (out.verified !== undefined ? Boolean(out.verified) : false);
+                out.link = out.link || (out.id ? `car-detail.html?id=${out.id}` : null);
+                if (out.price !== undefined) out.price = String(out.price);
+                return out;
+              };
+
+              const cars = data.cars.map(normalize).slice().reverse().slice(0, 100);
               if (dbFile === 'db.sample.json') {
                 console.info('[Listings] Using sample data (server/cache unavailable)');
               }
