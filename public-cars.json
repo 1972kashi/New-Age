@@ -1,0 +1,92 @@
+{
+  "cars": [
+    {
+      "id": "017ebeb47f2f442",
+      "year": "2020",
+      "price": "9,000,000",
+      "createdAt": "2026-07-17T17:07:54.452256+00:00",
+      "fuel": "Petrol",
+      "images": [
+        "Pic/GLC1.jpg"
+      ],
+      "title": "2020"
+    },
+    {
+      "id": "08533ffa5f084a5",
+      "year": "2017",
+      "price": "5,200,000",
+      "createdAt": "2026-07-21T13:59:32.420890+00:00",
+      "fuel": "Diesel",
+      "images": [
+        "Pic/GLCD1.jpg"
+      ],
+      "title": "2017"
+    },
+    {
+      "id": "813582dac205496",
+      "year": "2020",
+      "price": "3,550,000",
+      "createdAt": "2026-07-15T11:33:53.438490+00:00",
+      "fuel": "Petrol",
+      "images": [
+        "Pic/SUBF1.jpg"
+      ],
+      "title": "2020"
+    },
+    {
+      "id": "871be744bf544bd",
+      "year": "2019",
+      "price": "4,500,000",
+      "createdAt": "2026-07-13T17:33:47.011414+00:00",
+      "fuel": "Petrol",
+      "images": [
+        "Pic/BenzC11.jpg"
+      ],
+      "title": "2019"
+    },
+    {
+      "id": "939a71c2d3fb4b2",
+      "year": "2022",
+      "price": "18,500,000",
+      "createdAt": "2026-07-17T17:13:28.474803+00:00",
+      "fuel": "Petrol",
+      "images": [
+        "Pic/LC1.jpg"
+      ],
+      "title": "2022"
+    },
+    {
+      "id": "a1fb1253cf6b47c",
+      "year": "2019",
+      "price": "30,000,000",
+      "createdAt": "2026-07-21T13:49:13.055233+00:00",
+      "fuel": "Petrol",
+      "images": [
+        "Pic/BAMG1.JPG"
+      ],
+      "title": "2019"
+    },
+    {
+      "id": "ade9819f884b431",
+      "year": "2019",
+      "price": "1,550,00",
+      "createdAt": "2026-07-15T11:35:42.865900+00:00",
+      "fuel": "Petrol",
+      "images": [
+        "Pic/NEP1.jpg"
+      ],
+      "title": "2019"
+    },
+    {
+      "id": "aee932cebe1b4e7",
+      "year": "2019",
+      "price": "1,380,000",
+      "createdAt": "2026-07-21T13:54:53.215197+00:00",
+      "fuel": "Petrol",
+      "images": [
+        "Pic/VITZ1.jpg"
+      ],
+      "title": "2019"
+    }
+  ]
+}
