@@ -10,56 +10,11 @@
     return fallbackApiBase;
   };
 
-  const buildCandidateBases = () => {
-    const candidates = [];
-    const add = (value) => {
-      if (!value) return;
-      const normalized = value.replace(/\/+$/, '');
-      if (!normalized || candidates.includes(normalized)) return;
-      candidates.push(normalized);
-    };
+  const apiBase = getConfiguredApiBase() || fallbackApiBase;
+  window.API_BASE = apiBase;
+  window.__API_BASE__ = apiBase;
 
-    add(getConfiguredApiBase());
-
-    const host = window.location.hostname || 'localhost';
-    const protocol = window.location.protocol || 'http:';
-    const ports = [window.location.port, '8000', '8001', '8002', '8003', '8004', '5000', '3000', '8080'];
-    const baseHosts = [
-      `${protocol}//${host}`,
-      `http://${host}`,
-      'http://127.0.0.1',
-      'http://localhost',
-    ];
-
-    baseHosts.forEach((baseHost) => {
-      ports.forEach((port) => {
-        add(port ? `${baseHost}:${port}` : baseHost);
-      });
-    });
-
-    if (window.location.origin) add(window.location.origin);
-    return candidates;
-  };
-
-  const probeApiBase = (base) => {
-    try {
-      const xhr = new XMLHttpRequest();
-      xhr.open('GET', `${base}/api/cars?limit=1`, false);
-      xhr.setRequestHeader('Accept', 'application/json');
-      xhr.send(null);
-      return (xhr.status >= 200 && xhr.status < 500) ? base : null;
-    } catch (e) {
-      return null;
-    }
-  };
-
-  let API_BASE = getConfiguredApiBase();
-  window.API_BASE = API_BASE;
-  window.__API_BASE__ = API_BASE;
-
-  const getStoredToken = () => {
-    return localStorage.getItem('naa_token') || localStorage.getItem('token') || sessionStorage.getItem('naa_token') || sessionStorage.getItem('token');
-  };
+  const getStoredToken = () => localStorage.getItem('naa_token') || localStorage.getItem('token') || sessionStorage.getItem('naa_token') || sessionStorage.getItem('token');
 
   const setStoredToken = (token) => {
     if (!token) return;
@@ -76,9 +31,7 @@
     sessionStorage.removeItem('token');
   };
 
-  const getStoredRole = () => {
-    return localStorage.getItem('role') || sessionStorage.getItem('role') || null;
-  };
+  const getStoredRole = () => localStorage.getItem('role') || sessionStorage.getItem('role') || null;
 
   const setStoredRole = (role) => {
     if (!role) return;
@@ -94,7 +47,7 @@
     };
   };
 
-  const getCurrentApiBase = () => window.API_BASE || window.__API_BASE__ || API_BASE || fallbackApiBase;
+  const getApiBase = () => window.API_BASE || window.__API_BASE__ || apiBase || fallbackApiBase;
 
   const jsonRequest = async (path, options = {}) => {
     const headers = {
@@ -103,7 +56,7 @@
       ...(options.headers || {}),
     };
 
-    const url = path.startsWith('http') ? path : `${getCurrentApiBase()}${path.startsWith('/') ? path : `/${path}`}`;
+    const url = path.startsWith('http') ? path : `${getApiBase()}${path.startsWith('/') ? path : `/${path}`}`;
     const response = await fetch(url, { ...options, headers });
     const text = await response.text();
     let body = null;
@@ -117,31 +70,8 @@
     return body;
   };
 
-  const resolveApiBase = () => {
-    const configured = getConfiguredApiBase();
-    if (configured && configured !== fallbackApiBase) {
-      API_BASE = configured;
-      window.API_BASE = configured;
-      window.__API_BASE__ = configured;
-      return configured;
-    }
-
-    const candidates = buildCandidateBases();
-    for (const candidate of candidates) {
-      const detected = probeApiBase(candidate);
-      if (detected) {
-        API_BASE = detected;
-        window.API_BASE = detected;
-        window.__API_BASE__ = detected;
-        return detected;
-      }
-    }
-
-    return API_BASE;
-  };
-
   window.API_CONFIG = {
-    API_BASE: getCurrentApiBase(),
+    API_BASE: getApiBase(),
     getStoredToken,
     setStoredToken,
     clearStoredToken,
@@ -151,12 +81,7 @@
     jsonRequest,
   };
 
-  window.getApiBase = () => getCurrentApiBase();
+  window.getApiBase = getApiBase;
   window.getAuthHeaders = getAuthHeaders;
   window.apiJson = jsonRequest;
-
-  const resolved = resolveApiBase();
-  window.API_CONFIG.API_BASE = resolved;
-  window.API_BASE = resolved;
-  window.__API_BASE__ = resolved;
 })();

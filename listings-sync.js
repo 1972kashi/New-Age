@@ -2,16 +2,24 @@
 // Load uploaded cards from localStorage and append them to the index and listings pages
 (function(){
   const API_BASE = window.API_BASE || window.getApiBase?.() || (window.location.protocol === 'file:' ? 'http://localhost:8000' : window.location.origin);
+  const LISTING_FETCH_LIMIT = 12;
   let lastPreloadTime = 0;
+  let fetchUploadedCarsPromise = null;
+  let cachedUploadedCars = null;
+  let bootstrapListingsPromise = null;
+  let bootstrapListingsHasRun = false;
   
   async function fetchUploadedCars(){
-    try {
-      const res = await fetch(API_BASE + '/api/cars?limit=100');
+    if (cachedUploadedCars) return cachedUploadedCars;
+    if (fetchUploadedCarsPromise) return fetchUploadedCarsPromise;
+    fetchUploadedCarsPromise = (async () => {
+      try {
+        const res = await fetch(API_BASE + `/api/cars?limit=${LISTING_FETCH_LIMIT}`);
         if (res.ok) {
           const data = await res.json();
           const items = Array.isArray(data) ? data : (Array.isArray(data?.items) ? data.items : []);
           if (window.offlineSync?.cacheCars && items.length) {
-            await window.offlineSync.cacheCars(items);
+            await window.offlineSync.cacheCars(items, { suppressNotify: true });
             // Preload images in background only if enough time has passed (throttle to once per minute)
             if (window.offlineSync?.preloadImages && Date.now() - lastPreloadTime > 60000) {
               lastPreloadTime = Date.now();
@@ -24,42 +32,50 @@
       } catch (e) {
         // API is unavailable; fall back to cached uploads.
       }
-    
 
-    try {
-      if (window.offlineSync?.getCachedCars) {
-        const cached = await window.offlineSync.getCachedCars();
-        if (Array.isArray(cached) && cached.length) {
-          // Don't preload from cache (already cached)
-          return cached;
-        }
-      }
-    } catch (e) {
-      // Cached cars unavailable.
-    }
-
-    // Try to load static data fallbacks (db.json then db.sample.json)
-    const dbFiles = ['db.json', 'db.sample.json'];
-    for (const dbFile of dbFiles) {
       try {
-        const res = await fetch(dbFile);
-        if (res.ok) {
-          const data = await res.json();
-          if (Array.isArray(data.cars) && data.cars.length) {
-            const cars = data.cars.slice().reverse().slice(0, 100);
-            if (dbFile === 'db.sample.json') {
-              console.info('[Listings] Using sample data (server/cache unavailable)');
-            }
-            return cars;
+        if (window.offlineSync?.getCachedCars) {
+          const cached = await window.offlineSync.getCachedCars();
+          if (Array.isArray(cached) && cached.length) {
+            // Don't preload from cache (already cached)
+            return cached;
           }
         }
       } catch (e) {
-        // Continue to next fallback
+        // Cached cars unavailable.
       }
-    }
 
-    // No data available
-    return [];
+      // Try to load static data fallbacks (db.json then db.sample.json)
+      const dbFiles = ['db.json', 'db.sample.json'];
+      for (const dbFile of dbFiles) {
+        try {
+          const res = await fetch(dbFile);
+          if (res.ok) {
+            const data = await res.json();
+            if (Array.isArray(data.cars) && data.cars.length) {
+              const cars = data.cars.slice().reverse().slice(0, 100);
+              if (dbFile === 'db.sample.json') {
+                console.info('[Listings] Using sample data (server/cache unavailable)');
+              }
+              return cars;
+            }
+          }
+        } catch (e) {
+          // Continue to next fallback
+        }
+      }
+
+      // No data available
+      return [];
+    })();
+
+    try {
+      const result = await fetchUploadedCarsPromise;
+      cachedUploadedCars = result;
+      return result;
+    } finally {
+      fetchUploadedCarsPromise = null;
+    }
   }
 
   function getCarKey(c){
@@ -217,15 +233,27 @@
   }
 
   async function bootstrapListings(){
+    if (bootstrapListingsHasRun) return;
+    if (bootstrapListingsPromise) return bootstrapListingsPromise;
+    bootstrapListingsPromise = (async () => {
+      bootstrapListingsHasRun = true;
+      try {
+        await loadUploadedCardsForIndex();
+        await loadUploadedCardsForListings();
+      } catch (err) {
+        console.warn('Could not bootstrap listings', err);
+      }
+    })();
+
     try {
-      await loadUploadedCardsForIndex();
-      await loadUploadedCardsForListings();
-    } catch (err) {
-      console.warn('Could not bootstrap listings', err);
+      return await bootstrapListingsPromise;
+    } finally {
+      bootstrapListingsPromise = null;
     }
   }
 
   window.addEventListener('na-cars-cache-updated', () => {
+    if (bootstrapListingsHasRun) return;
     bootstrapListings();
   });
 

@@ -133,11 +133,13 @@
     return true;
   }
 
-  async function cacheCars(data){
+  async function cacheCars(data, options = {}){
     const payload = Array.isArray(data) ? data : (Array.isArray(data?.items) ? data.items : []);
     const normalized = payload.map(normalizeCarForCache).filter(Boolean);
     await put(STORE_CACHE, { key: 'cars', payload: normalized, updatedAt: new Date().toISOString() });
-    notifyCarsCacheUpdated(normalized);
+    if (!options.suppressNotify) {
+      notifyCarsCacheUpdated(normalized);
+    }
     return normalized;
   }
 

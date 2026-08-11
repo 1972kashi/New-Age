@@ -1,4 +1,4 @@
-const CACHE_NAME = 'new-age-v1';
+const CACHE_NAME = 'new-age-v2';
 const PRECACHE_URLS = [
   '/',
   '/index.html',
@@ -9,8 +9,23 @@ const PRECACHE_URLS = [
   '/offline-sync.js'
 ];
 
-const API_CACHE_NAME = 'new-age-api-v1';
-const IMG_CACHE_NAME = 'new-age-images-v1';
+const API_CACHE_NAME = 'new-age-api-v2';
+const IMG_CACHE_NAME = 'new-age-images-v2';
+
+self.addEventListener('install', event => {
+  event.waitUntil(
+    caches.open(CACHE_NAME).then(cache => cache.addAll(PRECACHE_URLS)).then(() => self.skipWaiting())
+  );
+});
+
+self.addEventListener('activate', event => {
+  event.waitUntil(
+    caches.keys().then(keys => Promise.all(
+      keys.filter(key => ![CACHE_NAME, API_CACHE_NAME, IMG_CACHE_NAME].includes(key))
+          .map(key => caches.delete(key))
+    )).then(() => self.clients.claim())
+  );
+});
 
 // Request deduplication to prevent duplicate simultaneous requests
 const PENDING_REQUESTS = new Map();

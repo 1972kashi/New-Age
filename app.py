@@ -206,9 +206,6 @@ def _check_rate(store: dict, key: str, limit: int, window: int):
     store[key] = entries
 
 
-from typing import Optional
-
-
 def audit_log(user_identifier: str, action: str, details: Optional[dict] = None):
     try:
         out = {
@@ -1384,9 +1381,6 @@ async def upload_image(
     dest = UPLOAD_DIR / filename
     with open(dest, "wb") as f:
         f.write(contents)
-
-    # If Pillow is available, also attempt to produce a WebP variant for adaptive loading
-    # Optional WebP conversion skipped if Pillow is not installed.
 
     audit_log(_admin.get('email','admin'), 'upload_image', {'filename': str(dest)})
 
