@@ -59,6 +59,63 @@
     if (breadcrumb) breadcrumb.textContent = name || 'Car Details';
   }
 
+  async function fetchStaticCarDetail() {
+    const feedFiles = ['public-cars.json', 'db.json', 'db.sample.json'];
+    for (const feedFile of feedFiles) {
+      try {
+        const response = await fetch(feedFile);
+        if (!response.ok) continue;
+        const data = await response.json();
+        if (!data || typeof data !== 'object') continue;
+
+        const carDetails = Array.isArray(data.carDetails) ? data.carDetails : [];
+        const cars = Array.isArray(data.cars) ? data.cars : [];
+
+        const matchById = (entry) => entry && (entry.id === carId || entry.carId === carId);
+        const matchByLink = (entry) => entry && typeof entry.link === 'string' && entry.link.endsWith(`?id=${carId}`);
+
+        let found = carDetails.find(matchById) || cars.find(matchById);
+        if (!found) {
+          found = carDetails.find(matchByLink) || cars.find(matchByLink);
+        }
+
+        if (found) {
+          return normalizeDetailObject(found);
+        }
+      } catch (error) {
+        // continue to next fallback file
+      }
+    }
+    return null;
+  }
+
+  function normalizeDetailObject(car) {
+    if (!car || typeof car !== 'object') return car;
+    const normalized = { ...car };
+    if (!normalized.name) {
+      normalized.name = normalized.title || [normalized.make, normalized.model, normalized.year].filter(Boolean).join(' ') || normalized.name || null;
+    }
+    if (!Array.isArray(normalized.images)) {
+      normalized.images = Array.isArray(normalized.photos)
+        ? normalized.photos
+        : normalized.img
+          ? [normalized.img]
+          : normalized.image
+            ? [normalized.image]
+            : [];
+    }
+    if (!normalized.img && Array.isArray(normalized.images) && normalized.images.length) {
+      normalized.img = normalized.images[0];
+    }
+    if (!normalized.miles && normalized.mileage) {
+      normalized.miles = normalized.mileage;
+    }
+    if (!normalized.trans && normalized.transmission) {
+      normalized.trans = normalized.transmission;
+    }
+    return normalized;
+  }
+
   async function loadCarDetail() {
     if (!carId) {
       setText('breadcrumbName', 'Vehicle Details');
@@ -69,12 +126,19 @@
 
     try {
       const response = await fetch(`${API_BASE}/api/car-details/${encodeURIComponent(carId)}`);
-      if (!response.ok) {
-        throw new Error('Car detail not found');
+      if (response.ok) {
+        const car = await response.json();
+        renderCar(car);
+        return;
       }
-      const car = await response.json();
-      renderCar(car);
+      throw new Error('Car detail not found');
     } catch (error) {
+      console.warn('API unavailable, falling back to static feed:', error);
+      const car = await fetchStaticCarDetail();
+      if (car) {
+        renderCar(car);
+        return;
+      }
       console.error(error);
       setText('breadcrumbName', 'Vehicle Not Found');
       setText('priceValue', '—');

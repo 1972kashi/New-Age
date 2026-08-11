@@ -18,9 +18,10 @@ DB_PATH = ROOT / 'db.json'
 SENSITIVE_KEYS = ('email', 'phone', 'password', 'owner', 'seller', 'contact', 'vin', 'ssn')
 
 ALLOWED_CAR_KEYS = (
-    'id', 'carId', 'title', 'make', 'model', 'year', 'price', 'mileage',
+    'id', 'carId', 'title', 'name', 'make', 'model', 'year', 'price', 'mileage',
     'location', 'verified', 'createdAt', 'summary', 'description',
-    'condition', 'fuel', 'transmission'
+    'condition', 'fuel', 'transmission', 'images', 'photos', 'img', 'image',
+    'engine', 'bodyType', 'drive', 'color'
 )
 
 
@@ -35,23 +36,27 @@ def sanitize_car(raw: Dict[str, Any]) -> Dict[str, Any]:
     for key in ('images', 'photos'):
         values = raw.get(key)
         if isinstance(values, list):
-            imgs.extend([p for p in values if isinstance(p, str)])
+            for p in values:
+                if isinstance(p, str) and p and p not in imgs:
+                    imgs.append(p)
     for key in ('img', 'image', 'img_main'):
         v = raw.get(key)
-        if isinstance(v, str) and v:
+        if isinstance(v, str) and v and v not in imgs:
             imgs.append(v)
 
     if imgs:
         out['images'] = imgs
 
     # Derive a public title if missing
-    if 'title' not in out:
-        parts = []
-        for fld in ('make', 'model', 'year'):
-            if raw.get(fld):
-                parts.append(str(raw.get(fld)))
-        if parts:
-            out['title'] = ' '.join(parts)
+    title_value = out.get('title') or raw.get('title')
+    if not title_value:
+        if raw.get('name'):
+            title_value = str(raw.get('name'))
+        else:
+            parts = [raw.get('make'), raw.get('model'), raw.get('year')]
+            title_value = ' '.join(str(p) for p in parts if p)
+    if title_value:
+        out['title'] = title_value
 
     # Ensure id exists
     if 'id' not in out:
@@ -143,7 +148,11 @@ def main():
             continue
 
     out_path = Path(args.out)
-    out_path.write_text(json.dumps({'cars': public}, indent=2, ensure_ascii=False), encoding='utf-8')
+    export_data = {'cars': public}
+    car_details = data.get('carDetails') or []
+    if car_details:
+        export_data['carDetails'] = [sanitize_car(c) for c in car_details if isinstance(c, dict)]
+    out_path.write_text(json.dumps(export_data, indent=2, ensure_ascii=False), encoding='utf-8')
     print('Wrote public feed to', out_path)
 
 
