@@ -45,8 +45,8 @@
         // Cached cars unavailable.
       }
 
-      // Try to load static data fallbacks (db.json then db.sample.json)
-      const dbFiles = ['db.json', 'db.sample.json'];
+      // Try to load static data fallbacks (public feed, db.json, then db.sample.json)
+      const dbFiles = ['public-cars.json', 'db.json', 'db.sample.json'];
       for (const dbFile of dbFiles) {
         try {
           const res = await fetch(dbFile);
