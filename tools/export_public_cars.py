@@ -65,7 +65,55 @@ def sanitize_car(raw: Dict[str, Any]) -> Dict[str, Any]:
             if s in k.lower():
                 out.pop(k, None)
 
+    # Map frontend-friendly fields expected by the client
+    # `name`, `img`, `miles`, `trans`, `badge`, `link`
+    # name: prefer title, then make/model/year
+    if 'title' in out and out['title']:
+        out['name'] = out['title']
+    else:
+        name_parts = []
+        for f in ('make', 'model', 'year'):
+            if raw.get(f):
+                name_parts.append(str(raw.get(f)))
+        out['name'] = ' '.join(name_parts) if name_parts else raw.get('name') or None
+
+    # img: first image if available
+    imgs = out.get('images') or []
+    if imgs:
+        out['img'] = imgs[0]
+
+    # miles/mileage
+    if 'mileage' in out:
+        out['miles'] = out['mileage']
+    elif raw.get('miles'):
+        out['miles'] = raw.get('miles')
+
+    # transmission -> trans
+    if 'transmission' in out:
+        out['trans'] = out['transmission']
+    elif raw.get('trans'):
+        out['trans'] = raw.get('trans')
+
+    # verified -> badge (boolean)
+    if out.get('verified') is not None:
+        out['badge'] = bool(out.get('verified'))
+    elif raw.get('verified') is not None:
+        out['badge'] = bool(raw.get('verified'))
+
+    # link: keep if present, else link to car-detail with id
+    if raw.get('link'):
+        out['link'] = raw.get('link')
+    else:
+        cid = out.get('id') or raw.get('id')
+        if cid:
+            out['link'] = f"car-detail.html?id={cid}"
+
+    # Ensure price exists as string
+    if 'price' in out and out['price'] is not None:
+        out['price'] = str(out['price'])
+
     return out
+
 
 
 def main():
